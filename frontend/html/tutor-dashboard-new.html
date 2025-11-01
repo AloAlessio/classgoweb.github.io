@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClassGo - Panel de Tutor</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="stylesheet" href="/css/tutor-dashboard.css">
+</head>
+<body>
+    <!-- Decorative Background -->
+    <div class="bg-circle bg-circle-1"></div>
+    <div class="bg-circle bg-circle-2"></div>
+    <div class="bg-circle bg-circle-3"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="logo-section">
+            <div class="logo-circle">
+                <div class="logo-icon"></div>
+            </div>
+            <h1 class="logo-text">ClassGo</h1>
+        </div>
+        <div class="header-info">
+            <div class="tutor-badge">🎓 Tutor</div>
+            <div class="user-avatar" onclick="toggleUserMenu(event)" id="userAvatar">
+                <span id="avatarText">T</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Welcome Section -->
+        <section class="welcome-section">
+            <h2 class="welcome-title" id="welcomeTitle">¡Bienvenido, Tutor! 🎓</h2>
+            <p class="welcome-subtitle" id="welcomeSubtitle">Gestiona tus cursos y estudiantes</p>
+        </section>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">📚</div>
+                <div class="stat-info">
+                    <div class="stat-value" id="totalCourses">0</div>
+                    <div class="stat-label">Cursos Creados</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-info">
+                    <div class="stat-value" id="totalStudents">0</div>
+                    <div class="stat-label">Estudiantes Activos</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📅</div>
+                <div class="stat-info">
+                    <div class="stat-value" id="upcomingClasses">0</div>
+                    <div class="stat-label">Clases Programadas</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⭐</div>
+                <div class="stat-info">
+                    <div class="stat-value" id="avgRating">5.0</div>
+                    <div class="stat-label">Calificación Promedio</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <div class="nav-tab active" onclick="switchSection('courses')">📚 Mis Cursos</div>
+            <div class="nav-tab" onclick="switchSection('students')">👥 Estudiantes</div>
+            <div class="nav-tab" onclick="switchSection('schedule')">📅 Calendario</div>
+            <div class="nav-tab" onclick="switchSection('messages')">💬 Mensajes</div>
+            <div class="nav-tab" onclick="switchSection('resources')">📎 Recursos</div>
+        </div>
+
+        <!-- Mis Cursos Section -->
+        <div id="coursesSection" class="content-section active">
+            <div class="section-header">
+                <h2>📚 Mis Cursos</h2>
+                <button class="btn-primary" onclick="openCreateCourseModal()">➕ Crear Nuevo Curso</button>
+            </div>
+            <div id="coursesGrid" class="courses-grid">
+                <!-- Courses will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Estudiantes Section -->
+        <div id="studentsSection" class="content-section">
+            <div class="section-header">
+                <h2>👥 Mis Estudiantes</h2>
+                <input type="text" id="studentSearch" placeholder="🔍 Buscar estudiante..." class="search-input">
+            </div>
+            <table class="students-table">
+                <thead>
+                    <tr>
+                        <th>Estudiante</th>
+                        <th>Curso</th>
+                        <th>Progreso</th>
+                        <th>Última Actividad</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="studentsTableBody">
+                    <!-- Students will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Calendario Section -->
+        <div id="scheduleSection" class="content-section">
+            <h2>📅 Calendario de Clases</h2>
+            <div class="calendar-layout">
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <button onclick="previousMonth()">‹</button>
+                        <h3 id="currentMonth">Mes Año</h3>
+                        <button onclick="nextMonth()">›</button>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid"></div>
+                </div>
+                <div class="upcoming-classes">
+                    <h3>Próximas Clases</h3>
+                    <div id="upcomingClassesList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mensajes Section -->
+        <div id="messagesSection" class="content-section">
+            <h2>💬 Mensajes</h2>
+            <div id="messagesList" class="messages-list">
+                <!-- Messages will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Recursos Section -->
+        <div id="resourcesSection" class="content-section">
+            <h2>📎 Recursos</h2>
+            <div id="resourcesList" class="resources-list">
+                <!-- Resources will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Course Modal -->
+    <div id="createCourseModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeCreateCourseModal()">&times;</span>
+            <h2>Crear Nuevo Curso</h2>
+            <form id="createCourseForm" onsubmit="submitCreateCourse(event)">
+                <div class="form-group">
+                    <label for="title">Título del Curso *</label>
+                    <input type="text" id="title" name="title" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">Descripción *</label>
+                    <textarea id="description" name="description" rows="4" required></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="category">Categoría *</label>
+                        <select id="category" name="category" required>
+                            <option value="">Selecciona...</option>
+                            <option value="matematicas">Matemáticas</option>
+                            <option value="ciencias">Ciencias</option>
+                            <option value="programacion">Programación</option>
+                            <option value="idiomas">Idiomas</option>
+                            <option value="otros">Otros</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="subject">Materia *</label>
+                        <input type="text" id="subject" name="subject" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="scheduledAt">Fecha y Hora *</label>
+                        <input type="datetime-local" id="scheduledAt" name="scheduledAt" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="duration">Duración (min)</label>
+                        <input type="number" id="duration" name="duration" value="60" min="30" max="180">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="maxStudents">Máximo de Estudiantes</label>
+                    <input type="number" id="maxStudents" name="maxStudents" value="20" min="1" max="100">
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeCreateCourseModal()">Cancelar</button>
+                    <button type="submit" class="btn-primary">Crear Curso</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- User Menu -->
+    <div id="userMenu" class="user-menu" style="display: none;">
+        <a href="/home">🏠 Inicio</a>
+        <a href="#" onclick="logout()">🚪 Cerrar Sesión</a>
+    </div>
+
+    <script>
+        function toggleUserMenu(event) {
+            event.stopPropagation();
+            const menu = document.getElementById('userMenu');
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+            
+            const avatar = document.getElementById('userAvatar');
+            const rect = avatar.getBoundingClientRect();
+            menu.style.top = (rect.bottom + 10) + 'px';
+            menu.style.right = '20px';
+        }
+        
+        document.addEventListener('click', () => {
+            document.getElementById('userMenu').style.display = 'none';
+        });
+    </script>
+    
+    <!-- Load API version without Firebase -->
+    <script src="/js/api-service.js"></script>
+    <script src="/js/tutor-dashboard-api.js"></script>
+</body>
+</html>

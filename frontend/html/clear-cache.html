@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Limpiar Cache - ClassGo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .command-box {
+            background: #1e293b;
+            color: #10b981;
+            padding: 20px;
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            margin: 20px 0;
+            word-break: break-all;
+            position: relative;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .copy-btn:hover {
+            background: #059669;
+        }
+        
+        .steps {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .steps ol {
+            margin-left: 20px;
+        }
+        
+        .steps li {
+            margin: 10px 0;
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        #status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 14px;
+            display: none;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        #status.success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        #status.info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧹 Limpiar Service Worker y Cache</h1>
+        <p class="subtitle">Herramienta para resetear completamente la PWA de ClassGo</p>
+        
+        <div class="steps">
+            <strong>📋 Instrucciones:</strong>
+            <ol>
+                <li>Abre las DevTools (presiona <strong>F12</strong>)</li>
+                <li>Ve a la pestaña <strong>Console</strong></li>
+                <li>Copia el comando de abajo</li>
+                <li>Pégalo en la consola y presiona <strong>Enter</strong></li>
+            </ol>
+        </div>
+        
+        <div class="command-box" id="commandBox">
+            <button class="copy-btn" onclick="copyCommand()">📋 Copiar</button>
+            navigator.serviceWorker.getRegistrations().then(r => r.forEach(reg => reg.unregister())); caches.keys().then(k => Promise.all(k.map(c => caches.delete(c)))); console.log('✅ Cache limpiado!'); setTimeout(() => location.reload(), 1000);
+        </div>
+        
+        <button class="btn" onclick="executeClean()">
+            🗑️ Ejecutar Limpieza Automática
+        </button>
+        
+        <div id="status"></div>
+    </div>
+    
+    <script>
+        function showStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = type;
+            status.style.display = 'block';
+        }
+        
+        function copyCommand() {
+            const command = document.getElementById('commandBox').textContent.replace('📋 Copiar', '').trim();
+            navigator.clipboard.writeText(command).then(() => {
+                showStatus('✅ Comando copiado al portapapeles!', 'success');
+                setTimeout(() => {
+                    document.getElementById('status').style.display = 'none';
+                }, 2000);
+            });
+        }
+        
+        async function executeClean() {
+            try {
+                showStatus('🔄 Limpiando Service Workers...', 'info');
+                
+                // Unregister all service workers
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for (let registration of registrations) {
+                    await registration.unregister();
+                }
+                
+                // Delete all caches
+                const cacheKeys = await caches.keys();
+                for (let key of cacheKeys) {
+                    await caches.delete(key);
+                }
+                
+                showStatus(`✅ Limpieza completa! Recargando en 2 segundos...`, 'success');
+                
+                // Auto reload after 2 seconds
+                setTimeout(() => {
+                    window.location.href = '/home';
+                }, 2000);
+                
+            } catch (error) {
+                showStatus(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Show current status on load
+        window.addEventListener('load', async () => {
+            try {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                const cacheKeys = await caches.keys();
+                
+                if (registrations.length === 0 && cacheKeys.length === 0) {
+                    showStatus('ℹ️ No hay Service Workers ni caches activos', 'info');
+                } else {
+                    showStatus(`📊 ${registrations.length} SW activos, ${cacheKeys.length} caches encontrados`, 'info');
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        });
+    </script>
+</body>
+</html>

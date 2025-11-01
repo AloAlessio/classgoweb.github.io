@@ -1,0 +1,24 @@
+{
+  "name": "classgo-fullstack",
+  "version": "1.0.0",
+  "description": "ClassGo Full Stack Application - Frontend & Backend integrated",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "cd backend && npm start",
+    "dev": "cd backend && npm run dev",
+    "install-all": "cd backend && npm install",
+    "init-db": "cd backend && npm run init-db",
+    "init-complete": "cd backend && node scripts/init-complete.js",
+    "test": "cd backend && npm test"
+  },
+  "keywords": ["education", "pwa", "nodejs", "firebase"],
+  "author": "ClassGo Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-username/classgo.git"
+  }
+}

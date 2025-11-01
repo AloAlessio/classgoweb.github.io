@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClassGo - Dashboard</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Plataforma educativa para clases virtuales con tutores expertos">
+    <meta name="theme-color" content="#0d7377">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ClassGo">
+    <meta name="msapplication-TileColor" content="#0d7377">
+    <meta name="msapplication-tap-highlight" content="no">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" sizes="152x152" href="/images/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/icon-192x192.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/icon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/images/icon-16x16.png">
+    
+    <link rel="stylesheet" href="/css/home.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo-section">
+                <div class="logo-circle">
+                    <div class="logo-icon"></div>
+                </div>
+                <h1 class="logo-text">ClassGo</h1>
+            </div>
+            <div class="user-section">
+                <div class="user-avatar" onclick="toggleUserMenu(event)" id="userAvatar">
+                    <span id="avatarText">?</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Welcome Section -->
+        <section class="welcome-section">
+            <h2 class="welcome-title" id="welcomeTitle">¡Bienvenido a ClassGo! 👋</h2>
+            <p class="welcome-subtitle" id="welcomeSubtitle">Explora nuestra plataforma educativa</p>
+        </section>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card" onclick="showStats('classes')">
+                <div class="stat-value" id="classesValue">1,200+</div>
+                <div class="stat-label">Clases Disponibles</div>
+            </div>
+            <div class="stat-card" onclick="showStats('students')">
+                <div class="stat-value" id="studentsValue">15,000+</div>
+                <div class="stat-label">Estudiantes Activos</div>
+            </div>
+            <div class="stat-card" onclick="showStats('tutors')">
+                <div class="stat-value" id="tutorsValue">250+</div>
+                <div class="stat-label">Tutores Expertos</div>
+            </div>
+            <div class="stat-card" onclick="showStats('progress')">
+                <div class="stat-value" id="progressValue">95%</div>
+                <div class="stat-label">Tasa de Éxito</div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <div class="nav-tab active" onclick="switchTab('all', this)">Todas las Categorías</div>
+            <div class="nav-tab" onclick="switchTab('science', this)">Ciencias</div>
+            <div class="nav-tab" onclick="switchTab('languages', this)">Idiomas</div>
+            <div class="nav-tab" onclick="switchTab('arts', this)">Arte</div>
+            <div class="nav-tab" onclick="switchTab('favorites', this)">Favoritos</div>
+        </div>
+
+        <!-- Categories Section -->
+        <h2 class="section-title">Explora las Categorías</h2>
+        <div class="categories-grid" id="categoriesGrid">
+            <!-- Categories will be populated by JavaScript -->
+        </div>
+
+        <!-- Upcoming Classes / Features Section -->
+        <h2 class="section-title" id="dynamicSectionTitle">Próximas Clases</h2>
+        <div class="upcoming-classes" id="dynamicContentSection">
+            <div class="class-item" onclick="joinClass('astronomia')">
+                <div class="class-info">
+                    <div class="class-subject">Astronomía: Sistema Solar</div>
+                    <div class="class-teacher">Tutor: Dr. María González</div>
+                    <div class="class-time">⏰ Hoy, 3:00 PM - 4:30 PM</div>
+                </div>
+                <button class="join-button">Unirse Ahora</button>
+            </div>
+            <div class="class-item" onclick="joinClass('biologia')">
+                <div class="class-info">
+                    <div class="class-subject">Biología: Células y Organismos</div>
+                    <div class="class-teacher">Tutor: Prof. Carlos Ramírez</div>
+                    <div class="class-time">⏰ Mañana, 10:00 AM - 11:30 AM</div>
+                </div>
+                <button class="join-button">Programada</button>
+            </div>
+            <div class="class-item" onclick="joinClass('ingles')">
+                <div class="class-info">
+                    <div class="class-subject">Inglés Conversacional</div>
+                    <div class="class-teacher">Tutor: Sarah Johnson</div>
+                    <div class="class-time">⏰ Mañana, 2:00 PM - 3:00 PM</div>
+                </div>
+                <button class="join-button">Programada</button>
+            </div>
+            <div class="class-item" onclick="joinClass('arte')">
+                <div class="class-info">
+                    <div class="class-subject">Arte: Técnicas de Acuarela</div>
+                    <div class="class-teacher">Tutor: Ana Martínez</div>
+                    <div class="class-time">⏰ Viernes, 4:00 PM - 5:30 PM</div>
+                </div>
+                <button class="join-button">Programada</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PWA and Core Scripts -->
+    <script src="/js/api-service.js"></script>
+    <script src="/js/appshell.js"></script>
+    <script src="/js/navigation.js"></script>
+    <script src="/js/home.js"></script>
+</body>
+</html>

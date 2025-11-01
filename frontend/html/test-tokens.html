@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔐 Probar Sistema de Tokens</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 30px;
+        }
+        .section {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        .section h2 {
+            margin-top: 0;
+            color: #667eea;
+            font-size: 18px;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            margin: 5px;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        .success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+        .error {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+        .token-display {
+            word-break: break-all;
+            background: #2d3748;
+            color: #48bb78;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        .stat {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Probar Sistema de Tokens</h1>
+
+        <!-- SECCIÓN 1: LOGIN -->
+        <div class="section">
+            <h2>1️⃣ Login (obtener token)</h2>
+            <button onclick="login()">🔑 Login como Admin</button>
+            <div id="loginResult"></div>
+        </div>
+
+        <!-- SECCIÓN 2: INFO DEL TOKEN -->
+        <div class="section">
+            <h2>2️⃣ Información del Token Actual</h2>
+            <button onclick="showTokenInfo()">📊 Ver Info del Token</button>
+            <button onclick="clearToken()">🗑️ Borrar Token</button>
+            <div id="tokenInfo"></div>
+        </div>
+
+        <!-- SECCIÓN 3: ESTADÍSTICAS -->
+        <div class="section">
+            <h2>3️⃣ Estadísticas de Renovación</h2>
+            <div class="grid" id="stats">
+                <div class="stat">
+                    <div class="stat-value" id="requestCount">0</div>
+                    <div class="stat-label">Peticiones Realizadas</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="refreshCount">0</div>
+                    <div class="stat-label">Tokens Renovados</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="timeRemaining">--</div>
+                    <div class="stat-label">Tiempo Restante</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 4: HACER PETICIONES -->
+        <div class="section">
+            <h2>4️⃣ Hacer Peticiones (para probar renovación)</h2>
+            <button onclick="makeRequest()">📤 Hacer Petición API</button>
+            <button onclick="makeMultipleRequests()">📤📤📤 Hacer 5 Peticiones</button>
+            <button onclick="startAutoRequests()">🔄 Auto-Request (cada 10s)</button>
+            <button onclick="stopAutoRequests()">⏹️ Detener Auto-Request</button>
+            <div id="requestResult"></div>
+        </div>
+
+        <!-- SECCIÓN 5: SIMULAR ESCENARIOS -->
+        <div class="section">
+            <h2>5️⃣ Simular Escenarios de Testing</h2>
+            <p style="font-size: 12px; color: #666;">
+                ⚠️ Estos botones modifican temporalmente el token para testing. 
+                Después de probar, vuelve a hacer login.
+            </p>
+            <button onclick="simulateExpiredToken()">⏰ Simular Token Expirado</button>
+            <button onclick="simulateModifiedToken()">🔨 Simular Token Modificado</button>
+            <button onclick="simulateAlmostExpired()">⚠️ Simular Token Casi Expirado</button>
+            <div id="simulationResult"></div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let requestCount = 0;
+        let refreshCount = 0;
+        let autoRequestInterval = null;
+        let originalToken = null;
+
+        // Actualizar estadísticas en pantalla
+        function updateStats() {
+            document.getElementById('requestCount').textContent = requestCount;
+            document.getElementById('refreshCount').textContent = refreshCount;
+            
+            const token = localStorage.getItem('authToken');
+            if (token) {
+                const decoded = decodeToken(token);
+                if (decoded && decoded.exp) {
+                    const remaining = decoded.exp - Date.now();
+                    if (remaining > 0) {
+                        const hours = Math.floor(remaining / (1000 * 60 * 60));
+                        const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+                        document.getElementById('timeRemaining').textContent = `${hours}h ${minutes}m`;
+                    } else {
+                        document.getElementById('timeRemaining').textContent = '❌ Expirado';
+                    }
+                }
+            }
+        }
+
+        // Decodificar token
+        function decodeToken(token) {
+            try {
+                const [payloadBase64] = token.split('.');
+                return JSON.parse(atob(payloadBase64));
+            } catch (error) {
+                return null;
+            }
+        }
+
+        // 1. LOGIN
+        async function login() {
+            const result = document.getElementById('loginResult');
+            result.innerHTML = '<div class="info">⏳ Iniciando sesión...</div>';
+
+            try {
+                const response = await fetch('http://localhost:3000/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'admin@classgo.com',
+                        password: '123456'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    localStorage.setItem('authToken', data.token);
+                    originalToken = data.token;
+                    requestCount = 0;
+                    refreshCount = 0;
+                    
+                    const decoded = decodeToken(data.token);
+                    result.innerHTML = `
+                        <div class="info success">
+                            ✅ Login exitoso!<br><br>
+                            👤 Usuario: ${data.user.email}<br>
+                            👑 Rol: ${data.user.rol}<br>
+                            🆔 ID: ${data.user.id}<br><br>
+                            📅 Creado: ${new Date(decoded.iat).toLocaleString()}<br>
+                            ⏰ Expira: ${new Date(decoded.exp).toLocaleString()}<br>
+                        </div>
+                    `;
+                    updateStats();
+                } else {
+                    result.innerHTML = `<div class="info error">❌ Error: ${data.message}</div>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="info error">❌ Error de conexión: ${error.message}</div>`;
+            }
+        }
+
+        // 2. MOSTRAR INFO DEL TOKEN
+        function showTokenInfo() {
+            const result = document.getElementById('tokenInfo');
+            const token = localStorage.getItem('authToken');
+
+            if (!token) {
+                result.innerHTML = '<div class="info warning">⚠️ No hay token. Haz login primero.</div>';
+                return;
+            }
+
+            const decoded = decodeToken(token);
+            if (!decoded) {
+                result.innerHTML = '<div class="info error">❌ Token inválido</div>';
+                return;
+            }
+
+            result.innerHTML = `
+                <div class="info success">
+                    <strong>📊 Información del Token:</strong><br><br>
+                    Email: ${decoded.email}<br>
+                    User ID: ${decoded.userId}<br>
+                    Rol: ${decoded.role}<br>
+                    Creado: ${new Date(decoded.iat).toLocaleString()}<br>
+                    Expira: ${new Date(decoded.exp).toLocaleString()}<br>
+                    Tiempo restante: ${Math.round((decoded.exp - Date.now()) / 1000 / 60)} minutos
+                </div>
+                <div class="token-display">
+                    ${token}
+                </div>
+            `;
+            updateStats();
+        }
+
+        // BORRAR TOKEN
+        function clearToken() {
+            localStorage.removeItem('authToken');
+            document.getElementById('tokenInfo').innerHTML = '<div class="info warning">🗑️ Token eliminado</div>';
+            updateStats();
+        }
+
+        // 3. HACER PETICIÓN API
+        async function makeRequest() {
+            const result = document.getElementById('requestResult');
+            const token = localStorage.getItem('authToken');
+
+            if (!token) {
+                result.innerHTML = '<div class="info warning">⚠️ No hay token. Haz login primero.</div>';
+                return;
+            }
+
+            result.innerHTML = '<div class="info">⏳ Haciendo petición...</div>';
+
+            try {
+                const oldToken = token;
+                
+                const response = await fetch('http://localhost:3000/api/stats/personal', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                // Verificar si hay nuevo token
+                const newToken = response.headers.get('X-New-Token');
+                
+                const data = await response.json();
+                requestCount++;
+
+                if (newToken) {
+                    localStorage.setItem('authToken', newToken);
+                    refreshCount++;
+                    result.innerHTML = `
+                        <div class="info success">
+                            ✅ Petición exitosa!<br>
+                            🔄 <strong>TOKEN RENOVADO AUTOMÁTICAMENTE!</strong><br><br>
+                            📊 Respuesta: ${JSON.stringify(data, null, 2)}<br><br>
+                            🔑 Token anterior: ${oldToken.substring(0, 50)}...<br>
+                            🆕 Token nuevo: ${newToken.substring(0, 50)}...
+                        </div>
+                    `;
+                } else {
+                    result.innerHTML = `
+                        <div class="info success">
+                            ✅ Petición exitosa!<br>
+                            ℹ️ Token NO renovado (aún válido por más de 2h)<br><br>
+                            📊 Respuesta: ${JSON.stringify(data, null, 2)}
+                        </div>
+                    `;
+                }
+
+                updateStats();
+            } catch (error) {
+                result.innerHTML = `<div class="info error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        // HACER MÚLTIPLES PETICIONES
+        async function makeMultipleRequests() {
+            for (let i = 0; i < 5; i++) {
+                await makeRequest();
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+        }
+
+        // AUTO-REQUEST
+        function startAutoRequests() {
+            if (autoRequestInterval) {
+                alert('Auto-request ya está activo');
+                return;
+            }
+            autoRequestInterval = setInterval(makeRequest, 10000);
+            alert('✅ Auto-request iniciado (cada 10 segundos)');
+        }
+
+        function stopAutoRequests() {
+            if (autoRequestInterval) {
+                clearInterval(autoRequestInterval);
+                autoRequestInterval = null;
+                alert('⏹️ Auto-request detenido');
+            }
+        }
+
+        // 4. SIMULAR ESCENARIOS
+        async function simulateExpiredToken() {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                alert('No hay token. Haz login primero.');
+                return;
+            }
+
+            const result = document.getElementById('simulationResult');
+            result.innerHTML = '<div class="info">⏳ Generando token expirado...</div>';
+
+            try {
+                // Solicitar al backend un token que expire en 0.001 horas (unos segundos)
+                const response = await fetch('http://localhost:3000/api/auth/test-token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        hoursUntilExpiration: 0.001 // Expira en ~3.6 segundos
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    localStorage.setItem('authToken', data.token);
+                    
+                    result.innerHTML = `
+                        <div class="info warning">
+                            ⏰ Token actualizado para expirar en unos segundos.<br>
+                            📅 Expira: ${new Date(data.expiresAt).toLocaleString()}<br><br>
+                            Espera 5 segundos y haz una petición para ver el logout automático.
+                        </div>
+                    `;
+                    updateStats();
+                } else {
+                    result.innerHTML = `<div class="info error">❌ Error: ${data.message}</div>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="info error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        function simulateModifiedToken() {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                alert('No hay token. Haz login primero.');
+                return;
+            }
+
+            const [payload, _] = token.split('.');
+            const modifiedToken = `${payload}.firma_invalida_modificada`;
+
+            localStorage.setItem('authToken', modifiedToken);
+            
+            document.getElementById('simulationResult').innerHTML = `
+                <div class="info warning">
+                    🔨 Token modificado (firma inválida).<br>
+                    Ahora haz una petición para ver el rechazo del backend.
+                </div>
+            `;
+        }
+
+        async function simulateAlmostExpired() {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                alert('No hay token. Haz login primero.');
+                return;
+            }
+
+            const result = document.getElementById('simulationResult');
+            result.innerHTML = '<div class="info">⏳ Generando token de prueba...</div>';
+
+            try {
+                // Solicitar al backend un token que expire en 1 hora
+                const response = await fetch('http://localhost:3000/api/auth/test-token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        hoursUntilExpiration: 1 // Expira en 1 hora
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    localStorage.setItem('authToken', data.token);
+                    originalToken = data.token;
+                    
+                    result.innerHTML = `
+                        <div class="info warning">
+                            ⚠️ Token actualizado para expirar en 1 hora.<br>
+                            📅 Expira: ${new Date(data.expiresAt).toLocaleString()}<br>
+                            🔄 Should Refresh: ${data.shouldRefresh ? 'Sí ✅' : 'No ❌'}<br><br>
+                            Ahora haz una petición para ver la renovación automática.
+                        </div>
+                    `;
+                    updateStats();
+                } else {
+                    result.innerHTML = `<div class="info error">❌ Error: ${data.message}</div>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="info error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        // Actualizar estadísticas cada 30 segundos
+        setInterval(updateStats, 30000);
+    </script>
+</body>
+</html>

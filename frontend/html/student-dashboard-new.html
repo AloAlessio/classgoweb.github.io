@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClassGo - Mi Aprendizaje</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="stylesheet" href="/css/student-dashboard.css">
+</head>
+<body>
+    <!-- Decorative Background -->
+    <div class="bg-circle bg-circle-1"></div>
+    <div class="bg-circle bg-circle-2"></div>
+    <div class="bg-circle bg-circle-3"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="logo-section">
+            <div class="logo-circle">
+                <div class="logo-icon"></div>
+            </div>
+            <h1 class="logo-text">ClassGo</h1>
+        </div>
+        <div class="header-info">
+            <div class="student-badge">📚 Estudiante</div>
+            <div class="user-avatar" onclick="toggleUserMenu(event)" id="userAvatar">
+                <span id="avatarText">E</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Welcome Section -->
+        <section class="welcome-section">
+            <h2 class="welcome-title" id="welcomeTitle">¡Bienvenido! 📚</h2>
+            <p class="welcome-subtitle" id="welcomeSubtitle">Continúa tu camino de aprendizaje</p>
+        </section>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">📚</div>
+                <div class="stat-info">
+                    <div class="stat-value" id="enrolledCourses">0</div>
+                    <div class="stat-label">Cursos Inscritos</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-info">
+                    <div class="stat-value" id="completedLessons">0</div>
+                    <div class="stat-label">Lecciones Completadas</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📈</div>
+                <div class="stat-info">
+                    <div class="stat-value" id="overallProgress">0%</div>
+                    <div class="stat-label">Progreso General</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🏆</div>
+                <div class="stat-info">
+                    <div class="stat-value" id="earnedCertificates">0</div>
+                    <div class="stat-label">Certificados</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-section="explore">🔍 Explorar Cursos</button>
+            <button class="nav-tab" data-section="myCourses">📚 Mis Cursos</button>
+            <button class="nav-tab" data-section="progress">📊 Progreso</button>
+            <button class="nav-tab" data-section="calendar">📅 Calendario</button>
+            <button class="nav-tab" data-section="messages">💬 Mensajes</button>
+        </div>
+
+        <!-- Explore Courses Section -->
+        <section id="exploreSection" class="content-section active">
+            <h3>Explorar Cursos Disponibles</h3>
+            
+            <div class="filters">
+                <div class="category-filters">
+                    <button class="category-btn active" data-category="all">Todos</button>
+                    <button class="category-btn" data-category="matematicas">Matemáticas</button>
+                    <button class="category-btn" data-category="ciencias">Ciencias</button>
+                    <button class="category-btn" data-category="programacion">Programación</button>
+                    <button class="category-btn" data-category="idiomas">Idiomas</button>
+                </div>
+                <input type="text" id="searchCourses" placeholder="🔍 Buscar cursos..." class="search-input">
+            </div>
+
+            <div id="exploreCoursesGrid" class="courses-grid">
+                <!-- Courses will be loaded here -->
+            </div>
+        </section>
+
+        <!-- My Courses Section -->
+        <section id="myCoursesSection" class="content-section">
+            <h3>Mis Cursos Inscritos</h3>
+            
+            <div class="filters">
+                <select id="myCoursesFilter" class="filter-select">
+                    <option value="all">Todos los cursos</option>
+                    <option value="active">En curso</option>
+                    <option value="completed">Completados</option>
+                    <option value="scheduled">Próximos</option>
+                </select>
+            </div>
+
+            <div id="myCoursesGrid" class="courses-grid">
+                <!-- Enrolled courses will be loaded here -->
+            </div>
+        </section>
+
+        <!-- Progress Section -->
+        <section id="progressSection" class="content-section">
+            <h3>Mi Progreso de Aprendizaje</h3>
+            
+            <div id="progressGrid" class="progress-grid">
+                <!-- Progress cards will be loaded here -->
+            </div>
+        </section>
+
+        <!-- Calendar Section -->
+        <section id="calendarSection" class="content-section">
+            <h3>Calendario de Clases</h3>
+            
+            <div class="calendar-container">
+                <div class="calendar-header">
+                    <button onclick="previousMonth()">‹</button>
+                    <h4 id="currentMonth">Mes Año</h4>
+                    <button onclick="nextMonth()">›</button>
+                </div>
+                <div class="calendar-grid" id="calendarGrid">
+                    <!-- Calendar days will be rendered here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Messages Section -->
+        <section id="messagesSection" class="content-section">
+            <h3>Mensajes</h3>
+            
+            <div class="messages-container">
+                <div class="conversations-panel">
+                    <input type="text" id="searchConversations" placeholder="🔍 Buscar conversaciones..." class="search-input">
+                    <div id="conversationsList" class="conversations-list">
+                        <!-- Conversations will be loaded here -->
+                    </div>
+                </div>
+                
+                <div class="chat-panel">
+                    <div id="messagesContainer" class="messages-container">
+                        <div class="empty-state">Selecciona una conversación</div>
+                    </div>
+                    <div class="message-input-container">
+                        <input type="text" id="messageInput" placeholder="Escribe un mensaje..." class="message-input">
+                        <button onclick="sendMessage()" class="send-btn">Enviar</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- User Menu (Dropdown) -->
+    <div id="userMenu" class="user-menu" style="display: none;">
+        <a href="/home">🏠 Inicio</a>
+        <a href="#" onclick="logout()">🚪 Cerrar Sesión</a>
+    </div>
+
+    <script>
+        function toggleUserMenu(event) {
+            event.stopPropagation();
+            const menu = document.getElementById('userMenu');
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+            
+            // Position menu below avatar
+            const avatar = document.getElementById('userAvatar');
+            const rect = avatar.getBoundingClientRect();
+            menu.style.top = (rect.bottom + 10) + 'px';
+            menu.style.right = '20px';
+        }
+        
+        // Close menu when clicking outside
+        document.addEventListener('click', () => {
+            document.getElementById('userMenu').style.display = 'none';
+        });
+    </script>
+    
+    <!-- Load API version without Firebase -->
+    <script src="/js/api-service.js"></script>
+    <script src="/js/student-dashboard-api.js"></script>
+</body>
+</html>
