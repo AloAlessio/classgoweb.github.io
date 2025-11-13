@@ -3,7 +3,19 @@
 
 class APIService {
     constructor() {
-        this.baseURL = 'http://localhost:3000/api';
+        // Detectar automáticamente el entorno
+        // En producción (Render), usa la URL de producción
+        // En desarrollo, usa localhost
+        const isProduction = window.location.hostname !== 'localhost' && 
+                           window.location.hostname !== '127.0.0.1';
+        
+        this.baseURL = isProduction 
+            ? `${window.location.origin}/api`  // Producción: usa la misma URL del sitio
+            : 'http://localhost:3000/api';     // Desarrollo: localhost
+        
+        console.log(`🌐 API Service initialized - Environment: ${isProduction ? 'Production' : 'Development'}`);
+        console.log(`📡 Base URL: ${this.baseURL}`);
+        
         this.token = null;
         this.refreshToken = null;
         this.isRefreshing = false;

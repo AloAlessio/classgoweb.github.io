@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: classgo-app
+    env: node
+    region: oregon # Región gratis: oregon, frankfurt, singapore
+    plan: free # Plan gratuito
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    
+    # Variables de entorno - Configura estas en el Dashboard de Render
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000 # Puerto predeterminado de Render
+      
+      # Las siguientes variables DEBES configurarlas en el dashboard de Render:
+      # FRONTEND_URL: La URL que Render te asigne (ej: https://classgo-app.onrender.com)
+      # FIREBASE_PROJECT_ID: Tu project ID de Firebase
+      # FIREBASE_CLIENT_EMAIL: El email de tu service account
+      # FIREBASE_PRIVATE_KEY: La clave privada (cópiala completa con \n)
+      # FIREBASE_DATABASE_URL: URL de tu Realtime Database
+      # JWT_SECRET: Una clave secreta fuerte para tokens
+      # RATE_LIMIT_WINDOW_MS: 900000
+      # RATE_LIMIT_MAX_REQUESTS: 100
+      # LOG_LEVEL: info
+      # MEETING_PROVIDER: google-meet
+      # MEETING_BASE_URL: https://meet.google.com
