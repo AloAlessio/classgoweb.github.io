@@ -1,5 +1,7 @@
-// Student Dashboard - API Version (No Firebase Client)
+﻿// Student Dashboard - API Version (No Firebase Client)
 // Uses backend API exclusively for all data operations
+
+const apiService = new APIService();
 
 let currentUser = null;
 let currentSection = 'explore';
@@ -55,14 +57,26 @@ async function initializeStudentDashboard() {
     }
     if (avatarText) avatarText.textContent = currentUser.name.charAt(0).toUpperCase();
     
+    // Check if coming back from game with a completion flag
+    const completedClassId = sessionStorage.getItem('completedClassId');
+    console.log('🔍 Checking for completedClassId:', completedClassId);
+    if (completedClassId) {
+        console.log('📝 User returned from game, marking class as completed:', completedClassId);
+        await completeClass(completedClassId);
+        sessionStorage.removeItem('completedClassId');
+        console.log('✅ completedClassId removed from sessionStorage');
+    } else {
+        console.log('ℹ️ No completedClassId found - user did not return from a game');
+    }
+    
     // Setup navigation
     setupNavigation();
     
-    // Load all data
+    // Load data in correct order to ensure proper filtering
+    await loadMyCourses();  // Load enrolled courses first
+    await loadCourses();    // Then load available courses (will be filtered automatically)
     await Promise.all([
         loadStats(),
-        loadCourses(),
-        loadMyCourses(),
         loadProgress(),
         loadMessages()
     ]);
@@ -90,6 +104,11 @@ function setupNavigation() {
 function switchSection(sectionName) {
     currentSection = sectionName;
     
+    // Stop polling when leaving messages section
+    if (sectionName !== 'messages') {
+        stopMessagePolling();
+    }
+    
     // Update tabs
     document.querySelectorAll('.nav-tab').forEach(tab => {
         tab.classList.remove('active');
@@ -106,6 +125,14 @@ function switchSection(sectionName) {
     const sectionElement = document.getElementById(`${sectionName}Section`);
     if (sectionElement) {
         sectionElement.classList.add('active');
+    }
+    
+    // Load data for specific sections
+    if (sectionName === 'calendar') {
+        loadCalendar();
+    } else if (sectionName === 'explore') {
+        // Re-filter courses to ensure enrolled courses are hidden
+        filterCourses();
     }
 }
 
@@ -139,6 +166,15 @@ function setupEventListeners() {
     searchConversations?.addEventListener('input', (e) => {
         filterConversations(e.target.value);
     });
+    
+    // Message input - Send with Enter key
+    const messageInput = document.getElementById('messageInput');
+    messageInput?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
 }
 
 // ===================
@@ -147,37 +183,62 @@ function setupEventListeners() {
 
 async function loadStats() {
     try {
-        const token = localStorage.getItem('authToken');
+        // Use myCourses data if already loaded
+        let coursesData = myCourses;
         
-        // Get enrolled classes
-        const response = await fetch('/api/classes?role=student', {
-            headers: {
-                'Authorization': `Bearer ${token}`
+        // If myCourses not loaded yet, fetch it
+        if (!coursesData || coursesData.length === 0) {
+            const data = await apiService.makeRequest('/classes?role=student', {
+                method: 'GET'
+            });
+            
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to load stats');
             }
-        });
-        
-        if (!response.ok) {
-            throw new Error('Failed to load stats');
+            
+            coursesData = data.data?.classes || [];
         }
         
-        const data = await response.json();
-        const enrolledClasses = data.data?.classes || [];
+        // Calculate precise stats matching the progress section
+        const totalEnrolled = coursesData.length;
+        // Count completed based on enrollmentStatus, not class status
+        const completedClasses = coursesData.filter(c => c.enrollmentStatus === 'completed').length;
+        const activeCourses = coursesData.filter(c => c.status === 'active').length;
+        const scheduledCourses = coursesData.filter(c => c.enrollmentStatus === 'scheduled' || (!c.enrollmentStatus && c.status === 'scheduled')).length;
         
-        // Calculate stats
-        const totalEnrolled = enrolledClasses.length;
-        const completedClasses = enrolledClasses.filter(c => c.status === 'completed').length;
-        const progress = totalEnrolled > 0 ? Math.round((completedClasses / totalEnrolled) * 100) : 0;
+        // Calculate overall progress as simple percentage: completed / total
+        // This makes it clear: 1 of 2 classes = 50%, 2 of 2 = 100%, etc.
+        const overallProgress = totalEnrolled > 0 ? Math.round((completedClasses / totalEnrolled) * 100) : 0;
         
-        // Update UI
+        // Update UI with precise data
         const enrolledCoursesEl = document.getElementById('enrolledCourses');
         const completedLessonsEl = document.getElementById('completedLessons');
         const overallProgressEl = document.getElementById('overallProgress');
         const earnedCertificatesEl = document.getElementById('earnedCertificates');
         
+        // Update header progress bar elements
+        const headerProgressPercentage = document.getElementById('headerProgressPercentage');
+        const headerProgressFill = document.getElementById('headerProgressFill');
+        const activeCoursesCount = document.getElementById('activeCoursesCount');
+        const completedCoursesCount = document.getElementById('completedCoursesCount');
+        const scheduledCoursesCount = document.getElementById('scheduledCoursesCount');
+        
         if (enrolledCoursesEl) enrolledCoursesEl.textContent = totalEnrolled;
         if (completedLessonsEl) completedLessonsEl.textContent = completedClasses;
-        if (overallProgressEl) overallProgressEl.textContent = `${progress}%`;
+        if (overallProgressEl) overallProgressEl.textContent = `${overallProgress}%`;
         if (earnedCertificatesEl) earnedCertificatesEl.textContent = completedClasses;
+        
+        // Update progress bar
+        if (headerProgressPercentage) headerProgressPercentage.textContent = `${overallProgress}%`;
+        if (headerProgressFill) {
+            // Animate the progress bar
+            setTimeout(() => {
+                headerProgressFill.style.width = `${overallProgress}%`;
+            }, 100);
+        }
+        if (activeCoursesCount) activeCoursesCount.textContent = activeCourses;
+        if (completedCoursesCount) completedCoursesCount.textContent = completedClasses;
+        if (scheduledCoursesCount) scheduledCoursesCount.textContent = scheduledCourses;
         
     } catch (error) {
         console.error('Error loading stats:', error);
@@ -190,20 +251,15 @@ async function loadStats() {
 
 async function loadCourses() {
     try {
-        const token = localStorage.getItem('authToken');
-        
-        // Get all available classes
-        const response = await fetch('/api/classes', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+        // Get ALL available classes (not just enrolled) using APIService
+        const data = await apiService.makeRequest('/classes?enrolled=false', {
+            method: 'GET'
         });
         
-        if (!response.ok) {
-            throw new Error('Failed to load courses');
+        if (!data.success) {
+            throw new Error(data.error || 'Failed to load courses');
         }
         
-        const data = await response.json();
         allCourses = data.data?.classes || [];
         
         filterCourses();
@@ -219,6 +275,13 @@ function filterCourses(searchTerm = '') {
     if (!coursesGrid) return;
     
     let filtered = allCourses;
+    
+    // Filter ONLY scheduled classes (available for enrollment)
+    filtered = filtered.filter(course => course.status === 'scheduled');
+    
+    // Filter out courses the user is already enrolled in
+    const enrolledCourseIds = myCourses.map(c => c.id);
+    filtered = filtered.filter(course => !enrolledCourseIds.includes(course.id));
     
     // Filter by category
     if (currentCategory && currentCategory !== 'all') {
@@ -242,69 +305,99 @@ function filterCourses(searchTerm = '') {
         coursesGrid.innerHTML = `
             <div class="empty-state">
                 <div class="empty-state-icon">📚</div>
-                <p>No se encontraron cursos</p>
+                <p>No se encontraron cursos disponibles</p>
                 <small>Intenta ajustar los filtros o buscar con otros términos</small>
             </div>
         `;
         return;
     }
     
-    coursesGrid.innerHTML = filtered.map(course => `
-        <div class="course-card">
-            <div class="course-badge ${course.category || 'general'}">${course.category || 'General'}</div>
-            <h3>${course.title}</h3>
-            <p>${course.description || 'Sin descripción'}</p>
-            <div class="course-meta">
-                <span>👥 ${course.currentStudents || 0}/${course.maxStudents || 20} estudiantes</span>
-                <span>⏱️ ${course.duration || 60} min</span>
+    coursesGrid.innerHTML = filtered.map(course => {
+        const isFull = course.currentStudents >= course.maxStudents;
+        const isClickable = !isFull;
+        
+        return `
+        <div class="course-card ${isClickable ? '' : 'disabled'}" 
+             ${isClickable ? `onclick="enrollInCourse('${course.id}')"` : ''} 
+             style="cursor: ${isClickable ? 'pointer' : 'not-allowed'}; ${!isClickable ? 'opacity: 0.6;' : ''}">
+            <div class="course-image-student">
+                ${getCategoryIcon(course.category)}
             </div>
-            <div class="course-tutor">
-                <strong>Tutor:</strong> ${course.tutor?.name || 'No asignado'}
+            <div class="course-content-student">
+                <div class="course-header-student">
+                    <h3 class="course-title-student">${course.title}</h3>
+                    <span class="course-category-badge">${course.category || 'General'}</span>
+                </div>
+                <p class="course-description-student">${course.description || 'Sin descripción'}</p>
+                
+                <div class="course-details-student">
+                    <div class="detail-item">
+                        <span class="detail-label">Instructor</span>
+                        <span class="detail-value">${course.tutor?.name || 'No asignado'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Duración</span>
+                        <span class="detail-value">${course.duration || 60} minutos</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Capacidad</span>
+                        <span class="detail-value">${course.currentStudents || 0}/${course.maxStudents || 20} estudiantes</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Fecha programada</span>
+                        <span class="detail-value">${formatDate(course.scheduledAt)}</span>
+                    </div>
+                </div>
+                
+                <div class="course-status-student">
+                    ${isFull ? 
+                        '<span class="status-full">Cupo lleno</span>' : 
+                        '<span class="status-available">Click para inscribirse</span>'
+                    }
+                </div>
             </div>
-            <div class="course-schedule">
-                <strong>📅 Fecha:</strong> ${formatDate(course.scheduledAt)}
-            </div>
-            <button 
-                class="btn-primary" 
-                onclick="enrollInCourse('${course.id}')"
-                ${course.currentStudents >= course.maxStudents ? 'disabled' : ''}
-            >
-                ${course.currentStudents >= course.maxStudents ? '❌ Lleno' : '✅ Inscribirse'}
-            </button>
         </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 async function enrollInCourse(courseId) {
-    if (!confirm('¿Deseas inscribirte en este curso?')) {
-        return;
-    }
-    
     try {
-        const token = localStorage.getItem('authToken');
-        
-        const response = await fetch(`/api/classes/${courseId}/join`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
+        // Enroll using APIService
+        const data = await apiService.makeRequest(`/classes/${courseId}/join`, {
+            method: 'POST'
         });
         
-        const data = await response.json();
-        
-        if (!response.ok) {
+        if (!data.success) {
+            // Manejo de errores específicos
+            if (data.error) {
+                if (data.error.includes('already enrolled')) {
+                    showNotification('Ya estás inscrito en este curso', 'info');
+                    switchSection('myCourses');
+                    return;
+                } else if (data.error.includes('not in scheduled status')) {
+                    showNotification('Este curso ya no está disponible para inscripción', 'warning');
+                    // Recargar cursos para actualizar la lista
+                    await loadCourses();
+                    return;
+                } else if (data.error.includes('full') || data.error.includes('capacity')) {
+                    showNotification('El curso está lleno. No hay cupos disponibles', 'warning');
+                    await loadCourses();
+                    return;
+                }
+            }
             throw new Error(data.error || 'Failed to enroll');
         }
         
         showNotification('¡Te has inscrito exitosamente! 🎉', 'success');
         
-        // Reload data
-        await Promise.all([
-            loadCourses(),
-            loadMyCourses(),
-            loadStats()
-        ]);
+        // Reload data en orden: primero mis cursos, luego los disponibles
+        await loadMyCourses(); // Cargar primero los cursos en los que estoy inscrito
+        await loadCourses();   // Luego recargar los disponibles (ya se filtrarán automáticamente)
+        await loadStats();     // Finalmente actualizar estadísticas
+        
+        // Cambiar automáticamente a "Mis Cursos" para ver el curso
+        switchSection('myCourses');
         
     } catch (error) {
         console.error('Error enrolling:', error);
@@ -318,21 +411,21 @@ async function enrollInCourse(courseId) {
 
 async function loadMyCourses() {
     try {
-        const token = localStorage.getItem('authToken');
-        
-        // Get user's enrolled classes
-        const response = await fetch('/api/classes', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+        // Get user's enrolled classes using APIService
+        const data = await apiService.makeRequest('/classes', {
+            method: 'GET'
         });
         
-        if (!response.ok) {
-            throw new Error('Failed to load my courses');
+        if (!data.success) {
+            throw new Error(data.error || 'Failed to load my courses');
         }
         
-        const data = await response.json();
         myCourses = data.data?.classes || [];
+        console.log('📚 Loaded courses with grades:', myCourses.map(c => ({ 
+            id: c.id, 
+            title: c.title, 
+            bestGrade: c.bestGrade 
+        })));
         
         displayMyCourses();
         
@@ -359,27 +452,54 @@ function displayMyCourses() {
     }
     
     coursesGrid.innerHTML = filtered.map(course => `
-        <div class="course-card enrolled">
-            <div class="course-badge ${course.category || 'general'}">${course.category || 'General'}</div>
-            <div class="status-badge ${course.status}">${getStatusText(course.status)}</div>
-            <h3>${course.title}</h3>
-            <p>${course.description || 'Sin descripción'}</p>
-            <div class="course-meta">
-                <span>👥 ${course.currentStudents || 0} estudiantes</span>
-                <span>⏱️ ${course.duration || 60} min</span>
+        <div class="course-card enrolled-card">
+            <div class="course-image-student">
+                ${getCategoryIcon(course.category)}
             </div>
-            <div class="course-tutor">
-                <strong>Tutor:</strong> ${course.tutor?.name || 'No asignado'}
-            </div>
-            <div class="course-schedule">
-                <strong>📅 Fecha:</strong> ${formatDate(course.scheduledAt)}
-            </div>
-            <div class="course-actions">
-                ${course.status === 'active' && course.meetingUrl ? 
-                    `<a href="${course.meetingUrl}" target="_blank" class="btn-primary">🎥 Unirse a clase</a>` :
-                    '<button class="btn-secondary" disabled>Próximamente</button>'
-                }
-                <button class="btn-danger" onclick="leaveCourse('${course.id}')">❌ Abandonar</button>
+            <div class="course-content-student">
+                <div class="course-header-student">
+                    <h3 class="course-title-student">${course.title}</h3>
+                    <span class="course-status-badge status-${course.status}">${getStatusText(course.status)}</span>
+                </div>
+                <span class="course-category-badge">${course.category || 'General'}</span>
+                
+                <div class="course-details-student">
+                    <div class="detail-item">
+                        <span class="detail-label">Instructor</span>
+                        <span class="detail-value">${course.tutor?.name || 'No asignado'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Duración</span>
+                        <span class="detail-value">${course.duration || 60} minutos</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Estudiantes</span>
+                        <span class="detail-value">${course.currentStudents || 0} inscritos</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Fecha programada</span>
+                        <span class="detail-value">${formatDate(course.scheduledAt)}</span>
+                    </div>
+                </div>
+                
+                <div class="course-actions-student">
+                    ${course.status === 'active' && course.meetingUrl ? 
+                        `<a href="${course.meetingUrl}" target="_blank" class="btn-join-class">
+                            <span>🎥</span> Unirse a la clase
+                        </a>` : ''
+                    }
+                    ${course.enrollmentStatus === 'completed' ? 
+                        `<button class="btn-game" disabled style="opacity: 0.6; cursor: not-allowed; background: #4a5568;">
+                            <span>✅</span> Entregado
+                        </button>` :
+                        `<button class="btn-game" onclick="playGame('${course.id}', '${course.title}', '${course.difficulty || 'medium'}', '${course.category || 'General'}')">
+                            <span>🎮</span> Jugar
+                        </button>`
+                    }
+                    <button class="btn-leave-course" onclick="leaveCourse('${course.id}')">
+                        <span>🚪</span> Abandonar
+                    </button>
+                </div>
             </div>
         </div>
     `).join('');
@@ -391,19 +511,12 @@ async function leaveCourse(courseId) {
     }
     
     try {
-        const token = localStorage.getItem('authToken');
-        
-        const response = await fetch(`/api/classes/${courseId}/leave`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
+        // Leave course using APIService
+        const data = await apiService.makeRequest(`/classes/${courseId}/leave`, {
+            method: 'POST'
         });
         
-        const data = await response.json();
-        
-        if (!response.ok) {
+        if (!data.success) {
             throw new Error(data.error || 'Failed to leave course');
         }
         
@@ -431,27 +544,194 @@ async function loadProgress() {
     if (!progressGrid) return;
     
     if (myCourses.length === 0) {
-        progressGrid.innerHTML = '<div class="empty-state">No hay progreso para mostrar</div>';
+        progressGrid.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">📊</div>
+                <p>No hay progreso para mostrar</p>
+                <small>Inscríbete en un curso para empezar</small>
+            </div>
+        `;
         return;
     }
     
-    progressGrid.innerHTML = myCourses.map(course => {
-        const progress = course.status === 'completed' ? 100 : 
-                        course.status === 'active' ? 50 : 0;
+    // Calculate overall statistics
+    const totalCourses = myCourses.length;
+    const completedCourses = myCourses.filter(c => c.status === 'completed').length;
+    const activeCourses = myCourses.filter(c => c.status === 'active').length;
+    const scheduledCourses = myCourses.filter(c => c.status === 'scheduled').length;
+    
+    // Calculate precise progress for each course
+    const coursesWithProgress = myCourses.map(course => {
+        const scheduledDate = course.scheduledAt ? new Date(course.scheduledAt._seconds * 1000) : null;
+        const enrolledDate = course.enrolledAt ? new Date(course.enrolledAt._seconds * 1000) : null;
+        const now = new Date();
         
-        return `
-            <div class="progress-card">
-                <h4>${course.title}</h4>
-                <div class="progress-bar-container">
-                    <div class="progress-bar-fill" style="width: ${progress}%"></div>
+        let progress = 0;
+        let daysUntilClass = null;
+        let progressDetails = '';
+        
+        // If student has played the game and has a grade, use that as progress
+        if (course.bestGradeOutOf10 !== undefined && course.bestGradeOutOf10 !== null) {
+            // Use the grade out of 10 for display
+            progress = course.bestGrade || 0; // Keep progress bar percentage for visual
+            progressDetails = `Calificación del juego: ${course.bestGradeOutOf10}/10`;
+        } else if (course.bestGrade !== undefined && course.bestGrade !== null) {
+            // Fallback to old percentage-based grade if bestGradeOutOf10 doesn't exist yet
+            progress = course.bestGrade;
+            progressDetails = `Calificación del juego: ${(course.bestGrade / 10).toFixed(1)}/10`;
+        } else if (course.status === 'completed') {
+            // Course finished - 100%
+            progress = 100;
+            progressDetails = 'Curso completado';
+        } else if (course.status === 'active') {
+            // Class is happening now or already happened
+            if (scheduledDate && now >= scheduledDate) {
+                // Class already happened or is today - 75% (waiting for completion)
+                progress = 75;
+                progressDetails = 'Clase realizada - Pendiente certificación';
+            } else {
+                // Class is scheduled and course is active (materials available) - 25%
+                progress = 25;
+                progressDetails = 'Inscrito - Materiales disponibles';
+            }
+        } else if (course.status === 'scheduled' && scheduledDate) {
+            // Calculate days until class
+            const diffTime = scheduledDate - now;
+            daysUntilClass = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (enrolledDate) {
+                // Calculate progress based on time passed since enrollment
+                const totalWaitTime = scheduledDate - enrolledDate;
+                const timePassed = now - enrolledDate;
+                const timeProgress = Math.min((timePassed / totalWaitTime) * 20, 20); // Max 20% before class
+                progress = Math.max(5, Math.round(timeProgress)); // Minimum 5%
+                progressDetails = `Esperando clase - ${daysUntilClass} ${daysUntilClass === 1 ? 'día' : 'días'}`;
+            } else {
+                progress = 5;
+                progressDetails = 'Recién inscrito';
+            }
+        } else {
+            // Unknown or pending status
+            progress = 0;
+            progressDetails = 'Pendiente';
+        }
+        
+        return {
+            ...course,
+            progress,
+            daysUntilClass,
+            scheduledDate,
+            progressDetails
+        };
+    });
+    
+    // Calculate overall progress as average of all courses
+    const totalProgress = coursesWithProgress.reduce((sum, course) => sum + course.progress, 0);
+    const overallProgress = Math.round(totalProgress / totalCourses);
+    
+    progressGrid.innerHTML = `
+            ${coursesWithProgress.map(course => `
+                <div class="progress-card-enhanced">
+                    <div class="progress-card-header">
+                        <div class="progress-card-title">
+                            <h4>${course.title}</h4>
+                            <span class="progress-category">${getCategoryIcon(course.category)} ${course.category || 'General'}</span>
+                        </div>
+                        <span class="progress-status status-${course.status}">${getStatusText(course.status)}</span>
+                    </div>
+                    
+                    <div class="progress-card-body">
+                        <div class="progress-metrics">
+                            <div class="metric">
+                                <span class="metric-icon">👨‍🏫</span>
+                                <span class="metric-label">Instructor:</span>
+                                <span class="metric-value">${course.tutor?.name || 'No asignado'}</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-icon">⏱️</span>
+                                <span class="metric-label">Duración:</span>
+                                <span class="metric-value">${course.duration || 60} min</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-icon">📅</span>
+                                <span class="metric-label">Fecha:</span>
+                                <span class="metric-value">${formatDate(course.scheduledAt)}</span>
+                            </div>
+                            ${course.daysUntilClass !== null ? `
+                                <div class="metric ${course.daysUntilClass <= 2 ? 'metric-urgent' : ''}">
+                                    <span class="metric-icon">⏰</span>
+                                    <span class="metric-label">Faltan:</span>
+                                    <span class="metric-value">
+                                        ${course.daysUntilClass > 0 ? 
+                                            `${course.daysUntilClass} ${course.daysUntilClass === 1 ? 'día' : 'días'}` : 
+                                            'Hoy'}
+                                    </span>
+                                </div>
+                            ` : ''}
+                        </div>
+                        
+                        <div class="progress-bar-section">
+                            ${(() => {
+                                // Determinar la calificación sobre 10
+                                let gradeValue = 0;
+                                let statusText = 'Sin calificación - Juega para obtener puntaje';
+                                let hasGrade = false;
+                                
+                                if (course.bestGradeOutOf10 !== undefined && course.bestGradeOutOf10 !== null) {
+                                    gradeValue = course.bestGradeOutOf10;
+                                    statusText = 'Puntaje obtenido en el juego';
+                                    hasGrade = true;
+                                } else if (course.bestGrade !== undefined && course.bestGrade !== null) {
+                                    gradeValue = (course.bestGrade / 10);
+                                    statusText = 'Puntaje obtenido en el juego';
+                                    hasGrade = true;
+                                }
+                                
+                                const gradeFormatted = gradeValue.toFixed(1);
+                                const barWidth = (gradeValue * 10); // 0-10 -> 0-100%
+                                
+                                return `
+                                    <div class="progress-bar-label">
+                                        <span>🎯 Puntaje del Juego</span>
+                                        <span class="progress-percentage ${hasGrade ? 'grade-highlight-value' : ''}" style="font-size: 18px; font-weight: 700;">
+                                            ${gradeFormatted}/10
+                                        </span>
+                                    </div>
+                                    <div class="progress-bar-container-enhanced">
+                                        <div class="progress-bar-fill-enhanced ${hasGrade ? 'grade-fill' : ''}" style="width: ${barWidth}%; ${!hasGrade ? 'opacity: 0.3;' : ''}"></div>
+                                    </div>
+                                    <small style="color: ${hasGrade ? 'rgba(45, 212, 191, 0.8)' : 'rgba(255, 255, 255, 0.5)'}; font-size: 12px; margin-top: 5px; display: block; font-weight: ${hasGrade ? '600' : '400'};">
+                                        ${statusText}
+                                    </small>
+                                `;
+                            })()}
+                        </div>
+                        
+                        <div class="progress-actions">
+                            ${course.status === 'active' && course.meetingUrl ? 
+                                `<a href="${course.meetingUrl}" target="_blank" class="btn-progress-action btn-join">
+                                    <span>🎥</span> Unirse
+                                </a>` : ''
+                            }
+                            ${course.enrollmentStatus === 'completed' ? 
+                                `<button class="btn-progress-action btn-game" disabled style="opacity: 0.6; cursor: not-allowed;">
+                                    <span>✅</span> Entregado
+                                </button>` :
+                                `<button class="btn-progress-action btn-game" onclick="playGame('${course.id}', '${course.title}', '${course.difficulty || 'medium'}', '${course.category || 'General'}')">
+                                    <span>🎮</span> Practicar
+                                </button>`
+                            }
+                            ${course.enrollmentStatus === 'completed' ? 
+                                `<button class="btn-progress-action btn-certificate">
+                                    <span>🏆</span> Certificado
+                                </button>` : ''
+                            }
+                        </div>
+                    </div>
                 </div>
-                <div class="progress-info">
-                    <span>${progress}% completado</span>
-                    <span class="status-${course.status}">${getStatusText(course.status)}</span>
-                </div>
-            </div>
-        `;
-    }).join('');
+            `).join('')}
+        </div>
+    `;
 }
 
 // ===================
@@ -460,88 +740,121 @@ async function loadProgress() {
 
 async function loadMessages() {
     try {
-        const token = localStorage.getItem('authToken');
-        
-        const response = await fetch('/api/conversations', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+        // Get contacts using APIService
+        const data = await apiService.makeRequest('/conversations/contacts/list', {
+            method: 'GET'
         });
         
-        if (!response.ok) {
-            throw new Error('Failed to load conversations');
+        if (!data.success) {
+            throw new Error(data.error || 'Failed to load contacts');
         }
         
-        const data = await response.json();
-        const conversations = data.data?.conversations || [];
+        const contacts = data.data?.contacts || [];
         
-        displayConversations(conversations);
+        displayConversations(contacts);
         
     } catch (error) {
-        console.error('Error loading messages:', error);
+        console.error('Error loading contacts:', error);
         const conversationsList = document.getElementById('conversationsList');
         if (conversationsList) {
-            conversationsList.innerHTML = '<div class="empty-state">Error al cargar conversaciones</div>';
+            conversationsList.innerHTML = '<div class="empty-state">Error al cargar contactos</div>';
         }
     }
 }
 
-function displayConversations(conversations) {
+function displayConversations(contacts) {
     const conversationsList = document.getElementById('conversationsList');
     if (!conversationsList) return;
     
-    if (conversations.length === 0) {
-        conversationsList.innerHTML = '<div class="empty-state">No tienes conversaciones</div>';
+    if (contacts.length === 0) {
+        conversationsList.innerHTML = '<div class="empty-state">No tienes tutores disponibles</div>';
         return;
     }
     
-    conversationsList.innerHTML = conversations.map(conv => `
-        <div class="conversation-item ${conv.unreadCount > 0 ? 'unread' : ''}" 
-             onclick="openConversation('${conv.id}')">
+    conversationsList.innerHTML = contacts.map(contact => `
+        <div class="conversation-item" 
+             onclick="startConversation('${contact.uid}', '${contact.name}')">
             <div class="conversation-avatar">
-                ${conv.otherParticipant?.name?.charAt(0).toUpperCase() || '?'}
+                ${contact.avatar || contact.name?.charAt(0).toUpperCase() || '?'}
             </div>
             <div class="conversation-info">
-                <div class="conversation-name">${conv.otherParticipant?.name || 'Usuario'}</div>
-                <div class="conversation-last-message">${conv.lastMessage || 'Sin mensajes'}</div>
+                <div class="conversation-name">${contact.name || 'Usuario'}</div>
+                <div class="conversation-last-message">${contact.email || ''}</div>
+                <div class="conversation-role">${contact.role === 'tutor' ? '👨‍🏫 Tutor' : '👤 ' + contact.role}</div>
             </div>
-            ${conv.unreadCount > 0 ? `<div class="unread-badge">${conv.unreadCount}</div>` : ''}
         </div>
     `).join('');
 }
 
-async function openConversation(conversationId) {
+async function startConversation(otherUserId, otherUserName) {
+    try {
+        // Get or create conversation using APIService
+        const data = await apiService.makeRequest('/conversations', {
+            method: 'POST',
+            body: JSON.stringify({ otherUserId })
+        });
+        
+        if (!data.success) {
+            throw new Error(data.error || 'Failed to start conversation');
+        }
+        
+        const conversationId = data.data?.conversationId;
+        
+        if (!conversationId) {
+            throw new Error('No conversation ID returned');
+        }
+        
+        // Update chat header with contact name
+        const chatHeader = document.querySelector('.chat-header');
+        if (chatHeader) {
+            chatHeader.style.display = 'block';
+            chatHeader.innerHTML = `<h4>Chat con ${otherUserName}</h4>`;
+        }
+        
+        // Open the conversation
+        await openConversation(conversationId);
+        
+    } catch (error) {
+        console.error('Error starting conversation:', error);
+        showNotification('Error al iniciar conversación', 'error');
+    }
+}
+
+async function openConversation(conversationId, isPolling = false) {
     currentConversation = conversationId;
     
     try {
-        const token = localStorage.getItem('authToken');
-        
-        const response = await fetch(`/api/conversations/${conversationId}/messages`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+        // Get messages using APIService
+        const data = await apiService.makeRequest(`/conversations/${conversationId}/messages`, {
+            method: 'GET'
         });
         
-        if (!response.ok) {
-            throw new Error('Failed to load messages');
+        if (!data.success) {
+            throw new Error(data.error || 'Failed to load messages');
         }
         
-        const data = await response.json();
         const messages = data.data?.messages || [];
         
         displayMessages(messages);
         
-        // Mark as read
-        fetch(`/api/conversations/${conversationId}/mark-read`, {
-            method: 'PATCH',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
+        // Mark as read using APIService (only on initial load, not during polling)
+        if (!isPolling) {
+            // Store message count for polling comparison
+            lastMessageCount = messages.length;
+            
+            apiService.makeRequest(`/conversations/${conversationId}/mark-read`, {
+                method: 'PATCH'
+            }).catch(err => console.error('Error marking as read:', err));
+            
+            // Start real-time polling
+            startMessagePolling();
+        }
         
     } catch (error) {
         console.error('Error loading conversation:', error);
-        showNotification('Error al cargar mensajes', 'error');
+        if (!isPolling) {
+            showNotification('Error al cargar mensajes', 'error');
+        }
     }
 }
 
@@ -581,25 +894,20 @@ async function sendMessage() {
     }
     
     try {
-        const token = localStorage.getItem('authToken');
-        
-        const response = await fetch(`/api/conversations/${currentConversation}/messages`, {
+        // Send message using APIService
+        const data = await apiService.makeRequest(`/conversations/${currentConversation}/messages`, {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
             body: JSON.stringify({ text })
         });
         
-        if (!response.ok) {
-            throw new Error('Failed to send message');
+        if (!data.success) {
+            throw new Error(data.error || 'Failed to send message');
         }
         
         messageInput.value = '';
         
-        // Reload messages
-        await openConversation(currentConversation);
+        // Reload messages immediately after sending
+        await openConversation(currentConversation, false);
         
     } catch (error) {
         console.error('Error sending message:', error);
@@ -610,6 +918,54 @@ async function sendMessage() {
 function filterConversations(searchTerm) {
     // TODO: Implement conversation filtering
     console.log('Filtering conversations:', searchTerm);
+}
+
+// Real-time message polling
+let messagePollingInterval = null;
+let lastMessageCount = 0;
+
+function startMessagePolling() {
+    // Clear any existing interval
+    if (messagePollingInterval) {
+        clearInterval(messagePollingInterval);
+    }
+    
+    // Poll every 3 seconds for real-time feel
+    messagePollingInterval = setInterval(async () => {
+        if (currentConversation) {
+            try {
+                const data = await apiService.makeRequest(`/conversations/${currentConversation}/messages`, {
+                    method: 'GET'
+                });
+                
+                if (data.success) {
+                    const messages = data.data?.messages || [];
+                    
+                    // Only update if message count changed (to avoid unnecessary re-renders)
+                    if (messages.length !== lastMessageCount) {
+                        lastMessageCount = messages.length;
+                        displayMessages(messages);
+                        
+                        // Scroll to bottom only if new messages arrived
+                        const messagesContainer = document.getElementById('messagesContainer');
+                        if (messagesContainer) {
+                            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                        }
+                    }
+                }
+            } catch (error) {
+                // Silently fail during polling to avoid console spam
+            }
+        }
+    }, 3000); // 3 seconds for near real-time
+}
+
+function stopMessagePolling() {
+    if (messagePollingInterval) {
+        clearInterval(messagePollingInterval);
+        messagePollingInterval = null;
+        lastMessageCount = 0;
+    }
 }
 
 // ===================
@@ -649,20 +1005,109 @@ function renderCalendar() {
 
 function formatDate(dateString) {
     if (!dateString) return 'Sin fecha';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
+    
+    try {
+        let date;
+        
+        // Handle Firebase Timestamp object
+        if (dateString._seconds) {
+            date = new Date(dateString._seconds * 1000);
+        } 
+        // Handle Firestore Timestamp with seconds property
+        else if (dateString.seconds) {
+            date = new Date(dateString.seconds * 1000);
+        }
+        // Handle ISO string or timestamp
+        else {
+            date = new Date(dateString);
+        }
+        
+        // Check if date is valid
+        if (isNaN(date.getTime())) {
+            console.warn('Invalid date:', dateString);
+            return 'Fecha no válida';
+        }
+        
+        return date.toLocaleDateString('es-ES', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    } catch (error) {
+        console.error('Error formatting date:', error);
+        return 'Fecha no válida';
+    }
 }
 
 function formatTime(timestamp) {
     if (!timestamp) return '';
-    const date = new Date(timestamp);
-    return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+    
+    try {
+        let date;
+        
+        // Handle Firebase Timestamp object
+        if (timestamp._seconds) {
+            date = new Date(timestamp._seconds * 1000);
+        } 
+        // Handle Firestore Timestamp with seconds property
+        else if (timestamp.seconds) {
+            date = new Date(timestamp.seconds * 1000);
+        }
+        // Handle ISO string or timestamp
+        else {
+            date = new Date(timestamp);
+        }
+        
+        // Check if date is valid
+        if (isNaN(date.getTime())) {
+            return '';
+        }
+        
+        return date.toLocaleTimeString('es-ES', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+        });
+    } catch (error) {
+        console.error('Error formatting time:', error);
+        return '';
+    }
+}
+
+function getCategoryIcon(category) {
+    const icons = {
+        'matematicas': '📐',
+        'ciencias': '🔬',
+        'historia': '📜',
+        'idiomas': '🗣️',
+        'ingles': '🇬🇧',
+        'español': '🇪🇸',
+        'frances': '🇫🇷',
+        'aleman': '🇩🇪',
+        'arte': '🎨',
+        'musica': '🎵',
+        'tecnologia': '💻',
+        'deportes': '⚽',
+        'literatura': '📚',
+        'quimica': '⚗️',
+        'fisica': '⚛️',
+        'biologia': '🧬',
+        'geografia': '🌍',
+        'astronomia': '🔭',
+        'filosofia': '🤔',
+        'economia': '💰',
+        'programacion': '💻',
+        'informatica': '🖥️',
+        'derecho': '⚖️',
+        'medicina': '⚕️',
+        'psicologia': '🧠',
+        'arquitectura': '🏛️',
+        'ingenieria': '⚙️',
+        'cocina': '👨‍🍳',
+        'fotografia': '📷'
+    };
+    return icons[category?.toLowerCase()] || '📚';
 }
 
 function getStatusText(status) {
@@ -691,6 +1136,253 @@ function showNotification(message, type = 'info') {
         notification.classList.remove('show');
         setTimeout(() => notification.remove(), 300);
     }, 3000);
+}
+
+// ===================
+// CALENDAR FUNCTIONS
+// ===================
+
+let currentMonth = new Date().getMonth();
+let currentYear = new Date().getFullYear();
+
+async function loadCalendar() {
+    renderCalendar();
+}
+
+function renderCalendar() {
+    const calendarGrid = document.getElementById('calendarGrid');
+    const currentMonthElement = document.getElementById('currentMonth');
+    
+    if (!calendarGrid || !currentMonthElement) return;
+    
+    const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    
+    currentMonthElement.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+    
+    const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    
+    // Get enrolled classes for this month
+    const classesInMonth = getClassesForMonthStudent(currentYear, currentMonth);
+    
+    let html = '';
+    
+    // Empty cells for days before month starts
+    for (let i = 0; i < firstDay; i++) {
+        html += '<div class="calendar-day empty"></div>';
+    }
+    
+    // Days of month
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    for (let day = 1; day <= daysInMonth; day++) {
+        const currentDate = new Date(currentYear, currentMonth, day);
+        const isToday = day === today.getDate() && 
+                       currentMonth === today.getMonth() && 
+                       currentYear === today.getFullYear();
+        
+        // Check if there are classes on this day
+        const classesThisDay = classesInMonth.filter(cls => {
+            const classDate = getDateFromScheduleStudent(cls.scheduledAt);
+            if (!classDate) return false;
+            return classDate.getDate() === day;
+        });
+        
+        let dayClass = '';
+        let indicator = '';
+        
+        if (classesThisDay.length > 0) {
+            // Determine the most critical status
+            const status = getClassStatusStudent(classesThisDay, currentDate);
+            dayClass = `has-class status-${status}`;
+            indicator = `<span class="class-indicator ${status}"></span>`;
+        }
+        
+        const todayClass = isToday ? 'today' : '';
+        html += `<div class="calendar-day ${todayClass} ${dayClass}" onclick="showDayClassesStudent(${day}, ${currentMonth}, ${currentYear})" title="${classesThisDay.length} clase(s)">
+            <span class="day-number">${day}</span>
+            ${indicator}
+        </div>`;
+    }
+    
+    calendarGrid.innerHTML = html;
+}
+
+function getClassesForMonthStudent(year, month) {
+    // Use myCourses instead of enrolledCourses
+    if (!Array.isArray(myCourses)) {
+        console.warn('myCourses is not an array:', myCourses);
+        return [];
+    }
+    
+    return myCourses.filter(course => {
+        const classDate = getDateFromScheduleStudent(course.scheduledAt);
+        if (!classDate) return false;
+        return classDate.getFullYear() === year && classDate.getMonth() === month;
+    });
+}
+
+function getDateFromScheduleStudent(scheduledAt) {
+    if (!scheduledAt) return null;
+    
+    try {
+        let date;
+        if (scheduledAt._seconds) {
+            date = new Date(scheduledAt._seconds * 1000);
+        } else if (scheduledAt.seconds) {
+            date = new Date(scheduledAt.seconds * 1000);
+        } else {
+            date = new Date(scheduledAt);
+        }
+        
+        if (isNaN(date.getTime())) return null;
+        date.setHours(0, 0, 0, 0);
+        return date;
+    } catch (error) {
+        return null;
+    }
+}
+
+function getClassStatusStudent(classes, currentDate) {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    
+    // Check if any class is overdue (past and not completed)
+    const hasOverdue = classes.some(cls => {
+        const classDate = getDateFromScheduleStudent(cls.scheduledAt);
+        return classDate < now && cls.status !== 'completed' && cls.status !== 'cancelled';
+    });
+    
+    if (hasOverdue) return 'atrasada';
+    
+    // Check if class is soon (within 2 days)
+    const twoDaysFromNow = new Date(now);
+    twoDaysFromNow.setDate(twoDaysFromNow.getDate() + 2);
+    
+    const isSoon = classes.some(cls => {
+        const classDate = getDateFromScheduleStudent(cls.scheduledAt);
+        return classDate >= now && classDate <= twoDaysFromNow && cls.status === 'scheduled';
+    });
+    
+    if (isSoon) return 'próxima';
+    
+    // Otherwise it's open/scheduled
+    return 'abierta';
+}
+
+function showDayClassesStudent(day, month, year) {
+    const classesInMonth = getClassesForMonthStudent(year, month);
+    const classesThisDay = classesInMonth.filter(cls => {
+        const classDate = getDateFromScheduleStudent(cls.scheduledAt);
+        if (!classDate) return false;
+        return classDate.getDate() === day;
+    });
+    
+    if (classesThisDay.length === 0) return;
+    
+    const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+    
+    // Update modal title
+    document.getElementById('dayClassesTitle').textContent = 
+        `Clases del ${day} de ${monthNames[month]} ${year}`;
+    
+    // Generate HTML for each class with status badge
+    const classesHTML = classesThisDay.map(cls => {
+        const status = getClassStatusStudent([cls]);
+        const statusColors = {
+            'abierta': '#10b981',
+            'próxima': '#f59e0b',
+            'atrasada': '#ef4444'
+        };
+        const statusColor = statusColors[status] || '#10b981';
+        
+        return `
+            <div class="day-class-item">
+                <div class="day-class-header">
+                    <h4>${cls.title}</h4>
+                    <span class="day-class-status" style="background: ${statusColor}; color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 600;">
+                        ${status}
+                    </span>
+                </div>
+                <div class="day-class-info">
+                    <span>🕒 ${formatDate(cls.scheduledAt)}</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    document.getElementById('dayClassesList').innerHTML = classesHTML;
+    document.getElementById('dayClassesModal').style.display = 'flex';
+}
+
+function closeDayClassesModal() {
+    document.getElementById('dayClassesModal').style.display = 'none';
+}
+
+function previousMonth() {
+    currentMonth--;
+    if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+    }
+    renderCalendar();
+}
+
+function nextMonth() {
+    currentMonth++;
+    if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+    }
+    renderCalendar();
+}
+
+// Play game function
+function playGame(courseId, courseTitle, difficulty, category) {
+    // Use the actual category from the course, not extracted from title
+    const subject = category || 'General';
+    
+    // Save token to sessionStorage for the game to use
+    const authToken = localStorage.getItem('authToken');
+    if (authToken) {
+        sessionStorage.setItem('gameAuthToken', authToken);
+        console.log('✅ Token saved to sessionStorage for game');
+    }
+    
+    // Mark that when user returns, this class should be marked as completed
+    sessionStorage.setItem('pendingCompletionClassId', courseId);
+    console.log('🎮 Starting game. pendingCompletionClassId set to:', courseId);
+    
+    // Redirect to game with parameters (use classId to match backend endpoint)
+    window.location.href = `/archer-game?subject=${encodeURIComponent(subject)}&difficulty=${difficulty}&classId=${courseId}`;
+}
+
+// Complete class function
+async function completeClass(classId) {
+    try {
+        console.log('📝 Marking class as completed:', classId);
+        
+        const data = await apiService.makeRequest(`/classes/${classId}/complete`, {
+            method: 'POST'
+        });
+        
+        if (data.success) {
+            console.log('✅ Class marked as completed successfully');
+            showNotification('¡Clase entregada! 🎉', 'success');
+            
+            // Reload all data to update stats and progress
+            await loadMyCourses();
+            await loadStats();
+            await loadProgress();
+        } else {
+            console.warn('⚠️ Failed to mark class as completed:', data.error);
+        }
+    } catch (error) {
+        console.error('❌ Error completing class:', error);
+    }
 }
 
 // Logout function

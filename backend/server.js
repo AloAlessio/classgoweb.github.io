@@ -140,6 +140,10 @@ app.get('/test-tokens', (req, res) => {
     res.sendFile(path.join(frontendPath, 'html', 'test-tokens.html'));
 });
 
+app.get('/archer-game', (req, res) => {
+    res.sendFile(path.join(frontendPath, 'html', 'archer-game.html'));
+});
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', authenticateUser, userRoutes);

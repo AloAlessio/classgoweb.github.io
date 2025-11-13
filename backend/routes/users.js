@@ -149,6 +149,61 @@ router.put('/profile', asyncHandler(async (req, res) => {
 }));
 
 /**
+ * @route   GET /api/users
+ * @desc    Get all users for assignment (Tutors and Admins)
+ * @access  Private (Tutor/Admin)
+ */
+router.get('/', asyncHandler(async (req, res) => {
+    try {
+        const { role } = req.query;
+        
+        console.log('📋 GET /api/users - Fetching users, role filter:', role);
+        
+        let query = admin.firestore().collection('users');
+        
+        // Filter by role if provided
+        if (role) {
+            query = query.where('role', '==', role);
+        }
+        
+        // Get all users (don't filter by status as it may not exist)
+        const snapshot = await query.get();
+        
+        const users = snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                uid: doc.id,
+                id: doc.id,
+                email: data.email,
+                name: data.name || data.displayName || 'Sin nombre',
+                role: data.role,
+                status: data.status || 'active'
+            };
+        });
+        
+        // Filter active users client-side and sort by name
+        const activeUsers = users
+            .filter(user => user.status === 'active' || !user.status)
+            .sort((a, b) => a.name.localeCompare(b.name));
+        
+        console.log('✅ Found', activeUsers.length, 'users');
+        
+        res.json({
+            success: true,
+            users: activeUsers,
+            total: activeUsers.length
+        });
+        
+    } catch (error) {
+        console.error('❌ Error fetching users:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Error al obtener usuarios'
+        });
+    }
+}));
+
+/**
  * @route   GET /api/users/list
  * @desc    Get all users (Admin only)
  * @access  Private (Admin)

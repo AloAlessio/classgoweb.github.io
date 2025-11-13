@@ -76,6 +76,118 @@ router.get('/', authenticateUser, asyncHandler(async (req, res) => {
 }));
 
 /**
+ * @route   GET /api/conversations/contacts/list
+ * @desc    Get list of available contacts (tutors for students, students for tutors)
+ * @access  Private
+ */
+router.get('/contacts/list', authenticateUser, asyncHandler(async (req, res) => {
+    const { uid, role } = req.user;
+
+    try {
+        let contacts = [];
+
+        if (role === 'alumno' || role === 'student') {
+            // Students can see tutors from their enrolled classes
+            const classesSnapshot = await admin.firestore()
+                .collection('classes')
+                .where('students', 'array-contains', uid)
+                .get();
+
+            const tutorIds = new Set();
+            classesSnapshot.docs.forEach(doc => {
+                const classData = doc.data();
+                if (classData.tutorId) {
+                    tutorIds.add(classData.tutorId);
+                }
+            });
+
+            // Get tutor details
+            for (const tutorId of tutorIds) {
+                const tutorDoc = await admin.firestore()
+                    .collection('users')
+                    .doc(tutorId)
+                    .get();
+
+                if (tutorDoc.exists) {
+                    const tutorData = tutorDoc.data();
+                    contacts.push({
+                        uid: tutorDoc.id,
+                        name: tutorData.name,
+                        email: tutorData.email,
+                        role: tutorData.role,
+                        avatar: tutorData.profile?.avatar || null
+                    });
+                }
+            }
+
+        } else if (role === 'tutor') {
+            // Tutors can see students from their classes
+            const classesSnapshot = await admin.firestore()
+                .collection('classes')
+                .where('tutorId', '==', uid)
+                .get();
+
+            const studentIds = new Set();
+            classesSnapshot.docs.forEach(doc => {
+                const classData = doc.data();
+                if (classData.students && Array.isArray(classData.students)) {
+                    classData.students.forEach(studentId => studentIds.add(studentId));
+                }
+            });
+
+            // Get student details
+            for (const studentId of studentIds) {
+                const studentDoc = await admin.firestore()
+                    .collection('users')
+                    .doc(studentId)
+                    .get();
+
+                if (studentDoc.exists) {
+                    const studentData = studentDoc.data();
+                    contacts.push({
+                        uid: studentDoc.id,
+                        name: studentData.name,
+                        email: studentData.email,
+                        role: studentData.role,
+                        avatar: studentData.profile?.avatar || null
+                    });
+                }
+            }
+
+        } else if (role === 'admin' || role === 'administrador') {
+            // Admins can see all users
+            const usersSnapshot = await admin.firestore()
+                .collection('users')
+                .where('uid', '!=', uid)
+                .limit(100)
+                .get();
+
+            contacts = usersSnapshot.docs.map(doc => {
+                const userData = doc.data();
+                return {
+                    uid: doc.id,
+                    name: userData.name,
+                    email: userData.email,
+                    role: userData.role,
+                    avatar: userData.profile?.avatar || null
+                };
+            });
+        }
+
+        res.json({
+            success: true,
+            data: {
+                contacts
+            }
+        });
+
+    } catch (error) {
+        console.error('Error fetching contacts:', error);
+        throw error;
+    }
+}));
+
+/**
  * @route   GET /api/conversations/:conversationId/messages
  * @desc    Get messages from a specific conversation
  * @access  Private

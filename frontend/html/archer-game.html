@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Knowledge Arrow - ClassGo</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="stylesheet" href="../css/archer-game-pixel.css?v=80">
+</head>
+<body>
+    <!-- SVG Filter for CRT Curve Effect -->
+    <svg style="position: absolute; width: 0; height: 0;">
+        <defs>
+            <filter id="crt-curve">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="0" result="blur" />
+                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0" result="goo" />
+                <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+                <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="8" xChannelSelector="R" yChannelSelector="G"/>
+                <feTurbulence baseFrequency="0.001 0.001" numOctaves="1" result="turbulence" seed="2" type="fractalNoise"/>
+            </filter>
+        </defs>
+    </svg>
+    
+    <!-- Background particles -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Game Container -->
+    <div class="game-container" id="gameContainer">
+        <!-- Header -->
+        <div class="game-header">
+            <button class="back-btn" onclick="goBack()">
+                <span>←</span> Volver
+            </button>
+            <div class="game-title">
+                <h1>🏹 Knowledge Arrow</h1>
+                <p class="subject-tag" id="subjectTag">General</p>
+            </div>
+            <div class="stats-display">
+                <div class="stat-item">
+                    <span class="stat-icon">🎯</span>
+                    <span class="stat-value" id="score">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-icon">🔥</span>
+                    <span class="stat-value" id="combo">x1</span>
+                </div>
+                <button class="pause-btn" onclick="togglePause()" title="Pausar">
+                    <span>⏸</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Canvas -->
+        <div class="game-canvas-wrapper">
+            <div class="question-display" id="questionDisplay">
+                <div class="question-text" id="questionText">Prepárate...</div>
+                <div class="timer-bar">
+                    <div class="timer-fill" id="timerFill"></div>
+                </div>
+            </div>
+            <div class="canvas-container">
+                <canvas id="gameCanvas"></canvas>
+                <div class="crt-overlay"></div>
+            </div>
+            <div class="combo-display" id="comboDisplay"></div>
+        </div>
+
+        <!-- Start Screen -->
+        <div class="start-screen" id="startScreen">
+            <div class="start-content">
+                <div class="game-logo">
+                    <div class="logo-icon">🏹</div>
+                    <h2>Knowledge Arrow</h2>
+                </div>
+                <div class="instructions">
+                    <h3>📖 Cómo Jugar</h3>
+                    <div class="instruction-item">
+                        <span class="instruction-number">1</span>
+                        <p>Lee la pregunta en la parte superior</p>
+                    </div>
+                    <div class="instruction-item">
+                        <span class="instruction-number">2</span>
+                        <p>Dispara flechas a los globos con la respuesta correcta</p>
+                    </div>
+                    <div class="instruction-item">
+                        <span class="instruction-number">3</span>
+                        <p>¡Crea combos para multiplicar tus puntos!</p>
+                    </div>
+                </div>
+                <div class="game-info">
+                    <div class="info-badge">
+                        <span>📚 Materia:</span>
+                        <strong id="startSubject">General</strong>
+                    </div>
+                    <div class="info-badge">
+                        <span>⚡ Dificultad:</span>
+                        <strong id="startDifficulty">Media</strong>
+                    </div>
+                </div>
+                
+                <!-- Character Selection -->
+                <div class="character-selection">
+                    <h3 style="font-size: 12px; margin-bottom: 15px; color: #FFD700;">🎯 Elige tu Arquero</h3>
+                    <div class="character-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div class="character-card active" onclick="selectCharacter(0)" data-character="0">
+                            <div class="character-preview" style="background: linear-gradient(135deg, #FF7F50, #E66A3C);">
+                                <span style="font-size: 32px;">👧</span>
+                            </div>
+                            <div class="character-name">Lina</div>
+                        </div>
+                        <div class="character-card" onclick="selectCharacter(1)" data-character="1">
+                            <div class="character-preview" style="background: linear-gradient(135deg, #CD853F, #8B4513);">
+                                <span style="font-size: 32px;">🧑</span>
+                            </div>
+                            <div class="character-name">Rex</div>
+                        </div>
+                        <div class="character-card" onclick="selectCharacter(2)" data-character="2">
+                            <div class="character-preview" style="background: linear-gradient(135deg, #5F9EA0, #3A6B6E);">
+                                <span style="font-size: 32px;">👩</span>
+                            </div>
+                            <div class="character-name">Maya</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="btn-start" onclick="startGame()">
+                    <span>▶</span> Comenzar Juego
+                </button>
+            </div>
+        </div>
+
+        <!-- Pause Overlay -->
+        <div class="pause-overlay" id="pauseOverlay">
+            <div class="pause-content">
+                <h2 class="pause-title">⏸ PAUSA</h2>
+                <div class="pause-stats">
+                    <div class="pause-stat">
+                        <span>Puntuación:</span>
+                        <strong id="pauseScore">0</strong>
+                    </div>
+                    <div class="pause-stat">
+                        <span>Combo:</span>
+                        <strong id="pauseCombo">x1</strong>
+                    </div>
+                    <div class="pause-stat">
+                        <span>Pregunta:</span>
+                        <strong id="pauseQuestion">1/10</strong>
+                    </div>
+                </div>
+                <div class="pause-buttons">
+                    <button class="btn-resume" onclick="togglePause()">
+                        <span>▶</span> Continuar
+                    </button>
+                    <button class="btn-restart" onclick="restartGame()">
+                        <span>🔄</span> Reiniciar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div class="game-over-screen" id="gameOverScreen">
+            <div class="game-over-content">
+                <h2 class="game-over-title">🎮 ¡Juego Terminado!</h2>
+                <div class="final-stats">
+                    <div class="final-stat">
+                        <span class="final-label">Puntuación Final</span>
+                        <span class="final-value" id="finalScore">0</span>
+                    </div>
+                    <div class="final-stat">
+                        <span class="final-label">Mejor Combo</span>
+                        <span class="final-value" id="bestCombo">x1</span>
+                    </div>
+                    <div class="final-stat">
+                        <span class="final-label">Preguntas Correctas</span>
+                        <span class="final-value" id="correctCount">0/0</span>
+                    </div>
+                    <div class="final-stat">
+                        <span class="final-label">Precisión</span>
+                        <span class="final-value" id="accuracy">0%</span>
+                    </div>
+                </div>
+                <div class="save-score" id="saveScoreSection">
+                    <input type="text" id="playerName" placeholder="✏️ Ingresa tu nombre" maxlength="20">
+                    <button class="btn-save-score" onclick="saveScore()">💾 Guardar Puntuación</button>
+                </div>
+                <div class="game-over-actions">
+                    <button class="btn-restart" onclick="restartGame()">
+                        <span>🔄</span> Jugar de Nuevo
+                    </button>
+                    <button class="btn-leaderboard" onclick="showLeaderboard()">
+                        <span>🏆</span> Ver Ranking
+                    </button>
+                    <button class="btn-back-go" onclick="goBack()">
+                        <span>←</span> Volver
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leaderboard -->
+        <div class="leaderboard-screen" id="leaderboardScreen">
+            <div class="leaderboard-content">
+                <h2>🏆 Tabla de Líderes</h2>
+                <div class="leaderboard-filter">
+                    <button class="filter-btn active" onclick="filterLeaderboard('all')">
+                        🏆 Todos
+                    </button>
+                    <button class="filter-btn" onclick="filterLeaderboard('subject')">
+                        📚 <span id="filterSubject">Esta Materia</span>
+                    </button>
+                </div>
+                <div class="leaderboard-list" id="leaderboardList"></div>
+                <button class="btn-close-leaderboard" onclick="closeLeaderboard()">
+                    ⬅️ Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+        <script src="../js/archer-game-pixel.js?v=105"></script>
+</body>
+</html>

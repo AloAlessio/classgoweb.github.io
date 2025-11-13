@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ClassGo - Mi Aprendizaje</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <link rel="stylesheet" href="/css/student-dashboard.css">
+    <link rel="stylesheet" href="/css/student-dashboard.css?v=99">
 </head>
 <body>
     <!-- Decorative Background -->
@@ -69,13 +69,31 @@
             </div>
         </div>
 
+        <!-- Progress Bar Section -->
+        <div class="header-progress-section">
+            <div class="progress-header-info">
+                <span class="progress-header-label">Tu Progreso de Aprendizaje</span>
+                <span class="progress-header-percentage" id="headerProgressPercentage">0%</span>
+            </div>
+            <div class="progress-header-bar">
+                <div class="progress-header-fill" id="headerProgressFill" style="width: 0%">
+                    <span class="progress-shine"></span>
+                </div>
+            </div>
+            <div class="progress-header-details">
+                <span class="progress-detail">
+                    <span id="scheduledCoursesCount">0</span> Próximos
+                </span>
+            </div>
+        </div>
+
         <!-- Navigation Tabs -->
         <div class="nav-tabs">
-            <button class="nav-tab active" data-section="explore">🔍 Explorar Cursos</button>
-            <button class="nav-tab" data-section="myCourses">📚 Mis Cursos</button>
-            <button class="nav-tab" data-section="progress">📊 Progreso</button>
-            <button class="nav-tab" data-section="calendar">📅 Calendario</button>
-            <button class="nav-tab" data-section="messages">💬 Mensajes</button>
+            <button class="nav-tab active" data-section="explore">Explorar Cursos</button>
+            <button class="nav-tab" data-section="myCourses">Mis Cursos</button>
+            <button class="nav-tab" data-section="progress">Progreso</button>
+            <button class="nav-tab" data-section="calendar">Calendario</button>
+            <button class="nav-tab" data-section="messages">Mensajes</button>
         </div>
 
         <!-- Explore Courses Section -->
@@ -118,7 +136,7 @@
 
         <!-- Progress Section -->
         <section id="progressSection" class="content-section">
-            <h3>Mi Progreso de Aprendizaje</h3>
+            <h3>Detalle de Progreso por Curso</h3>
             
             <div id="progressGrid" class="progress-grid">
                 <!-- Progress cards will be loaded here -->
@@ -128,6 +146,21 @@
         <!-- Calendar Section -->
         <section id="calendarSection" class="content-section">
             <h3>Calendario de Clases</h3>
+            
+            <div class="calendar-legend">
+                <div class="legend-item">
+                    <span class="legend-dot open"></span>
+                    <span>Clase programada</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-dot upcoming"></span>
+                    <span>Próxima (2 días o menos)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-dot overdue"></span>
+                    <span>Clase vencida</span>
+                </div>
+            </div>
             
             <div class="calendar-container">
                 <div class="calendar-header">
@@ -147,15 +180,18 @@
             
             <div class="messages-container">
                 <div class="conversations-panel">
-                    <input type="text" id="searchConversations" placeholder="🔍 Buscar conversaciones..." class="search-input">
+                    <input type="text" id="searchConversations" placeholder="🔍 Buscar contactos..." class="search-input">
                     <div id="conversationsList" class="conversations-list">
-                        <!-- Conversations will be loaded here -->
+                        <!-- Contacts will be loaded here -->
                     </div>
                 </div>
                 
                 <div class="chat-panel">
+                    <div class="chat-header" style="display: none;">
+                        <h4>Selecciona un contacto</h4>
+                    </div>
                     <div id="messagesContainer" class="messages-container">
-                        <div class="empty-state">Selecciona una conversación</div>
+                        <div class="empty-state">Selecciona un tutor para comenzar a conversar</div>
                     </div>
                     <div class="message-input-container">
                         <input type="text" id="messageInput" placeholder="Escribe un mensaje..." class="message-input">
@@ -170,6 +206,24 @@
     <div id="userMenu" class="user-menu" style="display: none;">
         <a href="/home">🏠 Inicio</a>
         <a href="#" onclick="logout()">🚪 Cerrar Sesión</a>
+    </div>
+
+    <!-- Day Classes Modal -->
+    <div id="dayClassesModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3 id="dayClassesTitle">Clases del Día</h3>
+                <button class="close-modal" onclick="closeDayClassesModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="dayClassesList" class="day-classes-list">
+                    <!-- Classes will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" onclick="closeDayClassesModal()">Cerrar</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -192,7 +246,7 @@
     </script>
     
     <!-- Load API version without Firebase -->
-    <script src="/js/api-service.js"></script>
-    <script src="/js/student-dashboard-api.js"></script>
+    <script src="/js/api-service.js?v=24"></script>
+    <script src="/js/student-dashboard-api.js?v=107"></script>
 </body>
 </html>

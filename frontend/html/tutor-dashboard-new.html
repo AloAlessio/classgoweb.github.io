@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ClassGo - Panel de Tutor</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <link rel="stylesheet" href="/css/tutor-dashboard.css">
+    <link rel="stylesheet" href="/css/tutor-dashboard.css?v=22">
 </head>
 <body>
     <!-- Decorative Background -->
@@ -71,49 +71,40 @@
 
         <!-- Navigation Tabs -->
         <div class="nav-tabs">
-            <div class="nav-tab active" onclick="switchSection('courses')">📚 Mis Cursos</div>
-            <div class="nav-tab" onclick="switchSection('students')">👥 Estudiantes</div>
-            <div class="nav-tab" onclick="switchSection('schedule')">📅 Calendario</div>
-            <div class="nav-tab" onclick="switchSection('messages')">💬 Mensajes</div>
-            <div class="nav-tab" onclick="switchSection('resources')">📎 Recursos</div>
+            <div class="nav-tab active" onclick="switchSection('courses')">Mis Cursos</div>
+            <div class="nav-tab" onclick="switchSection('schedule')">Calendario</div>
+            <div class="nav-tab" onclick="switchSection('messages')">Mensajes</div>
+            <div class="nav-tab" onclick="switchSection('resources')">Recursos</div>
         </div>
 
         <!-- Mis Cursos Section -->
         <div id="coursesSection" class="content-section active">
             <div class="section-header">
-                <h2>📚 Mis Cursos</h2>
-                <button class="btn-primary" onclick="openCreateCourseModal()">➕ Crear Nuevo Curso</button>
+                <h2>Mis Cursos</h2>
+                <button class="btn-primary" onclick="openCreateCourseModal()">Crear Nuevo Curso</button>
             </div>
             <div id="coursesGrid" class="courses-grid">
                 <!-- Courses will be loaded here -->
             </div>
         </div>
 
-        <!-- Estudiantes Section -->
-        <div id="studentsSection" class="content-section">
-            <div class="section-header">
-                <h2>👥 Mis Estudiantes</h2>
-                <input type="text" id="studentSearch" placeholder="🔍 Buscar estudiante..." class="search-input">
-            </div>
-            <table class="students-table">
-                <thead>
-                    <tr>
-                        <th>Estudiante</th>
-                        <th>Curso</th>
-                        <th>Progreso</th>
-                        <th>Última Actividad</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="studentsTableBody">
-                    <!-- Students will be loaded here -->
-                </tbody>
-            </table>
-        </div>
-
         <!-- Calendario Section -->
         <div id="scheduleSection" class="content-section">
-            <h2>📅 Calendario de Clases</h2>
+            <h2>Calendario de Clases</h2>
+            <div class="calendar-legend">
+                <div class="legend-item">
+                    <span class="legend-dot open"></span>
+                    <span>Abierta (programada)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-dot upcoming"></span>
+                    <span>Próxima (2 días o menos)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-dot overdue"></span>
+                    <span>Vencida (no completada)</span>
+                </div>
+            </div>
             <div class="calendar-layout">
                 <div class="calendar-container">
                     <div class="calendar-header">
@@ -132,85 +123,476 @@
 
         <!-- Mensajes Section -->
         <div id="messagesSection" class="content-section">
-            <h2>💬 Mensajes</h2>
-            <div id="messagesList" class="messages-list">
-                <!-- Messages will be loaded here -->
+            <h2>Mensajes</h2>
+            
+            <div class="messages-container">
+                <div class="conversations-panel">
+                    <input type="text" id="searchConversations" placeholder="🔍 Buscar contactos..." class="search-input">
+                    <div id="conversationsList" class="conversations-list">
+                        <!-- Contacts will be loaded here -->
+                    </div>
+                </div>
+                
+                <div class="chat-panel">
+                    <div class="chat-header" style="display: none;">
+                        <h4>Selecciona un contacto</h4>
+                    </div>
+                    <div id="messagesContainer" class="messages-container">
+                        <div class="empty-state">Selecciona un estudiante para comenzar a conversar</div>
+                    </div>
+                    <div class="message-input-container">
+                        <input type="text" id="messageInput" placeholder="Escribe un mensaje..." class="message-input">
+                        <button onclick="sendMessage()" class="send-btn">Enviar</button>
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- Recursos Section -->
         <div id="resourcesSection" class="content-section">
-            <h2>📎 Recursos</h2>
+            <h2>Recursos</h2>
             <div id="resourcesList" class="resources-list">
                 <!-- Resources will be loaded here -->
             </div>
         </div>
     </div>
+    
+    <!-- User Menu -->
+    <div id="userMenu" class="user-menu" style="display: none;">
+        <a href="/home">🏠 Inicio</a>
+        <a href="#" onclick="logout()">🚪 Cerrar Sesión</a>
+    </div>
 
-    <!-- Create Course Modal -->
+    <!-- Create Class Modal - MUST BE OUTSIDE CONTAINER -->
     <div id="createCourseModal" class="modal" style="display: none;">
-        <div class="modal-content">
+        <div class="modal-content modal-large">
             <span class="close" onclick="closeCreateCourseModal()">&times;</span>
-            <h2>Crear Nuevo Curso</h2>
+            <h2>📚 Crear Nueva Clase</h2>
+            
             <form id="createCourseForm" onsubmit="submitCreateCourse(event)">
-                <div class="form-group">
-                    <label for="title">Título del Curso *</label>
-                    <input type="text" id="title" name="title" required>
+                <!-- Step 1: Seleccionar Materia -->
+                <div class="form-step active" id="step1">
+                    <h3>1️⃣ Selecciona la Materia</h3>
+                    <div class="subjects-grid">
+                        <!-- Row 1 -->
+                        <div class="subject-card" onclick="selectSubject('ciencias', '🔬', 'Ciencias')">
+                            <div class="subject-icon">🔬</div>
+                            <div class="subject-name">Ciencias</div>
+                            <div class="subject-stats">
+                                <span>👥 1234</span>
+                                <span>📖 45</span>
+                            </div>
+                        </div>
+                        
+                        <div class="subject-card" onclick="selectSubject('astronomia', '🌌', 'Astronomía')">
+                            <div class="subject-icon">🌌</div>
+                            <div class="subject-name">Astronomía</div>
+                            <div class="subject-stats">
+                                <span>👥 856</span>
+                                <span>📖 28</span>
+                            </div>
+                        </div>
+                        
+                        <div class="subject-card" onclick="selectSubject('biologia', '🧬', 'Biología')">
+                            <div class="subject-icon">🧬</div>
+                            <div class="subject-name">Biología</div>
+                            <div class="subject-stats">
+                                <span>👥 1567</span>
+                                <span>📖 52</span>
+                            </div>
+                        </div>
+                        
+                        <div class="subject-card" onclick="selectSubject('arte', '🎨', 'Arte')">
+                            <div class="subject-icon">🎨</div>
+                            <div class="subject-name">Arte</div>
+                            <div class="subject-stats">
+                                <span>👥 2341</span>
+                                <span>📖 67</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Row 2 -->
+                        <div class="subject-card" onclick="selectSubject('ingles', '🗣️', 'Inglés')">
+                            <div class="subject-icon">🗣️</div>
+                            <div class="subject-name">Inglés</div>
+                            <div class="subject-stats">
+                                <span>👥 3456</span>
+                                <span>📖 89</span>
+                            </div>
+                        </div>
+                        
+                        <div class="subject-card" onclick="selectSubject('matematicas', '📐', 'Matemáticas')">
+                            <div class="subject-icon">📐</div>
+                            <div class="subject-name">Matemáticas</div>
+                            <div class="subject-stats">
+                                <span>👥 2890</span>
+                                <span>📖 73</span>
+                            </div>
+                        </div>
+                        
+                        <div class="subject-card" onclick="selectSubject('historia', '📚', 'Historia')">
+                            <div class="subject-icon">📚</div>
+                            <div class="subject-name">Historia</div>
+                            <div class="subject-stats">
+                                <span>👥 1678</span>
+                                <span>📖 41</span>
+                            </div>
+                        </div>
+                        
+                        <div class="subject-card" onclick="selectSubject('musica', '🎵', 'Música')">
+                            <div class="subject-icon">🎵</div>
+                            <div class="subject-name">Música</div>
+                            <div class="subject-stats">
+                                <span>👥 1234</span>
+                                <span>📖 35</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Row 3 -->
+                        <div class="subject-card" onclick="selectSubject('programacion', '💻', 'Programación')">
+                            <div class="subject-icon">💻</div>
+                            <div class="subject-name">Programación</div>
+                            <div class="subject-stats">
+                                <span>👥 4567</span>
+                                <span>📖 95</span>
+                            </div>
+                        </div>
+                        
+                        <div class="subject-card" onclick="selectSubject('geografia', '🌍', 'Geografía')">
+                            <div class="subject-icon">🌍</div>
+                            <div class="subject-name">Geografía</div>
+                            <div class="subject-stats">
+                                <span>👥 987</span>
+                                <span>📖 32</span>
+                            </div>
+                        </div>
+                        
+                        <div class="subject-card" onclick="selectSubject('frances', 'FR', 'Francés')">
+                            <div class="subject-icon subject-text">FR</div>
+                            <div class="subject-name">Francés</div>
+                            <div class="subject-stats">
+                                <span>👥 1456</span>
+                                <span>📖 44</span>
+                            </div>
+                        </div>
+                        
+                        <div class="subject-card" onclick="selectSubject('quimica', '⚗️', 'Química')">
+                            <div class="subject-icon">⚗️</div>
+                            <div class="subject-name">Química</div>
+                            <div class="subject-stats">
+                                <span>👥 1876</span>
+                                <span>📖 56</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" id="selectedSubject" name="subject" required>
+                    <input type="hidden" id="selectedSubjectIcon" name="subjectIcon">
+                    
+                    <div class="step-actions">
+                        <button type="button" class="btn-secondary" onclick="closeCreateCourseModal()">Cancelar</button>
+                        <button type="button" class="btn-primary" onclick="nextStep(2)" disabled id="btnStep1">Siguiente →</button>
+                    </div>
                 </div>
                 
-                <div class="form-group">
-                    <label for="description">Descripción *</label>
-                    <textarea id="description" name="description" rows="4" required></textarea>
-                </div>
-                
-                <div class="form-row">
+                <!-- Step 2: Detalles de la Clase -->
+                <div class="form-step" id="step2">
+                    <h3>2️⃣ Detalles de la Clase</h3>
+                    <div id="selectedSubjectDisplay" class="selected-subject-display"></div>
+                    
                     <div class="form-group">
-                        <label for="category">Categoría *</label>
-                        <select id="category" name="category" required>
-                            <option value="">Selecciona...</option>
-                            <option value="matematicas">Matemáticas</option>
-                            <option value="ciencias">Ciencias</option>
-                            <option value="programacion">Programación</option>
-                            <option value="idiomas">Idiomas</option>
-                            <option value="otros">Otros</option>
-                        </select>
+                        <label for="title">Título de la Clase *</label>
+                        <input type="text" id="title" name="title" placeholder="Ej: Introducción a la Física Cuántica" required>
                     </div>
                     
                     <div class="form-group">
-                        <label for="subject">Materia *</label>
-                        <input type="text" id="subject" name="subject" required>
+                        <label for="description">Descripción *</label>
+                        <textarea id="description" name="description" rows="3" placeholder="Describe brevemente el contenido de la clase..." required></textarea>
                     </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="scheduledAt">Fecha y Hora *</label>
-                        <input type="datetime-local" id="scheduledAt" name="scheduledAt" required>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="difficulty">Dificultad *</label>
+                            <select id="difficulty" name="difficulty" required>
+                                <option value="">Selecciona...</option>
+                                <option value="principiante">🟢 Principiante</option>
+                                <option value="intermedio">🟡 Intermedio</option>
+                                <option value="avanzado">🔴 Avanzado</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="deadline">Fecha Límite de Entrega *</label>
+                            <input type="datetime-local" id="deadline" name="deadline" required>
+                        </div>
                     </div>
                     
                     <div class="form-group">
-                        <label for="duration">Duración (min)</label>
-                        <input type="number" id="duration" name="duration" value="60" min="30" max="180">
+                        <label for="objectives">Objetivos de Aprendizaje</label>
+                        <textarea id="objectives" name="objectives" rows="2" placeholder="¿Qué aprenderán los estudiantes? (Opcional)"></textarea>
+                    </div>
+                    
+                    <div class="step-actions">
+                        <button type="button" class="btn-secondary" onclick="previousStep(1)">← Anterior</button>
+                        <button type="button" class="btn-primary" onclick="nextStep(3)">Siguiente →</button>
                     </div>
                 </div>
                 
-                <div class="form-group">
-                    <label for="maxStudents">Máximo de Estudiantes</label>
-                    <input type="number" id="maxStudents" name="maxStudents" value="20" min="1" max="100">
-                </div>
-                
-                <div class="modal-actions">
-                    <button type="button" class="btn-secondary" onclick="closeCreateCourseModal()">Cancelar</button>
-                    <button type="submit" class="btn-primary">Crear Curso</button>
+                <!-- Step 3: Asignar Estudiantes -->
+                <div class="form-step" id="step3">
+                    <h3>3️⃣ Asignar Estudiantes (Opcional)</h3>
+                    <p style="margin-bottom: 15px; opacity: 0.8;">Los estudiantes también pueden inscribirse por sí mismos después de crear el curso.</p>
+                    
+                    <div class="students-selection">
+                        <div class="search-students">
+                            <input type="text" id="searchStudents" placeholder="🔍 Buscar estudiante por nombre..." onkeyup="filterStudents()">
+                            <div class="selection-actions">
+                                <button type="button" class="btn-sm" onclick="selectAllStudents()">Seleccionar Todos</button>
+                                <button type="button" class="btn-sm" onclick="deselectAllStudents()">Deseleccionar Todos</button>
+                            </div>
+                        </div>
+                        
+                        <div class="students-list" id="studentsList">
+                            <!-- Students will be loaded here -->
+                            <div class="loading">Cargando estudiantes...</div>
+                        </div>
+                        
+                        <div class="selected-count">
+                            <span id="selectedCount">0</span> estudiante(s) seleccionado(s)
+                        </div>
+                    </div>
+                    
+                    <div class="step-actions">
+                        <button type="button" class="btn-secondary" onclick="previousStep(2)">← Anterior</button>
+                        <button type="submit" class="btn-primary">✅ Crear Clase</button>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- User Menu -->
-    <div id="userMenu" class="user-menu" style="display: none;">
-        <a href="/home">🏠 Inicio</a>
-        <a href="#" onclick="logout()">🚪 Cerrar Sesión</a>
+    <!-- Edit Class Modal -->
+    <div id="editCourseModal" class="modal" style="display: none;">
+        <div class="modal-content modal-large">
+            <span class="close" onclick="closeEditCourseModal()">&times;</span>
+            <h2>✏️ Editar Clase</h2>
+            
+            <form id="editCourseForm" onsubmit="submitEditCourse(event)">
+                <input type="hidden" id="editCourseId" name="courseId">
+                
+                <div class="form-section">
+                    <h3>📝 Información de la Clase</h3>
+                    
+                    <div class="form-group">
+                        <label for="editTitle">Título de la Clase *</label>
+                        <input type="text" id="editTitle" name="title" placeholder="Ej: Introducción a la Física Cuántica" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editDescription">Descripción *</label>
+                        <textarea id="editDescription" name="description" rows="3" placeholder="Describe brevemente el contenido de la clase..." required></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editCategory">Categoría *</label>
+                            <select id="editCategory" name="category" required>
+                                <option value="">Selecciona...</option>
+                                <option value="matematicas">Matemáticas</option>
+                                <option value="ciencias">Ciencias</option>
+                                <option value="historia">Historia</option>
+                                <option value="idiomas">Idiomas</option>
+                                <option value="arte">Arte</option>
+                                <option value="musica">Música</option>
+                                <option value="tecnologia">Tecnología</option>
+                                <option value="programacion">Programación</option>
+                                <option value="geografia">Geografía</option>
+                                <option value="biologia">Biología</option>
+                                <option value="quimica">Química</option>
+                                <option value="fisica">Física</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editDuration">Duración (minutos) *</label>
+                            <input type="number" id="editDuration" name="duration" min="15" max="240" step="15" value="60" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editScheduledAt">Fecha y Hora *</label>
+                            <input type="datetime-local" id="editScheduledAt" name="scheduledAt" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editMaxStudents">Estudiantes Máx. *</label>
+                            <input type="number" id="editMaxStudents" name="maxStudents" min="1" max="100" value="20" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editStatus">Estado *</label>
+                        <select id="editStatus" name="status" required>
+                            <option value="scheduled">Programado</option>
+                            <option value="active">En curso</option>
+                            <option value="completed">Completado</option>
+                            <option value="cancelled">Cancelado</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>👥 Gestión de Estudiantes</h3>
+                    
+                    <div class="student-management-help">
+                        <p>💡 <strong>Agregar estudiantes:</strong> Dale acceso al curso. Podrán verlo en su dashboard.</p>
+                        <p>🗑️ <strong>Quitar estudiantes:</strong> Elimina el acceso. Ya no podrán ver el curso.</p>
+                    </div>
+                    
+                    <div class="current-students-info">
+                        <div class="info-badge">
+                            <span class="info-label">Estudiantes actuales:</span>
+                            <span class="info-value" id="currentStudentsCount">0</span>
+                        </div>
+                        <div class="info-badge">
+                            <span class="info-label">Capacidad máxima:</span>
+                            <span class="info-value" id="maxStudentsDisplay">20</span>
+                        </div>
+                    </div>
+                    
+                    <div class="students-tabs">
+                        <button type="button" class="student-tab active" onclick="switchStudentTab('enrolled')">
+                            Estudiantes Inscritos (<span id="enrolledCount">0</span>)
+                        </button>
+                        <button type="button" class="student-tab" onclick="switchStudentTab('available')">
+                            Agregar Estudiantes (<span id="availableCount">0</span>)
+                        </button>
+                    </div>
+                    
+                    <div class="students-tab-content">
+                        <!-- Enrolled Students Tab -->
+                        <div id="enrolledStudentsTab" class="tab-pane active">
+                            <div class="search-box">
+                                <input type="text" id="searchEnrolled" placeholder="🔍 Buscar estudiante inscrito..." onkeyup="filterEnrolledStudents()">
+                            </div>
+                            <div class="enrolled-students-list" id="enrolledStudentsList">
+                                <div class="loading">Cargando estudiantes...</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Available Students Tab -->
+                        <div id="availableStudentsTab" class="tab-pane">
+                            <div class="search-box">
+                                <input type="text" id="searchAvailable" placeholder="🔍 Buscar estudiante..." onkeyup="filterAvailableStudents()">
+                                <div class="selection-actions">
+                                    <button type="button" class="btn-sm" onclick="selectAllAvailable()">Seleccionar Todos</button>
+                                    <button type="button" class="btn-sm" onclick="deselectAllAvailable()">Deseleccionar Todos</button>
+                                </div>
+                            </div>
+                            <div class="available-students-list" id="availableStudentsList">
+                                <div class="loading">Cargando estudiantes...</div>
+                            </div>
+                            <div class="selected-count">
+                                <span id="newStudentsCount">0</span> estudiante(s) seleccionado(s) para agregar
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeEditCourseModal()">Cancelar</button>
+                    <button type="submit" class="btn-primary">💾 Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Manage Class Modal -->
+    <div id="manageClassModal" class="modal" style="display: none;">
+        <div class="modal-content modal-large">
+            <span class="close" onclick="closeManageClassModal()">&times;</span>
+            <h2>📊 Gestión de Clase</h2>
+            
+            <div class="class-overview">
+                <h3 id="manageClassName">Nombre de la Clase</h3>
+                <div class="class-overview-stats">
+                    <div class="stat-item">
+                        <label>Estudiantes Inscritos</label>
+                        <span class="stat-value" id="enrolledCount">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <label>Han Asistido</label>
+                        <span class="stat-value" id="attendedCount">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <label>Completaron</label>
+                        <span class="stat-value" id="completedCount">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <label>Estado</label>
+                        <span class="stat-value" id="classStatusBadge">Programado</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="manage-tabs">
+                <button type="button" class="manage-tab active" onclick="switchManageTab('attendance')">
+                    Asistencia
+                </button>
+                <button type="button" class="manage-tab" onclick="switchManageTab('progress')">
+                    Progreso
+                </button>
+                <button type="button" class="manage-tab" onclick="switchManageTab('details')">
+                    Detalles
+                </button>
+            </div>
+
+            <div class="manage-content">
+                <!-- Attendance Tab -->
+                <div id="attendancePane" class="manage-pane active">
+                    <div class="attendance-list" id="attendanceList">
+                        <div class="loading">Cargando estudiantes...</div>
+                    </div>
+                </div>
+
+                <!-- Progress Tab -->
+                <div id="progressPane" class="manage-pane">
+                    <div class="progress-list" id="progressList">
+                        <div class="loading">Cargando progreso...</div>
+                    </div>
+                </div>
+
+                <!-- Details Tab -->
+                <div id="detailsPane" class="manage-pane">
+                    <div class="class-details" id="classDetails">
+                        <div class="loading">Cargando detalles...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" onclick="closeManageClassModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Day Classes Modal -->
+    <div id="dayClassesModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3 id="dayClassesTitle">Clases del Día</h3>
+                <button class="close-modal" onclick="closeDayClassesModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="dayClassesList" class="day-classes-list">
+                    <!-- Classes will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" onclick="closeDayClassesModal()">Cerrar</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -231,7 +613,7 @@
     </script>
     
     <!-- Load API version without Firebase -->
-    <script src="/js/api-service.js"></script>
-    <script src="/js/tutor-dashboard-api.js"></script>
+    <script src="/js/api-service.js?v=22"></script>
+    <script src="/js/tutor-dashboard-api.js?v=22"></script>
 </body>
 </html>
