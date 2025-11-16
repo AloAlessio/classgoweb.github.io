@@ -488,6 +488,14 @@ function displayMyCourses() {
                             <span>🎥</span> Unirse a la clase
                         </a>` : ''
                     }
+                    ${hasAttendedToday(course.id) ? 
+                        `<button class="btn-attendance" disabled style="background: #48bb78; cursor: not-allowed; opacity: 0.8;">
+                            <span>✅</span> Asistencia Registrada
+                        </button>` :
+                        `<button class="btn-attendance" onclick="openAttendanceModal('${course.id}', '${course.title}')">
+                            <span>📝</span> Marcar Asistencia
+                        </button>`
+                    }
                     ${course.enrollmentStatus === 'completed' ? 
                         `<button class="btn-game" disabled style="opacity: 0.6; cursor: not-allowed; background: #4a5568;">
                             <span>✅</span> Entregado
@@ -504,6 +512,27 @@ function displayMyCourses() {
         </div>
     `).join('');
 }
+
+/**
+ * Verificar si el estudiante ya registró asistencia hoy para esta clase
+ */
+function hasAttendedToday(classId) {
+    const today = new Date().toDateString();
+    const attendanceKey = `attendance_${classId}_${today}`;
+    return localStorage.getItem(attendanceKey) === 'true';
+}
+
+/**
+ * Marcar que el estudiante asistió hoy a esta clase
+ */
+function markAttendedToday(classId) {
+    const today = new Date().toDateString();
+    const attendanceKey = `attendance_${classId}_${today}`;
+    localStorage.setItem(attendanceKey, 'true');
+}
+
+// Hacer la función global
+window.markAttendedToday = markAttendedToday;
 
 async function leaveCourse(courseId) {
     if (!confirm('¿Estás seguro de que deseas abandonar este curso?')) {

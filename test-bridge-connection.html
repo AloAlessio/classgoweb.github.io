@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Arduino Bridge</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a202c;
+            color: white;
+        }
+        .status-box {
+            background: #2d3748;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .detected {
+            background: #48bb78;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 24px;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        button {
+            background: #4299e1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #3182ce;
+        }
+        pre {
+            background: #000;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Arduino Bridge Connection</h1>
+    
+    <div class="status-box">
+        <h2>Estado de Conexión</h2>
+        <div id="connectionStatus">Verificando...</div>
+    </div>
+
+    <div class="status-box">
+        <h2>Última Tarjeta Detectada</h2>
+        <div id="cardStatus">Esperando...</div>
+    </div>
+
+    <div id="detectionAlert" style="display: none;" class="detected">
+        🎉 ¡TARJETA DETECTADA!
+    </div>
+
+    <div class="status-box">
+        <h2>Log en Tiempo Real</h2>
+        <pre id="log"></pre>
+    </div>
+
+    <button onclick="checkStatus()">Verificar Estado</button>
+    <button onclick="clearLog()">Limpiar Log</button>
+
+    <script>
+        let lastDetectionTime = 0;
+        const logElement = document.getElementById('log');
+        
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.textContent = `[${timestamp}] ${message}\n` + logElement.textContent;
+        }
+
+        async function checkStatus() {
+            try {
+                const response = await fetch('http://localhost:3001/status');
+                const data = await response.json();
+                
+                document.getElementById('connectionStatus').innerHTML = `
+                    <strong>✅ Conectado</strong><br>
+                    Puerto: ${data.serial.port}<br>
+                    Serial conectado: ${data.serial.connected ? '✅' : '❌'}<br>
+                    Backend: ${data.backend}<br>
+                    Clase activa: ${data.activeClass || 'Ninguna'}
+                `;
+                
+                if (data.cardDetected && data.lastDetectionTime > lastDetectionTime) {
+                    lastDetectionTime = data.lastDetectionTime;
+                    
+                    document.getElementById('cardStatus').innerHTML = `
+                        <strong style="color: #48bb78;">🔖 TARJETA DETECTADA</strong><br>
+                        UID: ${data.lastUid}<br>
+                        Tiempo: ${new Date(data.lastDetectionTime).toLocaleString()}
+                    `;
+                    
+                    // Mostrar alerta
+                    const alert = document.getElementById('detectionAlert');
+                    alert.style.display = 'block';
+                    setTimeout(() => {
+                        alert.style.display = 'none';
+                    }, 3000);
+                    
+                    log(`🎉 TARJETA DETECTADA: ${data.lastUid}`);
+                } else if (data.lastUid) {
+                    document.getElementById('cardStatus').innerHTML = `
+                        Última UID: ${data.lastUid}<br>
+                        Tiempo: ${new Date(data.lastDetectionTime).toLocaleString()}
+                    `;
+                } else {
+                    document.getElementById('cardStatus').textContent = 'No hay tarjetas detectadas';
+                }
+                
+                log('✅ Estado verificado correctamente');
+                
+            } catch (error) {
+                document.getElementById('connectionStatus').innerHTML = `
+                    <strong style="color: #f56565;">❌ No conectado</strong><br>
+                    Error: ${error.message}<br>
+                    <small>Asegúrate de que el Arduino Bridge esté corriendo en puerto 3001</small>
+                `;
+                log(`❌ Error: ${error.message}`);
+            }
+        }
+
+        function clearLog() {
+            logElement.textContent = '';
+        }
+
+        // Auto-check cada 300ms
+        setInterval(checkStatus, 300);
+        
+        // Primera verificación
+        checkStatus();
+        
+        log('🚀 Sistema de monitoreo iniciado');
+    </script>
+</body>
+</html>

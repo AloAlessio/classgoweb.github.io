@@ -216,6 +216,11 @@ class APIService {
 
     // ============= CONVENIENCE METHODS =============
 
+    // Alias para compatibilidad
+    async request(endpoint, options = {}) {
+        return this.makeRequest(endpoint, options);
+    }
+
     async get(endpoint) {
         return this.makeRequest(endpoint, { method: 'GET' });
     }

@@ -21,6 +21,7 @@ const classRoutes = require('./routes/classes');
 const statsRoutes = require('./routes/stats');
 const notesRoutes = require('./routes/notes');
 const conversationRoutes = require('./routes/conversations');
+const attendanceRoutes = require('./routes/attendance');
 
 // Initialize Firebase Admin
 initFirebaseAdmin();
@@ -36,7 +37,7 @@ app.use(helmet({
             styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
             fontSrc: ["'self'", "https://fonts.gstatic.com"],
             scriptSrc: ["'self'", "'unsafe-inline'"],
-            connectSrc: ["'self'", "https://fonts.googleapis.com", "https://fonts.gstatic.com"],
+            connectSrc: ["'self'", "http://localhost:3001", "https://fonts.googleapis.com", "https://fonts.gstatic.com"],
             imgSrc: ["'self'", "data:", "https:"],
             frameSrc: ["'none'"],
             objectSrc: ["'none'"],
@@ -48,10 +49,10 @@ app.use(helmet({
 }));
 app.use(compression());
 
-// Rate limiting
+// Rate limiting (aumentado para permitir polling)
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 requests per windowMs
+    windowMs: 5 * 60 * 1000, // 5 minutes
+    max: 500, // limit each IP to 500 requests per windowMs
     message: { error: 'Too many requests, please try again later' }
 });
 app.use('/api/', limiter);
@@ -151,6 +152,7 @@ app.use('/api/classes', authenticateUser, classRoutes);
 app.use('/api/stats', authenticateUser, statsRoutes);
 app.use('/api/notes', authenticateUser, notesRoutes);
 app.use('/api/conversations', authenticateUser, conversationRoutes);
+app.use('/api/attendance', attendanceRoutes); // Permitir registro sin auth para Arduino
 
 // API Documentation endpoint
 app.get('/api', (req, res) => {

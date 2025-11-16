@@ -1,0 +1,21 @@
+{
+  "name": "classgo-arduino-bridge",
+  "version": "1.0.0",
+  "description": "Bridge between Arduino RFID reader and ClassGo backend",
+  "main": "rfid-bridge.js",
+  "scripts": {
+    "start": "node rfid-bridge.js",
+    "dev": "nodemon rfid-bridge.js"
+  },
+  "dependencies": {
+    "serialport": "^12.0.0",
+    "@serialport/parser-readline": "^12.0.0",
+    "axios": "^1.6.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": ["arduino", "rfid", "attendance", "education"],
+  "author": "ClassGo Team",
+  "license": "MIT"
+}

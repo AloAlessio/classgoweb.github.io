@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' http://localhost:3000 http://localhost:3001; img-src 'self' data: https:; font-src 'self' data:;">
+    <title>Sistema de Asistencias - ClassGo</title>
+    <link rel="stylesheet" href="../css/attendance.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="attendance-header">
+        <div class="header-content">
+            <button class="btn-back" onclick="window.history.back()">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Volver
+            </button>
+            <h1>📋 Sistema de Asistencias</h1>
+            <div class="header-actions">
+                <button class="btn-link-card" id="btnLinkCard">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <rect x="3" y="5" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                        <line x1="3" y1="9" x2="17" y2="9" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    Vincular Tarjeta
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="attendance-main">
+        <!-- Class Selector -->
+        <section class="class-selector-section">
+            <div class="selector-card">
+                <label for="classSelect">Seleccionar Clase:</label>
+                <select id="classSelect" class="class-select">
+                    <option value="">Cargando clases...</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- Loading State -->
+        <div class="loading-state" id="loadingState">
+            <div class="loader"></div>
+            <p>Cargando asistencias...</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <section class="stats-section" id="statsSection" style="display: none;">
+            <div class="stat-card stat-total">
+                <div class="stat-icon">👥</div>
+                <div class="stat-info">
+                    <span class="stat-label">Total Estudiantes</span>
+                    <span class="stat-value" id="statTotal">0</span>
+                </div>
+            </div>
+            <div class="stat-card stat-present">
+                <div class="stat-icon">✅</div>
+                <div class="stat-info">
+                    <span class="stat-label">Presentes</span>
+                    <span class="stat-value" id="statPresent">0</span>
+                </div>
+            </div>
+            <div class="stat-card stat-absent">
+                <div class="stat-icon">❌</div>
+                <div class="stat-info">
+                    <span class="stat-label">Ausentes</span>
+                    <span class="stat-value" id="statAbsent">0</span>
+                </div>
+            </div>
+            <div class="stat-card stat-percentage">
+                <div class="stat-icon">📊</div>
+                <div class="stat-info">
+                    <span class="stat-label">% Asistencia</span>
+                    <span class="stat-value" id="statPercentage">0%</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Date Filter -->
+        <section class="filter-section" id="filterSection" style="display: none;">
+            <div class="filter-card">
+                <label for="dateFilter">Filtrar por fecha:</label>
+                <input type="date" id="dateFilter" class="date-input">
+                <button class="btn-filter" id="btnFilter">Filtrar</button>
+                <button class="btn-clear-filter" id="btnClearFilter">Todas las fechas</button>
+            </div>
+        </section>
+
+        <!-- Attendance List -->
+        <section class="attendance-list-section" id="attendanceSection" style="display: none;">
+            <h2>Registro de Asistencias</h2>
+            <div class="attendance-grid" id="attendanceGrid">
+                <!-- Se llenará dinámicamente -->
+            </div>
+        </section>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <div class="empty-icon">📭</div>
+            <h3>No hay asistencias registradas</h3>
+            <p>Las asistencias aparecerán aquí cuando los estudiantes pasen su tarjeta RFID</p>
+        </div>
+    </main>
+
+    <!-- Modal: Vincular Tarjeta -->
+    <div class="modal" id="linkCardModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🔗 Vincular Tarjeta RFID</h2>
+                <button class="btn-close-modal" id="btnCloseModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Vincula una tarjeta RFID con un estudiante para el registro de asistencias automático.</p>
+                
+                <div class="form-group">
+                    <label for="studentSelect">Estudiante:</label>
+                    <select id="studentSelect" class="form-input">
+                        <option value="">Selecciona un estudiante...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="rfidInput">UID de la Tarjeta RFID:</label>
+                    <input type="text" id="rfidInput" class="form-input" placeholder="Ejemplo: 13:C9:46:14">
+                    <small>Pasa la tarjeta por el lector para obtener el UID</small>
+                </div>
+
+                <div class="rfid-scanner" id="rfidScanner">
+                    <div class="scanner-animation">
+                        <div class="scanner-pulse"></div>
+                        <svg width="60" height="60" viewBox="0 0 60 60">
+                            <rect x="10" y="15" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2" fill="none"/>
+                            <line x1="10" y1="25" x2="50" y2="25" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </div>
+                    <p>Esperando tarjeta...</p>
+                    <small>El UID se detectará automáticamente</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="btnCancelLink">Cancelar</button>
+                <button class="btn-primary" id="btnSaveLink">Vincular Tarjeta</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Real-time Notification -->
+    <div class="attendance-notification" id="attendanceNotification">
+        <div class="notification-content">
+            <div class="notification-icon">✅</div>
+            <div class="notification-text">
+                <strong id="notificationTitle">Asistencia Registrada</strong>
+                <p id="notificationMessage"></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/api-service.js"></script>
+    <script src="../js/attendance.js"></script>
+</body>
+</html>

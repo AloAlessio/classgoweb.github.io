@@ -1,7 +1,7 @@
 // Service Worker for ClassGo PWA
 // Handles caching, offline functionality, and background sync
 
-const CACHE_NAME = 'classgo-v62-pwa'; // Improved target positioning and distribution
+const CACHE_NAME = 'classgo-v64-attendance-csp-fix'; // Updated: CSP fix for Arduino Bridge
 const OFFLINE_URL = '/frontend/html/home.html';
 
 // Import app shell configuration

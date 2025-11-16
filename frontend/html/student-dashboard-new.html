@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' http://localhost:3001 https://fonts.googleapis.com https://fonts.gstatic.com; font-src 'self' https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline'; img-src 'self' data:;">
     <title>ClassGo - Mi Aprendizaje</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="stylesheet" href="/css/student-dashboard.css?v=99">
+    <link rel="stylesheet" href="/css/student-attendance.css?v=3">
 </head>
 <body>
     <!-- Decorative Background -->
@@ -244,9 +246,79 @@
             document.getElementById('userMenu').style.display = 'none';
         });
     </script>
+
+    <!-- Modal: Auto-registro de Asistencia -->
+    <div class="attendance-modal" id="attendanceModal">
+        <div class="attendance-modal-content">
+            <div class="attendance-modal-header">
+                <h2 id="attendanceClassName">Clase</h2>
+                <button class="attendance-close-btn" onclick="closeAttendanceModal()">×</button>
+            </div>
+            
+            <!-- Estado: Esperando tarjeta -->
+            <div class="attendance-waiting" id="attendanceWaiting">
+                <div class="rfid-card-animation">
+                    <div class="card-pulse"></div>
+                    <div class="card-icon">💳</div>
+                </div>
+                <h3>Pasa tu tarjeta RFID</h3>
+                <p>Acerca tu tarjeta al lector para registrar tu asistencia</p>
+                
+                <div class="loading-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+            
+            <!-- Estado: Éxito -->
+            <div class="attendance-success hidden" id="attendanceSuccess">
+                <div class="success-animation">
+                    <div class="checkmark-circle">
+                        <div class="checkmark"></div>
+                    </div>
+                </div>
+                <h3 class="success-title">¡Asistencia Registrada!</h3>
+                <p class="success-name" id="attendanceStudentName">Nombre del Estudiante</p>
+                <p class="success-time" id="attendanceTime">Hora</p>
+                <div class="confetti-container" id="confettiContainer"></div>
+            </div>
+            
+            <!-- Estado: Error -->
+            <div class="attendance-error hidden" id="attendanceError">
+                <div class="error-animation">
+                    <div class="error-icon">❌</div>
+                </div>
+                <h3>Error al Registrar</h3>
+                <p id="attendanceErrorMessage">Por favor intenta de nuevo</p>
+                <button class="btn-retry" onclick="retryAttendance()">
+                    🔄 Reintentar
+                </button>
+            </div>
+            
+            <!-- Estado: Tarjeta Rechazada -->
+            <div class="attendance-rejected hidden" id="attendanceRejected">
+                <div class="rejected-animation">
+                    <div class="rejected-circle">
+                        <div class="x-mark">
+                            <span class="x-line-1"></span>
+                            <span class="x-line-2"></span>
+                        </div>
+                    </div>
+                </div>
+                <h3 class="rejected-title">🚫 Acceso Denegado</h3>
+                <p class="rejected-message">Tarjeta no autorizada</p>
+                <p class="rejected-uid" id="rejectedUid">UID: --</p>
+                <button class="btn-close-rejected" onclick="closeAttendanceModal()">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
     
     <!-- Load API version without Firebase -->
     <script src="/js/api-service.js?v=24"></script>
-    <script src="/js/student-dashboard-api.js?v=107"></script>
+    <script src="/js/student-dashboard-api.js?v=109"></script>
+    <script src="/js/student-attendance.js?v=8"></script>
 </body>
 </html>
