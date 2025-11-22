@@ -13,18 +13,18 @@ const CONFIG = {
     // Puerto serial del Arduino (ajusta según tu sistema)
     // Windows: 'COM3', 'COM4', etc.
     // Linux/Mac: '/dev/ttyUSB0', '/dev/cu.usbmodem14101', etc.
-    SERIAL_PORT: 'COM16',
+    SERIAL_PORT: process.env.SERIAL_PORT || 'COM16',
     BAUD_RATE: 9600,
     
-    // URL del backend (cambia en producción)
-    BACKEND_URL: 'http://localhost:3000/api',
-    // En producción: 'https://classgo-web.onrender.com/api'
+    // URL del backend - Usa variable de entorno o detecta automáticamente
+    BACKEND_URL: process.env.BACKEND_URL || 'http://localhost:3000/api',
+    // En producción: 'https://tu-app.onrender.com/api'
     
     // ID de la clase activa (se puede cambiar en runtime)
     ACTIVE_CLASS_ID: null,
     
     // Puerto HTTP para recibir comandos del frontend
-    HTTP_PORT: 3001,
+    HTTP_PORT: process.env.HTTP_PORT || 3001,
     
     // Mapeo de UIDs a formato correcto
     AUTO_FORMAT_UID: true

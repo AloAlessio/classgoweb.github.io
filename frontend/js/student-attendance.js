@@ -8,6 +8,9 @@ let currentAttendanceClassName = null;
 let attendanceCheckInterval = null;
 let lastAttendanceCount = 0;
 
+// Configuración del Arduino Bridge (IP local)
+let ARDUINO_BRIDGE_URL = localStorage.getItem('arduinoBridgeURL') || null;
+
 /**
  * Abrir modal de asistencia
  */
@@ -25,6 +28,35 @@ async function openAttendanceModal(classId, className) {
     
     // Resetear estados
     showWaitingState();
+    
+    // Verificar si ya hay una URL configurada
+    if (!ARDUINO_BRIDGE_URL) {
+        console.log('⚙️ No hay URL configurada, solicitando al usuario...');
+        try {
+            await promptForArduinoBridge();
+        } catch (error) {
+            console.error('❌ Usuario canceló la configuración');
+            showErrorState('Necesitas configurar el lector RFID para registrar asistencia');
+            return;
+        }
+    } else {
+        // Verificar que la URL guardada sigue funcionando
+        console.log('🔍 Verificando conexión con:', ARDUINO_BRIDGE_URL);
+        try {
+            await testArduinoBridgeConnection(ARDUINO_BRIDGE_URL);
+            console.log('✅ Conexión verificada correctamente');
+        } catch (error) {
+            console.warn('⚠️ La URL guardada no responde, solicitando nueva configuración');
+            ARDUINO_BRIDGE_URL = null;
+            localStorage.removeItem('arduinoBridgeURL');
+            try {
+                await promptForArduinoBridge();
+            } catch (error) {
+                showErrorState('No se pudo conectar al lector RFID');
+                return;
+            }
+        }
+    }
     
     // Intentar configurar el Arduino Bridge automáticamente
     const bridgeConfigured = await configureArduinoBridge(classId);
@@ -45,7 +77,7 @@ async function openAttendanceModal(classId, className) {
  */
 function startCardDetectionForAttendance() {
     console.log('🔍 Iniciando escucha de tarjetas RFID...');
-    console.log('📡 Conectando a Arduino Bridge: http://localhost:3001/status');
+    console.log('📡 Conectando a Arduino Bridge:', ARDUINO_BRIDGE_URL);
     
     let lastProcessedDetection = 0;
     let lastProcessedRejection = 0;
@@ -54,7 +86,11 @@ function startCardDetectionForAttendance() {
     attendanceCheckInterval = setInterval(async () => {
         try {
             // Intentar obtener estado del Arduino Bridge
-            const response = await fetch('http://localhost:3001/status');
+            const response = await fetch(`${ARDUINO_BRIDGE_URL}/status`, {
+                method: 'GET',
+                mode: 'cors',
+                cache: 'no-cache'
+            });
             
             if (response.ok) {
                 const data = await response.json();
@@ -196,7 +232,7 @@ async function configureArduinoBridge(classId) {
         console.log('🔧 Intentando configurar Arduino Bridge para clase:', classId);
         
         // Intentar enviar comando al bridge via HTTP
-        const response = await fetch('http://localhost:3001/set-class', {
+        const response = await fetch(`${ARDUINO_BRIDGE_URL}/set-class`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -587,6 +623,165 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
+// ===================================
+// CONFIGURACIÓN DE ARDUINO BRIDGE
+// ===================================
+
+/**
+ * Probar conexión con Arduino Bridge
+ */
+async function testArduinoBridgeConnection(url) {
+    const response = await fetch(`${url}/status`, {
+        method: 'GET',
+        mode: 'cors',
+        cache: 'no-cache',
+        signal: AbortSignal.timeout(3000)
+    });
+    if (!response.ok) throw new Error('Connection failed');
+    return response.json();
+}
+
+/**
+ * Solicitar al usuario la configuración del Arduino Bridge
+ */
+function promptForArduinoBridge() {
+    return new Promise((resolve, reject) => {
+        const modal = document.createElement('div');
+        modal.className = 'arduino-config-modal';
+        modal.innerHTML = `
+            <div class="arduino-config-content">
+                <div class="config-header">
+                    <div class="config-icon">🔧</div>
+                    <h3>Configurar Lector RFID</h3>
+                    <p>Ingresa la dirección IP de la computadora con el Arduino</p>
+                </div>
+                
+                <div class="config-form">
+                    <div class="config-field">
+                        <label>Dirección IP:</label>
+                        <input type="text" id="arduinoIP" placeholder="192.168.1.100" value="localhost">
+                        <span class="hint">Si estás en la misma computadora, deja "localhost"</span>
+                    </div>
+                    
+                    <div class="config-field">
+                        <label>Puerto:</label>
+                        <input type="text" id="arduinoPort" placeholder="3001" value="3001">
+                    </div>
+                    
+                    <div class="config-examples">
+                        <p><strong>Ejemplos:</strong></p>
+                        <ul>
+                            <li>Misma computadora: <code>localhost:3001</code></li>
+                            <li>Red local: <code>192.168.1.100:3001</code></li>
+                            <li>Red escolar: <code>10.0.0.50:3001</code></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="config-actions">
+                    <button class="btn-test" id="testConnection">🔍 Probar Conexión</button>
+                    <button class="btn-save" id="saveConnection" disabled>💾 Guardar</button>
+                    <button class="btn-cancel" id="cancelConnection">❌ Cancelar</button>
+                </div>
+                
+                <div class="config-status" id="connectionStatus"></div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        const ipInput = document.getElementById('arduinoIP');
+        const portInput = document.getElementById('arduinoPort');
+        const testBtn = document.getElementById('testConnection');
+        const saveBtn = document.getElementById('saveConnection');
+        const cancelBtn = document.getElementById('cancelConnection');
+        const statusDiv = document.getElementById('connectionStatus');
+        
+        let testedURL = null;
+        
+        testBtn.onclick = async () => {
+            const ip = ipInput.value.trim();
+            const port = portInput.value.trim();
+            
+            if (!ip || !port) {
+                statusDiv.innerHTML = '<span class="status-error">⚠️ Completa todos los campos</span>';
+                return;
+            }
+            
+            const testURL = `http://${ip}:${port}`;
+            statusDiv.innerHTML = '<span class="status-testing">🔄 Probando conexión...</span>';
+            testBtn.disabled = true;
+            
+            try {
+                const response = await fetch(`${testURL}/status`, {
+                    method: 'GET',
+                    mode: 'cors',
+                    cache: 'no-cache'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    statusDiv.innerHTML = `<span class="status-success">✅ Conexión exitosa! Arduino Bridge funcionando</span>`;
+                    testedURL = testURL;
+                    saveBtn.disabled = false;
+                } else {
+                    throw new Error('Respuesta inválida');
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<span class="status-error">❌ No se pudo conectar. Verifica que:<br>
+                    1. El Arduino Bridge esté corriendo<br>
+                    2. La IP y puerto sean correctos<br>
+                    3. Estés en la misma red</span>`;
+                saveBtn.disabled = true;
+                testedURL = null;
+            } finally {
+                testBtn.disabled = false;
+            }
+        };
+        
+        saveBtn.onclick = () => {
+            if (testedURL) {
+                localStorage.setItem('arduinoBridgeURL', testedURL);
+                ARDUINO_BRIDGE_URL = testedURL;
+                document.body.removeChild(modal);
+                console.log('✅ Arduino Bridge configurado:', testedURL);
+                resolve(testedURL);
+            }
+        };
+        
+        cancelBtn.onclick = () => {
+            document.body.removeChild(modal);
+            reject(new Error('Configuración cancelada'));
+        };
+        
+        // Cerrar con ESC
+        const escapeHandler = (e) => {
+            if (e.key === 'Escape') {
+                document.body.removeChild(modal);
+                document.removeEventListener('keydown', escapeHandler);
+                reject(new Error('Configuración cancelada'));
+            }
+        };
+        document.addEventListener('keydown', escapeHandler);
+    });
+}
+
+/**
+ * Reconfigurar Arduino Bridge (desde un botón en el dashboard)
+ */
+window.reconfigureArduinoBridge = async function() {
+    ARDUINO_BRIDGE_URL = null;
+    localStorage.removeItem('arduinoBridgeURL');
+    try {
+        await promptForArduinoBridge();
+        alert('✅ Arduino Bridge reconfigurado correctamente');
+    } catch (error) {
+        console.log('Usuario canceló la reconfiguración');
+    }
+};
+
 console.log('✅ Sistema de auto-registro de asistencia cargado');
+
+
 
 
