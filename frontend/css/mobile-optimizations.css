@@ -101,6 +101,70 @@ button {
     }
 }
 
+/* ===== USER MENU MOBILE RESPONSIVE ===== */
+
+/* Mobile optimization for user menu dropdown */
+@media (max-width: 768px) {
+    .user-menu,
+    #userMenu,
+    #userMenuDropdown {
+        position: fixed !important;
+        top: 70px !important;
+        right: 10px !important;
+        left: 10px !important;
+        width: auto !important;
+        max-width: none !important;
+        min-width: 0 !important;
+        margin: 0 auto !important;
+        border-radius: 20px !important;
+        padding: 20px !important;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 
+                    0 0 0 1px rgba(45, 212, 191, 0.4) !important;
+    }
+
+    #userMenuDropdown > div,
+    #userMenu > div,
+    #userMenu > a {
+        font-size: 16px !important;
+        padding: 14px 16px !important;
+        touch-action: manipulation;
+        min-height: 44px !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .user-menu,
+    #userMenu,
+    #userMenuDropdown {
+        top: 60px !important;
+        right: 8px !important;
+        left: 8px !important;
+        border-radius: 16px !important;
+        padding: 16px !important;
+    }
+
+    #userMenuDropdown > div,
+    #userMenu > div,
+    #userMenu > a {
+        font-size: 15px !important;
+        padding: 12px 14px !important;
+    }
+}
+
+@media (max-width: 375px) {
+    .user-menu,
+    #userMenu,
+    #userMenuDropdown {
+        top: 55px !important;
+        right: 5px !important;
+        left: 5px !important;
+        border-radius: 14px !important;
+        padding: 14px !important;
+    }
+}
+
 /* ===== LANDSCAPE ORIENTATION OPTIMIZATIONS ===== */
 
 @media (max-height: 500px) and (orientation: landscape) {

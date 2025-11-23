@@ -551,77 +551,77 @@ function updateDynamicSection(isAuthenticated) {
         
         // Different content for tutors vs students
         if (userRole === USER_ROLES.TUTOR || userRole === USER_ROLES.ADMIN) {
-            // Show tutor's upcoming classes to teach
-            sectionTitle.textContent = 'Mis Próximas Clases a Impartir';
+            // Show popular topics for tutors to consider teaching
+            sectionTitle.textContent = 'Temas Más Demandados por Estudiantes';
             contentSection.innerHTML = `
-                <div class="class-item" onclick="joinClass('astronomia')">
+                <div class="class-item" style="cursor: pointer;">
                     <div class="class-info">
-                        <div class="class-subject">🌌 Astronomía: Sistema Solar</div>
-                        <div class="class-teacher">👥 5 estudiantes inscritos</div>
-                        <div class="class-time">⏰ Hoy, 3:00 PM - 4:30 PM</div>
+                        <div class="class-subject">🔥 Matemáticas Avanzadas</div>
+                        <div class="class-teacher">Alta demanda - Considera crear una clase</div>
+                        <div class="class-time">📊 +1,250 estudiantes buscando tutores</div>
                     </div>
-                    <button class="join-button" style="background: linear-gradient(135deg, #f59e0b, #d97706);">Iniciar Clase</button>
+                    <button class="join-button" style="background: linear-gradient(135deg, #f59e0b, #d97706);">Crear Clase</button>
                 </div>
-                <div class="class-item" onclick="joinClass('biologia')">
+                <div class="class-item" style="cursor: pointer;">
                     <div class="class-info">
-                        <div class="class-subject">🧬 Biología: Células y Organismos</div>
-                        <div class="class-teacher">👥 8 estudiantes inscritos</div>
-                        <div class="class-time">⏰ Mañana, 10:00 AM - 11:30 AM</div>
+                        <div class="class-subject">🌍 Inglés para Negocios</div>
+                        <div class="class-teacher">Tendencia creciente en idiomas</div>
+                        <div class="class-time">📊 +980 estudiantes interesados</div>
                     </div>
-                    <button class="join-button">Programada</button>
+                    <button class="join-button">Crear Clase</button>
                 </div>
-                <div class="class-item" onclick="joinClass('ingles')">
+                <div class="class-item" style="cursor: pointer;">
                     <div class="class-info">
-                        <div class="class-subject">🗣️ Inglés Conversacional Avanzado</div>
-                        <div class="class-teacher">👥 3 estudiantes inscritos • 🆕 1 solicitud pendiente</div>
-                        <div class="class-time">⏰ Mañana, 2:00 PM - 3:00 PM</div>
+                        <div class="class-subject">💻 Programación Python</div>
+                        <div class="class-teacher">El lenguaje más demandado actualmente</div>
+                        <div class="class-time">📊 +850 estudiantes buscando tutores</div>
                     </div>
-                    <button class="join-button">Programada</button>
+                    <button class="join-button">Crear Clase</button>
                 </div>
-                <div class="class-item" onclick="joinClass('quimica')">
+                <div class="class-item" style="cursor: pointer;">
                     <div class="class-info">
-                        <div class="class-subject">⚗️ Química: Reacciones Químicas</div>
-                        <div class="class-teacher">👥 6 estudiantes inscritos</div>
-                        <div class="class-time">⏰ Viernes, 4:00 PM - 5:30 PM</div>
+                        <div class="class-subject">🧪 Química Orgánica</div>
+                        <div class="class-teacher">Popular en ciencias naturales</div>
+                        <div class="class-time">📊 +720 estudiantes interesados</div>
                     </div>
-                    <button class="join-button">Programada</button>
+                    <button class="join-button">Crear Clase</button>
                 </div>
             `;
         } else {
-            // Show upcoming classes for students
-            sectionTitle.textContent = 'Próximas Clases';
+            // Show popular topics for students
+            sectionTitle.textContent = 'Lo Más Popular';
             contentSection.innerHTML = `
-                <div class="class-item" onclick="joinClass('astronomia')">
+                <div class="class-item" style="cursor: pointer;">
                     <div class="class-info">
-                        <div class="class-subject">Astronomía: Sistema Solar</div>
-                        <div class="class-teacher">Tutor: Dr. María González</div>
-                        <div class="class-time">⏰ Hoy, 3:00 PM - 4:30 PM</div>
+                        <div class="class-subject">🔥 Matemáticas Avanzadas</div>
+                        <div class="class-teacher">El tema más solicitado este mes</div>
+                        <div class="class-time">📊 +1,250 estudiantes interesados</div>
                     </div>
-                    <button class="join-button">Unirse Ahora</button>
+                    <button class="join-button">Explorar</button>
                 </div>
-                <div class="class-item" onclick="joinClass('biologia')">
+                <div class="class-item" style="cursor: pointer;">
                     <div class="class-info">
-                        <div class="class-subject">Biología: Células y Organismos</div>
-                        <div class="class-teacher">Tutor: Prof. Carlos Ramírez</div>
-                        <div class="class-time">⏰ Mañana, 10:00 AM - 11:30 AM</div>
+                        <div class="class-subject">🌍 Inglés para Negocios</div>
+                        <div class="class-teacher">Tendencia en idiomas profesionales</div>
+                        <div class="class-time">📊 +980 estudiantes interesados</div>
                     </div>
-                    <button class="join-button">Programada</button>
+                    <button class="join-button">Explorar</button>
                 </div>
-                <div class="class-item" onclick="joinClass('ingles')">
+                <div class="class-item" style="cursor: pointer;">
                     <div class="class-info">
-                        <div class="class-subject">Inglés Conversacional</div>
-                        <div class="class-teacher">Tutor: Sarah Johnson</div>
-                        <div class="class-time">⏰ Mañana, 2:00 PM - 3:00 PM</div>
+                        <div class="class-subject">💻 Programación Python</div>
+                        <div class="class-teacher">El lenguaje más demandado actualmente</div>
+                        <div class="class-time">📊 +850 estudiantes interesados</div>
                     </div>
-                    <button class="join-button">Programada</button>
+                    <button class="join-button">Explorar</button>
                 </div>
-                <div class="class-item" onclick="joinClass('arte')">
+                <div class="class-item" style="cursor: pointer;">
                     <div class="class-info">
-                        <div class="class-subject">Arte: Técnicas de Acuarela</div>
-                        <div class="class-teacher">Tutor: Ana Martínez</div>
-                        <div class="class-time">⏰ Viernes, 4:00 PM - 5:30 PM</div>
+                        <div class="class-subject">🧪 Química Orgánica</div>
+                        <div class="class-teacher">Popular en ciencias naturales</div>
+                        <div class="class-time">📊 +720 estudiantes interesados</div>
                     </div>
-                    <button class="join-button">Programada</button>
+                    <button class="join-button">Explorar</button>
                 </div>
             `;
         }
@@ -762,12 +762,6 @@ function toggleUserMenu(event) {
             </div>
             <div onclick="viewProfile()" style="padding: 10px; cursor: pointer; border-radius: 8px; margin-bottom: 5px; transition: background 0.2s; color: #e0f7f7;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">
                 👤 Mi Perfil
-            </div>
-            <div onclick="viewSettings()" style="padding: 10px; cursor: pointer; border-radius: 8px; margin-bottom: 5px; transition: background 0.2s; color: #e0f7f7;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">
-                ⚙️ Configuración
-            </div>
-            <div onclick="viewDetailedStats()" style="padding: 10px; cursor: pointer; border-radius: 8px; margin-bottom: 5px; transition: background 0.2s; color: #e0f7f7;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">
-                📊 Mis Estadísticas
             </div>`;
         
         // Add separator for special panels
@@ -785,35 +779,24 @@ function toggleUserMenu(event) {
                 </div>`;
         }
         
-        // Student Dashboard - ALWAYS show for admins, also show for students
-        if (currentUserRole === USER_ROLES.STUDENT || currentUserRole === USER_ROLES.ADMIN) {
+        // Student Dashboard - ONLY show for admins (students use Mi Perfil)
+        if (currentUserRole === USER_ROLES.ADMIN) {
             menuItems += `
                 <div onclick="goToStudentDashboard()" style="padding: 14px 12px; cursor: pointer; border-radius: 10px; margin-bottom: 8px; transition: all 0.3s ease; background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(37, 99, 235, 0.25)); border: 2px solid rgba(59, 130, 246, 0.5); color: #ffffff; font-weight: 600; font-size: 15px; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);" onmouseover="this.style.background='linear-gradient(135deg, rgba(59, 130, 246, 0.4), rgba(37, 99, 235, 0.4))'; this.style.borderColor='rgba(59, 130, 246, 0.8)'; this.style.boxShadow='0 4px 12px rgba(59, 130, 246, 0.5)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(37, 99, 235, 0.25))'; this.style.borderColor='rgba(59, 130, 246, 0.5)'; this.style.boxShadow='0 2px 8px rgba(59, 130, 246, 0.3)'; this.style.transform='translateY(0)'">
                     📚 Panel de Estudiante
                 </div>`;
         }
         
-        // Tutor Dashboard - ALWAYS show for admins, also show for tutors
-        if (currentUserRole === USER_ROLES.TUTOR || currentUserRole === USER_ROLES.ADMIN) {
+        // Tutor Dashboard - ONLY show for admins (tutors use Mi Perfil)
+        if (currentUserRole === USER_ROLES.ADMIN) {
             menuItems += `
                 <div onclick="goToTutorDashboard()" style="padding: 14px 12px; cursor: pointer; border-radius: 10px; margin-bottom: 8px; transition: all 0.3s ease; background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(217, 119, 6, 0.25)); border: 2px solid rgba(245, 158, 11, 0.5); color: #ffffff; font-weight: 600; font-size: 15px; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);" onmouseover="this.style.background='linear-gradient(135deg, rgba(245, 158, 11, 0.4), rgba(217, 119, 6, 0.4))'; this.style.borderColor='rgba(245, 158, 11, 0.8)'; this.style.boxShadow='0 4px 12px rgba(245, 158, 11, 0.5)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(217, 119, 6, 0.25))'; this.style.borderColor='rgba(245, 158, 11, 0.5)'; this.style.boxShadow='0 2px 8px rgba(245, 158, 11, 0.3)'; this.style.transform='translateY(0)'">
                     🎓 Panel de Tutor
                 </div>`;
         }
         
-        if (permissions.canManageUsers) {
-            menuItems += `
-                <div onclick="openAdminPanel()" style="padding: 14px 12px; cursor: pointer; border-radius: 10px; margin-bottom: 8px; transition: all 0.3s ease; background: linear-gradient(135deg, rgba(234, 179, 8, 0.25), rgba(202, 138, 4, 0.25)); border: 2px solid rgba(234, 179, 8, 0.5); color: #ffffff; font-weight: 600; font-size: 15px; box-shadow: 0 2px 8px rgba(234, 179, 8, 0.3);" onmouseover="this.style.background='linear-gradient(135deg, rgba(234, 179, 8, 0.4), rgba(202, 138, 4, 0.4))'; this.style.borderColor='rgba(234, 179, 8, 0.8)'; this.style.boxShadow='0 4px 12px rgba(234, 179, 8, 0.5)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='linear-gradient(135deg, rgba(234, 179, 8, 0.25), rgba(202, 138, 4, 0.25))'; this.style.borderColor='rgba(234, 179, 8, 0.5)'; this.style.boxShadow='0 2px 8px rgba(234, 179, 8, 0.3)'; this.style.transform='translateY(0)'">
-                    👑 Panel Admin
-                </div>`;
-        }
-        
-        if (permissions.canViewAllStats) {
-            menuItems += `
-                <div onclick="viewSystemStats()" style="padding: 10px; cursor: pointer; border-radius: 8px; margin-bottom: 5px; transition: background 0.2s; color: #ffd700;" onmouseover="this.style.background='rgba(255,215,0,0.1)'" onmouseout="this.style.background='transparent'">
-                    📊 Estadísticas del Sistema
-                </div>`;
-        }
+        // Panel Admin button removed - admins use "Mi Perfil" to access their admin panel
+        // Keeping student and tutor panels visible for admin access
         
         menuItems += `
             <div onclick="contactSupport()" style="padding: 10px; cursor: pointer; border-radius: 8px; margin-bottom: 5px; transition: background 0.2s; color: #e0f7f7;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">
@@ -824,38 +807,16 @@ function toggleUserMenu(event) {
                 🚪 Cerrar Sesión
             </div>`;
         
-        // Menu for authenticated users
+        // Menu for authenticated users - usando clases CSS para mejor control
         userMenuHTML = `
-            <div id="userMenuDropdown" style="
-                position: fixed;
-                top: 80px;
-                right: 20px;
-                background: rgba(255, 255, 255, 0.15);
-                backdrop-filter: blur(10px);
-                border-radius: 15px;
-                padding: 15px;
-                border: 1px solid rgba(255, 255, 255, 0.2);
-                z-index: 1000;
-                min-width: 240px;
-            ">
+            <div id="userMenuDropdown">
                 ${menuItems}
             </div>
         `;
     } else {
-        // Menu for guest users
+        // Menu for guest users - usando clases CSS para mejor control
         userMenuHTML = `
-            <div id="userMenuDropdown" style="
-                position: fixed;
-                top: 80px;
-                right: 20px;
-                background: rgba(255, 255, 255, 0.15);
-                backdrop-filter: blur(10px);
-                border-radius: 15px;
-                padding: 15px;
-                border: 1px solid rgba(255, 255, 255, 0.2);
-                z-index: 1000;
-                min-width: 220px;
-            ">
+            <div id="userMenuDropdown">
                 <div style="padding: 12px; text-align: center; margin-bottom: 12px; color: #5eead4; font-size: 15px; font-weight: 500; background: rgba(255,255,255,0.05); border-radius: 8px;">
                     👋 Modo Invitado
                 </div>
@@ -1033,7 +994,20 @@ function goToLogin() {
 // User menu functions for authenticated users
 function viewProfile() {
     document.getElementById('userMenuDropdown')?.remove();
-    showNotification('info', 'Perfil de usuario - Próximamente disponible');
+    
+    // Redirigir al dashboard correspondiente según el rol del usuario
+    const userRole = localStorage.getItem('userRole');
+    
+    if (userRole === USER_ROLES.STUDENT) {
+        goToStudentDashboard();
+    } else if (userRole === USER_ROLES.TUTOR) {
+        goToTutorDashboard();
+    } else if (userRole === USER_ROLES.ADMIN) {
+        // Admin va directo al panel de admin
+        openAdminPanel();
+    } else {
+        showNotification('error', 'No se pudo determinar tu rol de usuario');
+    }
 }
 
 function viewSettings() {
@@ -1129,8 +1103,8 @@ function openAdminPanel() {
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(15px) saturate(180%);
-            -webkit-backdrop-filter: blur(15px) saturate(180%);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1138,390 +1112,192 @@ function openAdminPanel() {
             animation: fadeIn 0.3s ease-out;
         ">
             <div style="
-                background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
-                backdrop-filter: blur(40px) saturate(180%);
-                -webkit-backdrop-filter: blur(40px) saturate(180%);
-                border-radius: 32px;
+                background: linear-gradient(135deg, rgba(20, 25, 33, 0.98), rgba(13, 115, 119, 0.95));
+                backdrop-filter: blur(40px);
+                -webkit-backdrop-filter: blur(40px);
+                border-radius: 24px;
                 padding: 0;
-                border: 1px solid rgba(255, 255, 255, 0.25);
-                max-width: 920px;
-                width: 92%;
-                max-height: 88vh;
+                border: 1px solid rgba(45, 212, 191, 0.3);
+                max-width: 800px;
+                width: 90%;
+                max-height: 85vh;
                 overflow: hidden;
                 color: white;
-                box-shadow: 
-                    0 24px 60px rgba(0, 0, 0, 0.5),
-                    0 1px 0 rgba(255, 255, 255, 0.2) inset,
-                    0 0 80px rgba(94, 234, 212, 0.15);
+                box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(45, 212, 191, 0.2);
                 animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-                position: relative;
             ">
-                <!-- Glass Header with Gradient -->
+                <!-- Header -->
                 <div style="
-                    background: linear-gradient(135deg, rgba(234, 179, 8, 0.15), rgba(202, 138, 4, 0.1));
-                    backdrop-filter: blur(20px) saturate(180%);
-                    -webkit-backdrop-filter: blur(20px) saturate(180%);
-                    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-                    padding: 28px 36px;
+                    background: linear-gradient(135deg, rgba(45, 212, 191, 0.15), rgba(20, 184, 166, 0.1));
+                    border-bottom: 1px solid rgba(45, 212, 191, 0.2);
+                    padding: 24px 32px;
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    position: relative;
-                    overflow: hidden;
                 ">
-                    <!-- Top shine effect -->
-                    <div style="
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        right: 0;
-                        height: 1px;
-                        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-                    "></div>
-                    
-                    <div style="display: flex; align-items: center; gap: 16px;">
-                        <div style="
-                            width: 56px;
-                            height: 56px;
-                            background: linear-gradient(135deg, rgba(234, 179, 8, 0.9), rgba(202, 138, 4, 0.9));
-                            border-radius: 18px;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            font-size: 28px;
-                            box-shadow: 
-                                0 8px 24px rgba(234, 179, 8, 0.4),
-                                0 0 30px rgba(234, 179, 8, 0.2),
-                                0 1px 0 rgba(255, 255, 255, 0.3) inset;
-                            border: 1px solid rgba(255, 255, 255, 0.3);
-                        ">👑</div>
-                        <div>
-                            <h2 style="
-                                margin: 0;
-                                font-size: 26px;
-                                font-weight: 700;
-                                background: linear-gradient(135deg, #ffffff 0%, #fef3c7 50%, #fbbf24 100%);
-                                -webkit-background-clip: text;
-                                -webkit-text-fill-color: transparent;
-                                background-clip: text;
-                                filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
-                                letter-spacing: -0.5px;
-                            ">Panel de Administración</h2>
-                            <p style="
-                                margin: 4px 0 0 0;
-                                font-size: 13px;
-                                color: rgba(255, 255, 255, 0.7);
-                                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-                            ">Control total del sistema</p>
-                        </div>
+                    <div>
+                        <h2 style="
+                            margin: 0 0 4px 0;
+                            font-size: 24px;
+                            font-weight: 700;
+                            color: #ffffff;
+                        ">Panel de Administración</h2>
+                        <p style="
+                            margin: 0;
+                            font-size: 13px;
+                            color: rgba(255, 255, 255, 0.6);
+                        ">Gestión y control del sistema</p>
                     </div>
                     
                     <button onclick="closeAdminPanel()" style="
-                        background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.08));
-                        backdrop-filter: blur(10px);
-                        border: 1px solid rgba(255, 255, 255, 0.25);
-                        border-radius: 14px;
-                        width: 44px;
-                        height: 44px;
+                        background: rgba(255, 255, 255, 0.1);
+                        border: 1px solid rgba(255, 255, 255, 0.2);
+                        border-radius: 12px;
+                        width: 40px;
+                        height: 40px;
                         color: white;
                         cursor: pointer;
-                        font-size: 22px;
-                        font-weight: 300;
-                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                        font-size: 20px;
+                        transition: all 0.2s;
                         display: flex;
                         align-items: center;
                         justify-content: center;
                     " onmouseover="
-                        this.style.background='linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.12))';
-                        this.style.transform='scale(1.1) rotate(90deg)';
-                        this.style.borderColor='rgba(255, 255, 255, 0.4)';
+                        this.style.background='rgba(255, 255, 255, 0.15)';
+                        this.style.transform='rotate(90deg)';
                     " onmouseout="
-                        this.style.background='linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.08))';
-                        this.style.transform='scale(1) rotate(0deg)';
-                        this.style.borderColor='rgba(255, 255, 255, 0.25)';
+                        this.style.background='rgba(255, 255, 255, 0.1)';
+                        this.style.transform='rotate(0deg)';
                     ">×</button>
                 </div>
                 
-                <!-- Liquid Glass Action Buttons -->
+                <!-- Action Buttons -->
                 <div style="
-                    padding: 24px 36px;
+                    padding: 24px 32px;
                     display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-                    gap: 18px;
+                    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+                    gap: 16px;
                 ">
                     <button onclick="showUserManagement()" style="
                         background: linear-gradient(135deg, rgba(45, 212, 191, 0.2), rgba(20, 184, 166, 0.15));
-                        backdrop-filter: blur(20px) saturate(180%);
-                        -webkit-backdrop-filter: blur(20px) saturate(180%);
                         color: #ffffff;
                         border: 1px solid rgba(45, 212, 191, 0.4);
-                        padding: 20px 24px;
-                        border-radius: 20px;
-                        font-weight: 700;
+                        padding: 18px 20px;
+                        border-radius: 16px;
+                        font-weight: 600;
                         font-size: 15px;
                         cursor: pointer;
-                        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-                        box-shadow: 
-                            0 6px 20px rgba(45, 212, 191, 0.25),
-                            0 0 30px rgba(94, 234, 212, 0.1),
-                            0 1px 0 rgba(255, 255, 255, 0.2) inset;
-                        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-                        position: relative;
-                        overflow: hidden;
+                        transition: all 0.3s;
+                        box-shadow: 0 4px 12px rgba(45, 212, 191, 0.2);
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         gap: 10px;
                     " onmouseover="
                         this.style.background='linear-gradient(135deg, rgba(45, 212, 191, 0.3), rgba(20, 184, 166, 0.25))';
-                        this.style.transform='translateY(-4px) scale(1.02)';
-                        this.style.borderColor='rgba(45, 212, 191, 0.6)';
-                        this.style.boxShadow='0 12px 32px rgba(45, 212, 191, 0.4), 0 0 50px rgba(94, 234, 212, 0.2), 0 1px 0 rgba(255, 255, 255, 0.3) inset';
+                        this.style.transform='translateY(-2px)';
+                        this.style.boxShadow='0 8px 20px rgba(45, 212, 191, 0.35)';
                     " onmouseout="
                         this.style.background='linear-gradient(135deg, rgba(45, 212, 191, 0.2), rgba(20, 184, 166, 0.15))';
-                        this.style.transform='translateY(0) scale(1)';
-                        this.style.borderColor='rgba(45, 212, 191, 0.4)';
-                        this.style.boxShadow='0 6px 20px rgba(45, 212, 191, 0.25), 0 0 30px rgba(94, 234, 212, 0.1), 0 1px 0 rgba(255, 255, 255, 0.2) inset';
+                        this.style.transform='translateY(0)';
+                        this.style.boxShadow='0 4px 12px rgba(45, 212, 191, 0.2)';
                     ">
-                        <span style="font-size: 22px;">👥</span>
                         <span>Gestionar Usuarios</span>
                     </button>
                     
                     <button onclick="viewSystemStats()" style="
                         background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(109, 40, 217, 0.15));
-                        backdrop-filter: blur(20px) saturate(180%);
-                        -webkit-backdrop-filter: blur(20px) saturate(180%);
                         color: #ffffff;
                         border: 1px solid rgba(139, 92, 246, 0.4);
-                        padding: 20px 24px;
-                        border-radius: 20px;
-                        font-weight: 700;
+                        padding: 18px 20px;
+                        border-radius: 16px;
+                        font-weight: 600;
                         font-size: 15px;
                         cursor: pointer;
-                        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-                        box-shadow: 
-                            0 6px 20px rgba(139, 92, 246, 0.25),
-                            0 0 30px rgba(139, 92, 246, 0.1),
-                            0 1px 0 rgba(255, 255, 255, 0.2) inset;
-                        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-                        position: relative;
-                        overflow: hidden;
+                        transition: all 0.3s;
+                        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         gap: 10px;
                     " onmouseover="
                         this.style.background='linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(109, 40, 217, 0.25))';
-                        this.style.transform='translateY(-4px) scale(1.02)';
-                        this.style.borderColor='rgba(139, 92, 246, 0.6)';
-                        this.style.boxShadow='0 12px 32px rgba(139, 92, 246, 0.4), 0 0 50px rgba(139, 92, 246, 0.2), 0 1px 0 rgba(255, 255, 255, 0.3) inset';
+                        this.style.transform='translateY(-2px)';
+                        this.style.boxShadow='0 8px 20px rgba(139, 92, 246, 0.35)';
                     " onmouseout="
                         this.style.background='linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(109, 40, 217, 0.15))';
-                        this.style.transform='translateY(0) scale(1)';
-                        this.style.borderColor='rgba(139, 92, 246, 0.4)';
-                        this.style.boxShadow='0 6px 20px rgba(139, 92, 246, 0.25), 0 0 30px rgba(139, 92, 246, 0.1), 0 1px 0 rgba(255, 255, 255, 0.2) inset';
+                        this.style.transform='translateY(0)';
+                        this.style.boxShadow='0 4px 12px rgba(139, 92, 246, 0.2)';
                     ">
-                        <span style="font-size: 22px;">📊</span>
-                        <span>Estadísticas Sistema</span>
+                        <span>Estadísticas del Sistema</span>
                     </button>
                 </div>
                 
-                <!-- Liquid Glass Content Area -->
-                <div style="padding: 0 36px 36px 36px; overflow-y: auto; max-height: calc(88vh - 240px);">
+                <!-- Content Area -->
+                <div style="padding: 0 32px 32px 32px; overflow-y: auto; max-height: calc(85vh - 200px);">
                     <div id="adminPanelContent" style="
-                        background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04));
-                        backdrop-filter: blur(25px) saturate(180%);
-                        -webkit-backdrop-filter: blur(25px) saturate(180%);
-                        border-radius: 24px;
-                        border: 1px solid rgba(255, 255, 255, 0.15);
-                        padding: 40px;
-                        min-height: 380px;
-                        box-shadow: 
-                            0 8px 32px rgba(0, 0, 0, 0.12),
-                            0 1px 0 rgba(255, 255, 255, 0.1) inset;
-                        position: relative;
-                        overflow: hidden;
+                        background: rgba(255, 255, 255, 0.05);
+                        backdrop-filter: blur(10px);
+                        border-radius: 16px;
+                        border: 1px solid rgba(255, 255, 255, 0.1);
+                        padding: 32px;
+                        min-height: 300px;
                     ">
-                        <!-- Top highlight -->
-                        <div style="
-                            position: absolute;
-                            top: 0;
-                            left: 0;
-                            right: 0;
-                            height: 1px;
-                            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-                        "></div>
-                        
                         <div style="text-align: center; padding: 30px 20px;">
-                            <!-- Crown icon with glow -->
-                            <div style="
-                                width: 100px;
-                                height: 100px;
-                                margin: 0 auto 24px;
-                                background: linear-gradient(135deg, rgba(234, 179, 8, 0.2), rgba(202, 138, 4, 0.15));
-                                backdrop-filter: blur(15px);
-                                border-radius: 28px;
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                                font-size: 52px;
-                                box-shadow: 
-                                    0 12px 40px rgba(234, 179, 8, 0.3),
-                                    0 0 60px rgba(234, 179, 8, 0.2),
-                                    0 1px 0 rgba(255, 255, 255, 0.2) inset;
-                                border: 1px solid rgba(234, 179, 8, 0.4);
-                                animation: float 3s ease-in-out infinite;
-                            ">👑</div>
-                            
                             <h3 style="
                                 margin: 0 0 12px 0;
-                                font-size: 28px;
-                                font-weight: 700;
-                                background: linear-gradient(135deg, #ffffff 0%, #fef3c7 50%, #fbbf24 100%);
-                                -webkit-background-clip: text;
-                                -webkit-text-fill-color: transparent;
-                                background-clip: text;
-                                filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
+                                font-size: 22px;
+                                font-weight: 600;
+                                color: #ffffff;
                             ">Centro de Control</h3>
                             
                             <p style="
-                                margin: 0 0 32px 0;
-                                font-size: 15px;
-                                color: rgba(255, 255, 255, 0.75);
-                                text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-                            ">Selecciona una opción para comenzar</p>
+                                margin: 0 0 24px 0;
+                                font-size: 14px;
+                                color: rgba(255, 255, 255, 0.6);
+                            ">Selecciona una opción para administrar el sistema</p>
                         
-                            <!-- Features Grid -->
+                            <!-- Quick Stats -->
                             <div style="
                                 display: grid;
-                                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                                gap: 16px;
-                                margin-top: 8px;
+                                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                                gap: 12px;
+                                margin-top: 20px;
                             ">
-                                <!-- Feature Card 1 -->
                                 <div style="
-                                    background: linear-gradient(135deg, rgba(45, 212, 191, 0.15), rgba(45, 212, 191, 0.08));
-                                    backdrop-filter: blur(15px);
-                                    border-radius: 18px;
-                                    padding: 20px;
-                                    border: 1px solid rgba(45, 212, 191, 0.3);
-                                    text-align: center;
-                                    box-shadow: 0 4px 16px rgba(45, 212, 191, 0.15);
+                                    background: rgba(45, 212, 191, 0.1);
+                                    border-radius: 12px;
+                                    padding: 16px;
+                                    border: 1px solid rgba(45, 212, 191, 0.2);
                                 ">
-                                    <div style="font-size: 32px; margin-bottom: 10px;">👥</div>
                                     <div style="
-                                        font-size: 14px;
-                                        font-weight: 600;
-                                        color: rgba(255, 255, 255, 0.95);
-                                        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-                                    ">Gestionar Usuarios</div>
+                                        font-size: 13px;
+                                        font-weight: 500;
+                                        color: rgba(255, 255, 255, 0.8);
+                                        margin-bottom: 4px;
+                                    ">Gestión de Usuarios</div>
                                     <div style="
-                                        font-size: 12px;
-                                        color: rgba(255, 255, 255, 0.6);
-                                        margin-top: 6px;
->Control total</div>
+                                        font-size: 11px;
+                                        color: rgba(255, 255, 255, 0.5);
+                                    ">Crear, editar, eliminar</div>
                                 </div>
                                 
-                                <!-- Feature Card 2: Estadísticas -->
-                                <div style=
-                                    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(139, 92, 246, 0.08));
-                                    backdrop-filter: blur(15px);
-                                    border-radius: 18px;
-                                    padding: 20px;
-                                    border: 1px solid rgba(139, 92, 246, 0.3);
-                                    text-align: center;
-                                    box-shadow: 0 4px 16px rgba(139, 92, 246, 0.15);
+                                <div style="
+                                    background: rgba(139, 92, 246, 0.1);
+                                    border-radius: 12px;
+                                    padding: 16px;
+                                    border: 1px solid rgba(139, 92, 246, 0.2);
                                 ">
-                                    <div style="font-size: 32px; margin-bottom: 10px;">📊</div>
                                     <div style="
-                                        font-size: 14px;
-                                        font-weight: 600;
-                                        color: rgba(255, 255, 255, 0.95);
-                                        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+                                        font-size: 13px;
+                                        font-weight: 500;
+                                        color: rgba(255, 255, 255, 0.8);
+                                        margin-bottom: 4px;
                                     ">Estadísticas</div>
                                     <div style="
-                                        font-size: 12px;
-                                        color: rgba(255, 255, 255, 0.6);
-                                        margin-top: 6px;
-                                    ">Métricas en tiempo real</div>
-                                </div>
-                            </div>
-                            
-                            <!-- Admin Privileges -->
-                            <div style="
-                                margin-top: 32px;
-                                background: linear-gradient(135deg, rgba(234, 179, 8, 0.12), rgba(234, 179, 8, 0.06));
-                                backdrop-filter: blur(15px);
-                                border-radius: 20px;
-                                padding: 24px;
-                                border: 1px solid rgba(234, 179, 8, 0.3);
-                                box-shadow: 0 4px 20px rgba(234, 179, 8, 0.15);
-                                text-align: left;
-                            ">
-                                <div style="
-                                    display: flex;
-                                    align-items: center;
-                                    gap: 12px;
-                                    margin-bottom: 16px;
-                                ">
-                                    <div style="
-                                        font-size: 24px;
-                                        width: 40px;
-                                        height: 40px;
-                                        background: linear-gradient(135deg, rgba(234, 179, 8, 0.3), rgba(202, 138, 4, 0.2));
-                                        border-radius: 12px;
-                                        display: flex;
-                                        align-items: center;
-                                        justify-content: center;
-                                        border: 1px solid rgba(234, 179, 8, 0.4);
-                                    ">👑</div>
-                                    <h4 style="
-                                        margin: 0;
-                                        font-size: 17px;
-                                        font-weight: 700;
-                                        color: rgba(251, 191, 36, 0.95);
-                                        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-                                    ">Privilegios de Administrador</h4>
-                                </div>
-                                <div style="
-                                    display: flex;
-                                    flex-direction: column;
-                                    gap: 10px;
-                                ">
-                                    <div style="
-                                        display: flex;
-                                        align-items: center;
-                                        gap: 10px;
-                                        padding: 10px;
-                                        background: rgba(255, 255, 255, 0.05);
-                                        border-radius: 10px;
-                                    ">
-                                        <span style="color: #4ade80;">✓</span>
-                                        <span style="font-size: 14px; color: rgba(255, 255, 255, 0.9);">Acceso total a Panel de Estudiante</span>
-                                    </div>
-                                    <div style="
-                                        display: flex;
-                                        align-items: center;
-                                        gap: 10px;
-                                        padding: 10px;
-                                        background: rgba(255, 255, 255, 0.05);
-                                        border-radius: 10px;
-                                    ">
-                                        <span style="color: #4ade80;">✓</span>
-                                        <span style="font-size: 14px; color: rgba(255, 255, 255, 0.9);">Acceso total a Panel de Tutor</span>
-                                    </div>
-                                    <div style="
-                                        display: flex;
-                                        align-items: center;
-                                        gap: 10px;
-                                        padding: 10px;
-                                        background: rgba(255, 255, 255, 0.05);
-                                        border-radius: 10px;
-                                    ">
-                                        <span style="color: #4ade80;">✓</span>
-                                        <span style="font-size: 14px; color: rgba(255, 255, 255, 0.9);">Sin restricciones de funcionalidad</span>
-                                    </div>
+                                        font-size: 11px;
+                                        color: rgba(255, 255, 255, 0.5);
+                                    ">Métricas del sistema</div>
                                 </div>
                             </div>
                         </div>
@@ -1530,7 +1306,6 @@ function openAdminPanel() {
             </div>
         </div>
         
-        <!-- Animations CSS -->
         <style>
             @keyframes fadeIn {
                 from { opacity: 0; }
@@ -1540,31 +1315,12 @@ function openAdminPanel() {
             @keyframes slideUp {
                 from {
                     opacity: 0;
-                    transform: translateY(40px) scale(0.95);
+                    transform: translateY(30px) scale(0.95);
                 }
                 to {
                     opacity: 1;
                     transform: translateY(0) scale(1);
                 }
-            }
-            
-            @keyframes float {
-                0%, 100% {
-                    transform: translateY(0px);
-                }
-                50% {
-                    transform: translateY(-10px);
-                }
-            }
-            
-            /* Ocultar scrollbar pero mantener funcionalidad */
-            .admin-content-wrapper {
-                scrollbar-width: none; /* Firefox */
-                -ms-overflow-style: none; /* IE y Edge */
-            }
-            
-            .admin-content-wrapper::-webkit-scrollbar {
-                display: none; /* Chrome, Safari, Opera */
             }
         </style>
     `;
@@ -1575,10 +1331,8 @@ function openAdminPanel() {
 function closeAdminPanel() {
     const modal = document.getElementById('adminPanelModal');
     if (modal) {
-        // Smooth exit animation
         modal.style.opacity = '0';
-        modal.style.transform = 'scale(0.95)';
-        modal.style.transition = 'all 0.3s ease-out';
+        modal.style.transition = 'opacity 0.3s ease-out';
         
         setTimeout(() => {
             modal.remove();
@@ -2024,7 +1778,7 @@ async function showUserManagement() {
                                         box-shadow: 0 4px 16px rgba(45, 212, 191, 0.2);
                                         transition: all 0.2s ease;
                                         white-space: nowrap;
-                                    " onmouseover="this.style.background='linear-gradient(135deg, rgba(45, 212, 191, 0.35), rgba(45, 212, 191, 0.25))'; this.style.transform='scale(1.05)'; this.style.boxShadow='0 6px 20px rgba(45, 212, 191, 0.35)';" onmouseout="this.style.background='linear-gradient(135deg, rgba(45, 212, 191, 0.25), rgba(45, 212, 191, 0.15))'; this.style.transform='scale(1)'; this.style.boxShadow='0 4px 16px rgba(45, 212, 191, 0.2)';">🎭 Cambiar Rol</button>
+                                    " onmouseover="this.style.background='linear-gradient(135deg, rgba(45, 212, 191, 0.35), rgba(45, 212, 191, 0.25))'; this.style.transform='scale(1.05)'; this.style.boxShadow='0 6px 20px rgba(45, 212, 191, 0.35)';" onmouseout="this.style.background='linear-gradient(135deg, rgba(45, 212, 191, 0.25), rgba(45, 212, 191, 0.15))'; this.style.transform='scale(1)'; this.style.boxShadow='0 4px 16px rgba(45, 212, 191, 0.2)';">Cambiar Rol</button>
                                     
                                     <button onclick="toggleUserStatus('${user.id}', '${user.status}')" style="
                                         padding: 10px 20px;
@@ -2040,7 +1794,7 @@ async function showUserManagement() {
                                         box-shadow: 0 4px 16px rgba(251, 191, 36, 0.2);
                                         transition: all 0.2s ease;
                                         white-space: nowrap;
-                                    " onmouseover="this.style.background='linear-gradient(135deg, rgba(251, 191, 36, 0.35), rgba(251, 191, 36, 0.25))'; this.style.transform='scale(1.05)'; this.style.boxShadow='0 6px 20px rgba(251, 191, 36, 0.35)';" onmouseout="this.style.background='linear-gradient(135deg, rgba(251, 191, 36, 0.25), rgba(251, 191, 36, 0.15))'; this.style.transform='scale(1)'; this.style.boxShadow='0 4px 16px rgba(251, 191, 36, 0.2)';">${statusActive ? '⏸️ Desactivar' : '▶️ Activar'}</button>
+                                    " onmouseover="this.style.background='linear-gradient(135deg, rgba(251, 191, 36, 0.35), rgba(251, 191, 36, 0.25))'; this.style.transform='scale(1.05)'; this.style.boxShadow='0 6px 20px rgba(251, 191, 36, 0.35)';" onmouseout="this.style.background='linear-gradient(135deg, rgba(251, 191, 36, 0.25), rgba(251, 191, 36, 0.15))'; this.style.transform='scale(1)'; this.style.boxShadow='0 4px 16px rgba(251, 191, 36, 0.2)';">${statusActive ? 'Desactivar' : 'Activar'}</button>
                                     
                                     <button onclick="deleteUser('${user.id}', '${user.email}')" style="
                                         padding: 10px 20px;
@@ -2056,7 +1810,7 @@ async function showUserManagement() {
                                         box-shadow: 0 4px 16px rgba(239, 68, 68, 0.2);
                                         transition: all 0.2s ease;
                                         white-space: nowrap;
-                                    " onmouseover="this.style.background='linear-gradient(135deg, rgba(239, 68, 68, 0.35), rgba(239, 68, 68, 0.25))'; this.style.transform='scale(1.05)'; this.style.boxShadow='0 6px 20px rgba(239, 68, 68, 0.35)';" onmouseout="this.style.background='linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(239, 68, 68, 0.15))'; this.style.transform='scale(1)'; this.style.boxShadow='0 4px 16px rgba(239, 68, 68, 0.2)';">🗑️ Eliminar</button>
+                                    " onmouseover="this.style.background='linear-gradient(135deg, rgba(239, 68, 68, 0.35), rgba(239, 68, 68, 0.25))'; this.style.transform='scale(1.05)'; this.style.boxShadow='0 6px 20px rgba(239, 68, 68, 0.35)';" onmouseout="this.style.background='linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(239, 68, 68, 0.15))'; this.style.transform='scale(1)'; this.style.boxShadow='0 4px 16px rgba(239, 68, 68, 0.2)';">Eliminar</button>
                                 </div>
                             </div>
                         </div>

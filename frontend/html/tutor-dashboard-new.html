@@ -6,6 +6,7 @@
     <title>ClassGo - Panel de Tutor</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="stylesheet" href="/css/tutor-dashboard.css?v=22">
+    <link rel="stylesheet" href="/css/mobile-optimizations.css?v=1">
 </head>
 <body>
     <!-- Decorative Background -->
@@ -159,8 +160,16 @@
     
     <!-- User Menu -->
     <div id="userMenu" class="user-menu" style="display: none;">
-        <a href="/home">🏠 Inicio</a>
-        <a href="#" onclick="logout()">🚪 Cerrar Sesión</a>
+        <div style="padding: 12px; cursor: pointer; border-radius: 8px; margin-bottom: 6px; transition: all 0.2s; color: #e0f7f7;" onclick="goToMyProfile()" onmouseover="this.style.background='rgba(255,255,255,0.08)'; this.style.color='#ffffff';" onmouseout="this.style.background='transparent'; this.style.color='#e0f7f7';">
+            👤 Mi Perfil
+        </div>
+        <div style="padding: 12px; cursor: pointer; border-radius: 8px; margin-bottom: 6px; transition: all 0.2s; color: #e0f7f7;" onclick="window.location.href='/home'" onmouseover="this.style.background='rgba(255,255,255,0.08)'; this.style.color='#ffffff';" onmouseout="this.style.background='transparent'; this.style.color='#e0f7f7';">
+            🏠 Inicio
+        </div>
+        <hr style="border: none; height: 1px; background: rgba(255,255,255,0.2); margin: 10px 0;">
+        <div style="padding: 12px; cursor: pointer; border-radius: 8px; color: #ff6b6b; transition: all 0.2s;" onclick="logout()" onmouseover="this.style.background='rgba(255,107,107,0.1)';" onmouseout="this.style.background='transparent';">
+            🚪 Cerrar Sesión
+        </div>
     </div>
 
     <!-- Create Class Modal - MUST BE OUTSIDE CONTAINER -->
@@ -599,16 +608,28 @@
         function toggleUserMenu(event) {
             event.stopPropagation();
             const menu = document.getElementById('userMenu');
-            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
             
-            const avatar = document.getElementById('userAvatar');
-            const rect = avatar.getBoundingClientRect();
-            menu.style.top = (rect.bottom + 10) + 'px';
-            menu.style.right = '20px';
+            if (menu.style.display === 'none' || !menu.style.display) {
+                menu.style.display = 'block';
+                // El CSS maneja el posicionamiento
+            } else {
+                menu.style.display = 'none';
+            }
+        }
+        
+        // Function to navigate to user's profile/dashboard
+        function goToMyProfile() {
+            // El tutor ya está en su dashboard, solo cerramos el menú
+            const menu = document.getElementById('userMenu');
+            if (menu) menu.style.display = 'none';
+            
+            // Scroll to top para mostrar la información del perfil
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
         
         document.addEventListener('click', () => {
-            document.getElementById('userMenu').style.display = 'none';
+            const menu = document.getElementById('userMenu');
+            if (menu) menu.style.display = 'none';
         });
     </script>
     

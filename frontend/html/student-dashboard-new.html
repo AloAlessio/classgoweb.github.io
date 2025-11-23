@@ -6,8 +6,51 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' http://localhost:3000 http://localhost:3001 https://*.onrender.com https://fonts.googleapis.com https://fonts.gstatic.com; font-src 'self' https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline'; img-src 'self' data:;">
     <title>ClassGo - Mi Aprendizaje</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <link rel="stylesheet" href="/css/student-dashboard.css?v=99">
+    <link rel="stylesheet" href="/css/student-dashboard.css?v=100">
     <link rel="stylesheet" href="/css/student-attendance.css?v=4">
+    <link rel="stylesheet" href="/css/mobile-optimizations.css?v=2">
+    <style>
+        /* CRITICAL: Force correct menu positioning */
+        #userMenu {
+            position: fixed !important;
+            top: 80px !important;
+            right: 20px !important;
+            left: auto !important;
+            bottom: auto !important;
+            background: linear-gradient(135deg, rgba(20, 25, 33, 0.98), rgba(13, 115, 119, 0.95)) !important;
+            backdrop-filter: blur(20px) !important;
+            -webkit-backdrop-filter: blur(20px) !important;
+            border-radius: 16px !important;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(45, 212, 191, 0.3) !important;
+            padding: 15px !important;
+            min-width: 240px !important;
+            max-width: 280px !important;
+            z-index: 10000 !important;
+            animation: slideDownMenu 0.3s ease-out !important;
+        }
+        
+        @keyframes slideDownMenu {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 768px) {
+            #userMenu {
+                top: 70px !important;
+                right: 10px !important;
+                left: 10px !important;
+                max-width: none !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            #userMenu {
+                top: 60px !important;
+                right: 8px !important;
+                left: 8px !important;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Decorative Background -->
@@ -206,9 +249,19 @@
 
     <!-- User Menu (Dropdown) -->
     <div id="userMenu" class="user-menu" style="display: none;">
-        <a href="/home">🏠 Inicio</a>
-        <a href="#" onclick="reconfigureArduinoBridge()">🔧 Configurar Lector RFID</a>
-        <a href="#" onclick="logout()">🚪 Cerrar Sesión</a>
+        <div style="padding: 12px; cursor: pointer; border-radius: 8px; margin-bottom: 6px; transition: all 0.2s; color: #e0f7f7;" onclick="goToMyProfile()" onmouseover="this.style.background='rgba(255,255,255,0.08)'; this.style.color='#ffffff';" onmouseout="this.style.background='transparent'; this.style.color='#e0f7f7';">
+            👤 Mi Perfil
+        </div>
+        <div style="padding: 12px; cursor: pointer; border-radius: 8px; margin-bottom: 6px; transition: all 0.2s; color: #e0f7f7;" onclick="window.location.href='/home'" onmouseover="this.style.background='rgba(255,255,255,0.08)'; this.style.color='#ffffff';" onmouseout="this.style.background='transparent'; this.style.color='#e0f7f7';">
+            🏠 Inicio
+        </div>
+        <div style="padding: 12px; cursor: pointer; border-radius: 8px; margin-bottom: 6px; transition: all 0.2s; color: #e0f7f7;" onclick="reconfigureArduinoBridge()" onmouseover="this.style.background='rgba(255,255,255,0.08)'; this.style.color='#ffffff';" onmouseout="this.style.background='transparent'; this.style.color='#e0f7f7';">
+            🔧 Configurar Lector RFID
+        </div>
+        <hr style="border: none; height: 1px; background: rgba(255,255,255,0.2); margin: 10px 0;">
+        <div style="padding: 12px; cursor: pointer; border-radius: 8px; color: #ff6b6b; transition: all 0.2s;" onclick="logout()" onmouseover="this.style.background='rgba(255,107,107,0.1)';" onmouseout="this.style.background='transparent';">
+            🚪 Cerrar Sesión
+        </div>
     </div>
 
     <!-- Day Classes Modal -->
@@ -233,19 +286,85 @@
         function toggleUserMenu(event) {
             event.stopPropagation();
             const menu = document.getElementById('userMenu');
-            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
             
-            // Position menu below avatar
-            const avatar = document.getElementById('userAvatar');
-            const rect = avatar.getBoundingClientRect();
-            menu.style.top = (rect.bottom + 10) + 'px';
-            menu.style.right = '20px';
+            if (menu.style.display === 'none' || !menu.style.display) {
+                menu.style.display = 'block';
+                
+                // FORCE positioning - remove any inline styles that might interfere
+                menu.style.position = '';
+                menu.style.top = '';
+                menu.style.right = '';
+                menu.style.left = '';
+                menu.style.bottom = '';
+                
+                // Debug info
+                console.log('Menu opened');
+                console.log('Position:', window.getComputedStyle(menu).position);
+                console.log('Top:', window.getComputedStyle(menu).top);
+                console.log('Right:', window.getComputedStyle(menu).right);
+                console.log('Left:', window.getComputedStyle(menu).left);
+            } else {
+                menu.style.display = 'none';
+            }
         }
         
         // Close menu when clicking outside
         document.addEventListener('click', () => {
-            document.getElementById('userMenu').style.display = 'none';
+            const menu = document.getElementById('userMenu');
+            if (menu) menu.style.display = 'none';
         });
+        
+        // Ensure menu has correct positioning on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const menu = document.getElementById('userMenu');
+            if (menu) {
+                // Clear any conflicting inline styles
+                menu.style.position = '';
+                menu.style.top = '';
+                menu.style.right = '';
+                menu.style.left = '';
+                menu.style.bottom = '';
+            }
+        });
+        
+        // Debug function to check menu position
+        function debugMenuPosition() {
+            const menu = document.getElementById('userMenu');
+            const styles = window.getComputedStyle(menu);
+            
+            const info = `
+MENU DEBUG INFO:
+================
+Display: ${menu.style.display}
+Position: ${styles.position}
+Top: ${styles.top}
+Right: ${styles.right}
+Left: ${styles.left}
+Bottom: ${styles.bottom}
+Z-index: ${styles.zIndex}
+Width: ${styles.width}
+Height: ${styles.height}
+
+Viewport Height: ${window.innerHeight}px
+Viewport Width: ${window.innerWidth}px
+
+Inline styles on element:
+${menu.getAttribute('style')}
+            `;
+            
+            alert(info);
+            console.log(info);
+        }
+        
+        // Function to navigate to user's profile/dashboard
+        function goToMyProfile() {
+            // El estudiante ya está en su dashboard, solo cerramos el menú
+            const menu = document.getElementById('userMenu');
+            if (menu) menu.style.display = 'none';
+            
+            // Scroll to top para mostrar la información del perfil
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
     </script>
 
     <!-- Modal: Auto-registro de Asistencia -->

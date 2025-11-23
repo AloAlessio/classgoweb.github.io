@@ -2621,18 +2621,44 @@ textarea {
 }
 
 /* User Menu Dropdown */
-.user-menu {
-    position: fixed;
-    background: linear-gradient(135deg, rgba(20, 25, 33, 0.98), rgba(13, 115, 119, 0.95));
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-radius: 16px;
+.user-menu,
+#userMenu,
+#userMenuDropdown {
+    position: fixed !important;
+    top: 80px !important;
+    right: 20px !important;
+    left: auto !important;
+    background: linear-gradient(135deg, rgba(20, 25, 33, 0.98), rgba(13, 115, 119, 0.95)) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border-radius: 16px !important;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 
-                0 0 0 1px rgba(45, 212, 191, 0.3);
-    padding: 8px;
-    min-width: 200px;
-    z-index: 10000;
+                0 0 0 1px rgba(45, 212, 191, 0.3) !important;
+    padding: 15px !important;
+    min-width: 240px !important;
+    max-width: 280px !important;
+    z-index: 10000 !important;
     animation: slideDown 0.2s ease-out;
+}
+
+/* Menu items hover effect */
+#userMenu > div,
+#userMenu > a {
+    display: block !important;
+    padding: 12px !important;
+    margin-bottom: 6px !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    transition: all 0.2s !important;
+    text-decoration: none !important;
+    color: #e0f7f7 !important;
+}
+
+#userMenu > div:hover,
+#userMenu > a:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #ffffff !important;
+    transform: translateX(-2px) !important;
 }
 
 @keyframes slideDown {
