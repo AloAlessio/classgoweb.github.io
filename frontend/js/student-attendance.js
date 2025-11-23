@@ -162,8 +162,15 @@ async function registerManualAttendance() {
         
         console.log('👤 Estudiante:', studentName);
         
+        // Detectar entorno automáticamente
+        const API_BASE_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000/api'
+            : '/api';  // En producción usa la ruta relativa (mismo dominio)
+        
+        console.log('🌐 API URL:', API_BASE_URL);
+        
         // TEMPORAL: Usar endpoint de test mientras se crea el índice de Firebase
-        const response = await fetch('http://localhost:3000/api/attendance/register-test', {
+        const response = await fetch(`${API_BASE_URL}/attendance/register-test`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
