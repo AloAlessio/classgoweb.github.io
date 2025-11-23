@@ -823,12 +823,6 @@ function toggleUserMenu(event) {
                 <div onclick="promptLogin('profile')" style="padding: 12px; cursor: pointer; border-radius: 8px; margin-bottom: 6px; transition: all 0.2s; color: #e0f7f7;" onmouseover="this.style.background='rgba(255,255,255,0.08)'; this.style.color='#ffffff';" onmouseout="this.style.background='transparent'; this.style.color='#e0f7f7';">
                     👤 Ver Mi Perfil
                 </div>
-                <div onclick="promptLogin('stats')" style="padding: 12px; cursor: pointer; border-radius: 8px; margin-bottom: 6px; transition: all 0.2s; color: #e0f7f7;" onmouseover="this.style.background='rgba(255,255,255,0.08)'; this.style.color='#ffffff';" onmouseout="this.style.background='transparent'; this.style.color='#e0f7f7';">
-                    📊 Mis Estadísticas
-                </div>
-                <div onclick="promptLogin('progress')" style="padding: 12px; cursor: pointer; border-radius: 8px; margin-bottom: 8px; transition: all 0.2s; color: #e0f7f7;" onmouseover="this.style.background='rgba(255,255,255,0.08)'; this.style.color='#ffffff';" onmouseout="this.style.background='transparent'; this.style.color='#e0f7f7';">
-                    📈 Mi Progreso
-                </div>
                 <hr style="border: none; height: 1px; background: rgba(255,255,255,0.2); margin: 15px 0;">
                 <div onclick="goToLogin()" style="
                     padding: 15px 20px; 
@@ -1094,6 +1088,9 @@ function openAdminPanel() {
         return;
     }
     
+    // Bloquear scroll del body
+    document.body.style.overflow = 'hidden';
+    
     // Create admin panel modal
     const adminPanelHTML = `
         <div id="adminPanelModal" style="
@@ -1118,10 +1115,11 @@ function openAdminPanel() {
                 border-radius: 24px;
                 padding: 0;
                 border: 1px solid rgba(45, 212, 191, 0.3);
-                max-width: 800px;
+                max-width: 900px;
                 width: 90%;
-                max-height: 85vh;
-                overflow: hidden;
+                max-height: 90vh;
+                overflow-y: auto;
+                scroll-behavior: smooth;
                 color: white;
                 box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(45, 212, 191, 0.2);
                 animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1234,7 +1232,7 @@ function openAdminPanel() {
                 </div>
                 
                 <!-- Content Area -->
-                <div style="padding: 0 32px 32px 32px; overflow-y: auto; max-height: calc(85vh - 200px);">
+                <div style="padding: 0 32px 32px 32px;">
                     <div id="adminPanelContent" style="
                         background: rgba(255, 255, 255, 0.05);
                         backdrop-filter: blur(10px);
@@ -1322,6 +1320,32 @@ function openAdminPanel() {
                     transform: translateY(0) scale(1);
                 }
             }
+            
+            /* Custom scrollbar for admin panel */
+            #adminPanelModal ::-webkit-scrollbar {
+                width: 10px;
+            }
+            
+            #adminPanelModal ::-webkit-scrollbar-track {
+                background: rgba(255, 255, 255, 0.05);
+                border-radius: 10px;
+            }
+            
+            #adminPanelModal ::-webkit-scrollbar-thumb {
+                background: linear-gradient(135deg, rgba(45, 212, 191, 0.5), rgba(20, 184, 166, 0.4));
+                border-radius: 10px;
+                border: 2px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            #adminPanelModal ::-webkit-scrollbar-thumb:hover {
+                background: linear-gradient(135deg, rgba(45, 212, 191, 0.7), rgba(20, 184, 166, 0.6));
+            }
+            
+            /* Firefox scrollbar */
+            #adminPanelModal * {
+                scrollbar-width: thin;
+                scrollbar-color: rgba(45, 212, 191, 0.5) rgba(255, 255, 255, 0.05);
+            }
         </style>
     `;
     
@@ -1336,6 +1360,8 @@ function closeAdminPanel() {
         
         setTimeout(() => {
             modal.remove();
+            // Restaurar scroll del body
+            document.body.style.overflow = '';
         }, 300);
     }
 }
@@ -1648,19 +1674,7 @@ async function showUserManagement() {
                     </div>
                 </div>
             
-            <style>
-                /* Ocultar scrollbar pero mantener funcionalidad */
-                .user-list-container {
-                    scrollbar-width: none; /* Firefox */
-                    -ms-overflow-style: none; /* IE y Edge */
-                }
-                
-                .user-list-container::-webkit-scrollbar {
-                    display: none; /* Chrome, Safari, Opera */
-                }
-            </style>
-            
-            <div class="user-list-container" style="display: grid; gap: 16px; max-height: 500px; overflow-y: auto; padding-right: 8px;">
+            <div class="user-list-container" style="display: grid; gap: 16px;">
                 ${users.map(user => {
                     const statusActive = user.status === 'activo' || user.status === 'active';
                     const createdDate = user.createdAt && user.createdAt.toDate ? 

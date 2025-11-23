@@ -6,7 +6,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' http://localhost:3000 http://localhost:3001 https://*.onrender.com https://fonts.googleapis.com https://fonts.gstatic.com; font-src 'self' https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline'; img-src 'self' data:;">
     <title>ClassGo - Mi Aprendizaje</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <link rel="stylesheet" href="/css/student-dashboard.css?v=100">
+    <link rel="stylesheet" href="/css/student-dashboard.css?v=101">
     <link rel="stylesheet" href="/css/student-attendance.css?v=4">
     <link rel="stylesheet" href="/css/mobile-optimizations.css?v=2">
     <style>
@@ -248,10 +248,8 @@
     </div>
 
     <!-- User Menu (Dropdown) -->
+    <!-- Version 2.1 - Menu simplified, removed Mi Perfil -->
     <div id="userMenu" class="user-menu" style="display: none;">
-        <div style="padding: 12px; cursor: pointer; border-radius: 8px; margin-bottom: 6px; transition: all 0.2s; color: #e0f7f7;" onclick="goToMyProfile()" onmouseover="this.style.background='rgba(255,255,255,0.08)'; this.style.color='#ffffff';" onmouseout="this.style.background='transparent'; this.style.color='#e0f7f7';">
-            👤 Mi Perfil
-        </div>
         <div style="padding: 12px; cursor: pointer; border-radius: 8px; margin-bottom: 6px; transition: all 0.2s; color: #e0f7f7;" onclick="window.location.href='/home'" onmouseover="this.style.background='rgba(255,255,255,0.08)'; this.style.color='#ffffff';" onmouseout="this.style.background='transparent'; this.style.color='#e0f7f7';">
             🏠 Inicio
         </div>
