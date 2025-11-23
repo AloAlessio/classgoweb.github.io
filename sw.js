@@ -1,7 +1,7 @@
 // Service Worker for ClassGo PWA
 // Handles caching, offline functionality, and background sync
 
-const CACHE_NAME = 'classgo-v66-api-url-fix'; // Updated: Auto-detect API URL
+const CACHE_NAME = 'classgo-v67-rejection-reset-fix'; // Updated: Reset rejection state correctly
 const OFFLINE_URL = '/frontend/html/home.html';
 
 // Import app shell configuration

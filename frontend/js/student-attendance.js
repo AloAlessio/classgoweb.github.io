@@ -273,6 +273,12 @@ function closeAttendanceModal() {
     // Detener polling
     stopAttendancePolling();
     
+    // Ocultar TODOS los estados para evitar que aparezcan al reabrir
+    document.getElementById('attendanceWaiting').classList.add('hidden');
+    document.getElementById('attendanceSuccess').classList.add('hidden');
+    document.getElementById('attendanceError').classList.add('hidden');
+    document.getElementById('attendanceRejected').classList.add('hidden');
+    
     // Limpiar variables
     currentAttendanceClassId = null;
     currentAttendanceClassName = null;
@@ -501,9 +507,15 @@ function showRejectedState(uid) {
     // Detener polling
     stopAttendancePolling();
     
-    // Cerrar automáticamente después de 5 segundos
+    // Auto-cerrar después de 5 segundos y resetear completamente
     setTimeout(() => {
-        closeAttendanceModal();
+        // Ocultar estado de rechazo antes de cerrar
+        rejectedElement.classList.add('hidden');
+        
+        // Pequeño delay antes de cerrar para suavizar la transición
+        setTimeout(() => {
+            closeAttendanceModal();
+        }, 200);
     }, 5000);
 }
 
