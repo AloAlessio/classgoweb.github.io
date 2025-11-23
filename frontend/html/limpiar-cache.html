@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Limpiar Caché - ClassGo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        
+        .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .status {
+            margin: 30px 0;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .status.loading {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-top: 20px;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .log {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .log-entry {
+            padding: 5px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">🧹</div>
+        <h1>Limpiar Caché del Sistema</h1>
+        <p>Limpiando Service Worker y caché...</p>
+        
+        <div id="status" class="status loading">
+            ⏳ Procesando...
+        </div>
+        
+        <div id="log" class="log"></div>
+        
+        <a href="/student-dashboard" class="btn" id="returnBtn" style="display: none;">
+            ← Volver al Dashboard
+        </a>
+    </div>
+    
+    <script>
+        const statusDiv = document.getElementById('status');
+        const logDiv = document.getElementById('log');
+        const returnBtn = document.getElementById('returnBtn');
+        
+        function log(message) {
+            console.log(message);
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.textContent = message;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        async function clearEverything() {
+            try {
+                log('🗑️ Iniciando limpieza completa...');
+                
+                // 1. Desregistrar Service Workers
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    log(`📋 Encontrados ${registrations.length} Service Workers`);
+                    
+                    for (let registration of registrations) {
+                        await registration.unregister();
+                        log('✅ Service Worker desregistrado');
+                    }
+                }
+                
+                // 2. Limpiar todos los cachés
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    log(`📦 Encontrados ${cacheNames.length} cachés`);
+                    
+                    for (let cacheName of cacheNames) {
+                        await caches.delete(cacheName);
+                        log(`✅ Caché eliminado: ${cacheName}`);
+                    }
+                }
+                
+                // 3. Limpiar localStorage
+                const localStorageKeys = Object.keys(localStorage);
+                log(`💾 Encontradas ${localStorageKeys.length} entradas en localStorage`);
+                
+                // No borrar token ni datos de usuario, solo configuración de Arduino
+                const keysToKeep = ['authToken', 'userId', 'userRole', 'userName'];
+                for (let key of localStorageKeys) {
+                    if (!keysToKeep.includes(key)) {
+                        localStorage.removeItem(key);
+                        log(`✅ localStorage limpiado: ${key}`);
+                    }
+                }
+                
+                // 4. Limpiar sessionStorage
+                sessionStorage.clear();
+                log('✅ sessionStorage limpiado');
+                
+                log('');
+                log('🎉 ¡Limpieza completa!');
+                log('⏩ Redirigiendo en 3 segundos...');
+                
+                statusDiv.className = 'status success';
+                statusDiv.textContent = '✅ Caché limpiado exitosamente';
+                returnBtn.style.display = 'inline-block';
+                
+                // Redirigir automáticamente
+                setTimeout(() => {
+                    window.location.href = '/student-dashboard';
+                }, 3000);
+                
+            } catch (error) {
+                console.error('Error al limpiar:', error);
+                log(`❌ Error: ${error.message}`);
+                
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '❌ Error al limpiar caché';
+                returnBtn.style.display = 'inline-block';
+            }
+        }
+        
+        // Ejecutar al cargar
+        clearEverything();
+    </script>
+</body>
+</html>
