@@ -11,10 +11,32 @@ let lastAttendanceCount = 0;
 // Configuración del Arduino Bridge (IP local)
 let ARDUINO_BRIDGE_URL = localStorage.getItem('arduinoBridgeURL') || null;
 
+// Flags de control
+let isModalOpening = false;
+let isModalClosing = false;
+let autoCloseTimeout = null;
+
 /**
  * Abrir modal de asistencia
  */
 async function openAttendanceModal(classId, className) {
+    // Prevenir aperturas múltiples o durante cierre
+    if (isModalOpening || isModalClosing) {
+        console.warn('⚠️ Modal ya está en transición, ignorando apertura');
+        return;
+    }
+    
+    isModalOpening = true;
+    
+    // Limpiar timeout de cierre automático si existe
+    if (autoCloseTimeout) {
+        clearTimeout(autoCloseTimeout);
+        autoCloseTimeout = null;
+    }
+    
+    // Detener cualquier polling anterior
+    stopAttendancePolling();
+    
     currentAttendanceClassId = classId;
     currentAttendanceClassName = className;
     lastAttendanceCount = 0;
@@ -69,6 +91,11 @@ async function openAttendanceModal(classId, className) {
     startCardDetectionForAttendance();
     
     console.log('📝 Modal de asistencia abierto para clase:', classId);
+    
+    // Liberar flag después de un breve delay
+    setTimeout(() => {
+        isModalOpening = false;
+    }, 500);
 }
 
 /**
@@ -267,6 +294,20 @@ async function configureArduinoBridge(classId) {
  * Cerrar modal de asistencia
  */
 function closeAttendanceModal() {
+    // Prevenir cierres múltiples
+    if (isModalClosing) {
+        console.warn('⚠️ Modal ya se está cerrando, ignorando');
+        return;
+    }
+    
+    isModalClosing = true;
+    
+    // Limpiar timeout de cierre automático
+    if (autoCloseTimeout) {
+        clearTimeout(autoCloseTimeout);
+        autoCloseTimeout = null;
+    }
+    
     const modal = document.getElementById('attendanceModal');
     modal.classList.remove('active');
     
@@ -285,6 +326,11 @@ function closeAttendanceModal() {
     lastAttendanceCount = 0;
     
     console.log('✅ Modal de asistencia cerrado');
+    
+    // Liberar flag después de la animación del modal (500ms)
+    setTimeout(() => {
+        isModalClosing = false;
+    }, 500);
 }
 
 /**
@@ -396,13 +442,21 @@ function showWaitingState() {
  * Mostrar estado de éxito con animación increíble
  */
 function showSuccessState(attendance) {
+    // Limpiar timeout anterior si existe
+    if (autoCloseTimeout) {
+        clearTimeout(autoCloseTimeout);
+        autoCloseTimeout = null;
+    }
+    
     // Primero mostrar animación de tarjeta detectada
     showCardDetectedAnimation();
     
     // Después de 1.5 segundos, mostrar el éxito final
     setTimeout(() => {
-        // Ocultar waiting
+        // Ocultar waiting y rejected
         document.getElementById('attendanceWaiting').classList.add('hidden');
+        document.getElementById('attendanceError').classList.add('hidden');
+        document.getElementById('attendanceRejected').classList.add('hidden');
         
         // Mostrar success
         const successElement = document.getElementById('attendanceSuccess');
@@ -439,13 +493,17 @@ function showSuccessState(attendance) {
         playSuccessSound();
         
         // Cerrar automáticamente después de 4 segundos y recargar clases
-        setTimeout(() => {
-            closeAttendanceModal();
+        autoCloseTimeout = setTimeout(() => {
+            if (!isModalClosing) {
+                closeAttendanceModal();
+            }
             
             // Recargar las clases para actualizar el botón
             if (typeof loadMyCourses === 'function') {
                 loadMyCourses();
             }
+            
+            autoCloseTimeout = null;
         }, 4000);
     }, 1500);
 }
@@ -492,6 +550,12 @@ function showErrorState(message) {
  * Mostrar estado de tarjeta rechazada
  */
 function showRejectedState(uid) {
+    // Limpiar timeout anterior si existe
+    if (autoCloseTimeout) {
+        clearTimeout(autoCloseTimeout);
+        autoCloseTimeout = null;
+    }
+    
     // Ocultar otros estados
     document.getElementById('attendanceWaiting').classList.add('hidden');
     document.getElementById('attendanceSuccess').classList.add('hidden');
@@ -508,14 +572,18 @@ function showRejectedState(uid) {
     stopAttendancePolling();
     
     // Auto-cerrar después de 5 segundos y resetear completamente
-    setTimeout(() => {
+    autoCloseTimeout = setTimeout(() => {
         // Ocultar estado de rechazo antes de cerrar
         rejectedElement.classList.add('hidden');
         
         // Pequeño delay antes de cerrar para suavizar la transición
         setTimeout(() => {
-            closeAttendanceModal();
+            if (!isModalClosing) {
+                closeAttendanceModal();
+            }
         }, 200);
+        
+        autoCloseTimeout = null;
     }, 5000);
 }
 
