@@ -658,10 +658,32 @@ body {
 
 /* ============= RESPONSIVE ============= */
 
+
+/* ============================================
+   RESPONSIVE DESIGN - MOBILE OPTIMIZATION
+   ============================================ */
+
+/* Tablet Landscape - 1024px */
+@media (max-width: 1024px) {
+    .container {
+        padding: 20px 30px;
+    }
+    
+    .stats-section {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Tablet Portrait - 768px */
 @media (max-width: 768px) {
+    .container {
+        padding: 15px 20px;
+    }
+    
     .header-content {
         flex-direction: column;
         gap: 1rem;
+        padding: 16px 20px;
     }
     
     .attendance-header h1 {
@@ -670,11 +692,13 @@ body {
     
     .stats-section {
         grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
     }
     
     .filter-card {
         flex-direction: column;
         align-items: stretch;
+        padding: 20px;
     }
     
     .date-input {
@@ -685,10 +709,148 @@ body {
         flex-direction: column;
         align-items: flex-start;
         gap: 1rem;
+        padding: 18px;
     }
     
     .attendance-notification {
         right: 1rem;
         left: 1rem;
+        top: 1rem;
     }
 }
+
+/* Mobile Landscape - 640px */
+@media (max-width: 640px) {
+    .container {
+        padding: 12px 16px;
+    }
+    
+    .attendance-header h1 {
+        font-size: 1.3rem;
+    }
+    
+    .stats-section {
+        gap: 12px;
+    }
+}
+
+/* Mobile Portrait - 480px */
+@media (max-width: 480px) {
+    .container {
+        padding: 10px 12px;
+    }
+    
+    .header-content {
+        padding: 12px 16px;
+    }
+    
+    .attendance-header h1 {
+        font-size: 1.2rem;
+    }
+    
+    .stats-section {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .stat-card {
+        padding: 16px 14px;
+    }
+    
+    .stat-value {
+        font-size: 28px;
+    }
+    
+    .stat-label {
+        font-size: 13px;
+    }
+    
+    .filter-card {
+        padding: 16px;
+        gap: 12px;
+    }
+    
+    .filter-label {
+        font-size: 13px;
+    }
+    
+    .date-input,
+    .filter-select {
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+    
+    .attendance-card {
+        padding: 16px;
+        gap: 12px;
+        border-radius: 14px;
+    }
+    
+    .student-name {
+        font-size: 15px;
+    }
+    
+    .student-id {
+        font-size: 12px;
+    }
+    
+    .attendance-notification {
+        right: 10px;
+        left: 10px;
+        top: 10px;
+        padding: 14px;
+        font-size: 14px;
+    }
+}
+
+/* Small Mobile - 375px */
+@media (max-width: 375px) {
+    .container {
+        padding: 8px 10px;
+    }
+    
+    .attendance-header h1 {
+        font-size: 1.1rem;
+    }
+    
+    .stat-value {
+        font-size: 26px;
+    }
+}
+
+/* Landscape Orientation Mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+    .stats-section {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+    
+    .stat-card {
+        padding: 12px;
+    }
+}
+
+/* Touch Device Optimizations */
+@media (hover: none) and (pointer: coarse) {
+    /* Larger touch targets */
+    .date-input,
+    .filter-select,
+    .attendance-card {
+        min-height: 44px;
+    }
+    
+    /* Remove hover effects */
+    .stat-card:hover,
+    .attendance-card:hover {
+        transform: none;
+    }
+    
+    /* Add active states for touch feedback */
+    .stat-card:active,
+    .attendance-card:active {
+        transform: scale(0.98);
+    }
+}
+

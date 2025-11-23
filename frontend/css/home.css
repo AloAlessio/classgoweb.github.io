@@ -751,31 +751,422 @@ body::after {
     font-weight: 600;
 }
 
-/* Responsive */
+/* ============================================
+   RESPONSIVE DESIGN - MOBILE OPTIMIZATION
+   ============================================ */
+
+/* Tablet Landscape - 1024px */
+@media (max-width: 1024px) {
+    .container {
+        padding: 20px 30px;
+    }
+    
+    .header {
+        padding: 16px 24px;
+    }
+    
+    .categories-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Tablet Portrait - 768px */
 @media (max-width: 768px) {
+    .container {
+        padding: 15px 20px;
+    }
+    
     .header {
         flex-direction: column;
-        gap: 20px;
+        gap: 15px;
+        padding: 16px 20px;
+        border-radius: 20px;
+    }
+    
+    .logo-section {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .header-info {
+        width: 100%;
+        justify-content: space-between;
     }
 
     .categories-grid {
         grid-template-columns: 1fr;
+        gap: 16px;
     }
 
     .stats-grid {
         grid-template-columns: 1fr;
+        gap: 16px;
     }
 
     .class-item {
         flex-direction: column;
         align-items: flex-start;
         gap: 15px;
+        padding: 20px;
+    }
+    
+    .class-info {
+        width: 100%;
+    }
+    
+    .class-actions {
+        width: 100%;
     }
 
     .join-button {
         width: 100%;
+        padding: 14px 20px;
+    }
+    
+    .welcome-section {
+        padding: 24px 20px;
+    }
+    
+    .welcome-title {
+        font-size: 24px;
+    }
+    
+    .role-modal-content {
+        width: 95%;
+        padding: 32px 28px;
     }
 }
+
+/* Mobile Landscape - 640px */
+@media (max-width: 640px) {
+    .container {
+        padding: 12px 16px;
+    }
+    
+    .header {
+        padding: 14px 18px;
+        margin: 8px 0 30px;
+    }
+    
+    .logo-circle {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .logo-text {
+        font-size: 24px;
+    }
+    
+    .user-avatar {
+        width: 42px;
+        height: 42px;
+        font-size: 16px;
+    }
+    
+    .welcome-section {
+        padding: 20px 18px;
+        border-radius: 18px;
+    }
+    
+    .welcome-title {
+        font-size: 22px;
+    }
+    
+    .welcome-subtitle {
+        font-size: 14px;
+    }
+    
+    .category-card {
+        padding: 20px 18px;
+    }
+    
+    .stat-card {
+        padding: 18px 16px;
+    }
+}
+
+/* Mobile Portrait - 480px */
+@media (max-width: 480px) {
+    body::before,
+    body::after {
+        width: 300px;
+        height: 300px;
+        filter: blur(60px);
+    }
+    
+    .container {
+        padding: 10px 12px;
+    }
+    
+    .header {
+        padding: 12px 16px;
+        margin: 6px 0 24px;
+        border-radius: 16px;
+    }
+    
+    .logo-circle {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .logo-icon {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .logo-text {
+        font-size: 20px;
+    }
+    
+    .tutor-badge,
+    .student-badge {
+        padding: 6px 12px;
+        font-size: 12px;
+        border-radius: 16px;
+    }
+    
+    .user-avatar {
+        width: 38px;
+        height: 38px;
+        font-size: 15px;
+    }
+    
+    .welcome-section {
+        padding: 18px 16px;
+        margin-bottom: 24px;
+        border-radius: 16px;
+    }
+    
+    .welcome-title {
+        font-size: 20px;
+        margin-bottom: 8px;
+    }
+    
+    .welcome-subtitle {
+        font-size: 13px;
+    }
+    
+    .stats-grid {
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+    
+    .stat-card {
+        padding: 16px 14px;
+        gap: 14px;
+        border-radius: 14px;
+    }
+    
+    .stat-icon {
+        font-size: 32px;
+        width: 50px;
+        height: 50px;
+    }
+    
+    .stat-value {
+        font-size: 26px;
+    }
+    
+    .stat-label {
+        font-size: 13px;
+    }
+    
+    .categories-grid {
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+    
+    .category-card {
+        padding: 18px 16px;
+        border-radius: 14px;
+    }
+    
+    .category-icon {
+        font-size: 32px;
+        margin-bottom: 10px;
+    }
+    
+    .category-name {
+        font-size: 15px;
+    }
+    
+    .category-count {
+        font-size: 12px;
+    }
+    
+    .classes-section {
+        gap: 12px;
+    }
+    
+    .classes-header {
+        padding: 16px;
+    }
+    
+    .section-title {
+        font-size: 18px;
+    }
+    
+    .class-item {
+        padding: 16px;
+        gap: 12px;
+        border-radius: 14px;
+    }
+    
+    .class-title {
+        font-size: 16px;
+        margin-bottom: 6px;
+    }
+    
+    .class-description {
+        font-size: 13px;
+        margin-bottom: 10px;
+    }
+    
+    .class-meta {
+        font-size: 12px;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    
+    .join-button {
+        padding: 12px 18px;
+        font-size: 14px;
+        border-radius: 12px;
+    }
+    
+    .role-modal-content {
+        width: 95%;
+        padding: 28px 24px;
+        border-radius: 24px;
+    }
+    
+    .role-modal-title {
+        font-size: 20px;
+        margin-bottom: 18px;
+    }
+    
+    .role-modal-email {
+        font-size: 14px;
+        margin-bottom: 14px;
+    }
+    
+    .role-modal-current {
+        font-size: 13px;
+        margin-bottom: 18px;
+    }
+    
+    .role-modal-buttons {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .role-modal-btn {
+        width: 100%;
+        padding: 14px 24px;
+        font-size: 14px;
+    }
+}
+
+/* Small Mobile - 375px */
+@media (max-width: 375px) {
+    .container {
+        padding: 8px 10px;
+    }
+    
+    .header {
+        padding: 10px 14px;
+    }
+    
+    .logo-text {
+        font-size: 18px;
+    }
+    
+    .welcome-title {
+        font-size: 18px;
+    }
+    
+    .stat-value {
+        font-size: 24px;
+    }
+    
+    .category-name {
+        font-size: 14px;
+    }
+    
+    .class-title {
+        font-size: 15px;
+    }
+}
+
+/* Landscape Orientation Mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+    .header {
+        padding: 10px 16px;
+    }
+    
+    .welcome-section {
+        padding: 16px;
+        margin-bottom: 16px;
+    }
+    
+    .welcome-title {
+        font-size: 18px;
+        margin-bottom: 6px;
+    }
+    
+    .welcome-subtitle {
+        font-size: 12px;
+    }
+    
+    .stats-grid,
+    .categories-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+    
+    .stat-card,
+    .category-card {
+        padding: 12px;
+    }
+}
+
+/* Touch Device Optimizations */
+@media (hover: none) and (pointer: coarse) {
+    /* Larger touch targets for mobile */
+    .user-avatar {
+        min-width: 44px;
+        min-height: 44px;
+    }
+    
+    .join-button,
+    .role-modal-btn {
+        min-height: 44px;
+    }
+    
+    .category-card {
+        min-height: 100px;
+    }
+    
+    /* Remove hover effects on touch devices */
+    .category-card:hover,
+    .stat-card:hover,
+    .class-item:hover {
+        transform: none;
+    }
+    
+    /* Add active state for touch feedback */
+    .category-card:active,
+    .stat-card:active,
+    .join-button:active {
+        transform: scale(0.98);
+    }
+}
+
 
 /* Decorative Background Circles */
 .bg-circle {
@@ -1031,15 +1422,4 @@ body::after {
 
 .notification-toast:active {
     transform: translateX(0) scale(0.98) !important;
-}
-
-/* Mobile responsive notifications */
-@media (max-width: 768px) {
-    .notification-toast {
-        top: 10px !important;
-        right: 10px !important;
-        left: 10px !important;
-        max-width: none !important;
-        min-width: auto !important;
-    }
 }

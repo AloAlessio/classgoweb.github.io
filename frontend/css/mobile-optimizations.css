@@ -1,0 +1,412 @@
+/* ============================================
+   MOBILE OPTIMIZATIONS - PERFORMANCE & UX
+   ============================================
+   
+   Este archivo contiene optimizaciones adicionales
+   para mejorar el rendimiento y experiencia móvil
+*/
+
+/* ===== PERFORMANCE OPTIMIZATIONS ===== */
+
+/* Hardware acceleration for smooth animations */
+.stat-card,
+.category-card,
+.class-item,
+.nav-tab,
+.user-avatar,
+.course-card,
+.join-button,
+.action-button,
+.modal-content {
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+/* Optimize scrolling performance */
+.container,
+.courses-grid,
+.categories-grid,
+.classes-section,
+.messages-container {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+}
+
+/* Prevent text selection on interactive elements */
+.nav-tab,
+.stat-card,
+.category-card,
+.user-avatar,
+button {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* ===== TOUCH INTERACTION IMPROVEMENTS ===== */
+
+/* Larger touch targets for better accessibility */
+@media (hover: none) and (pointer: coarse) {
+    /* Minimum 44x44px touch targets (Apple HIG) */
+    a,
+    button,
+    input[type="button"],
+    input[type="submit"],
+    .clickable {
+        min-width: 44px;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Comfortable spacing between touch targets */
+    .nav-tabs {
+        gap: 12px;
+    }
+    
+    .modal-buttons {
+        gap: 14px;
+    }
+}
+
+/* ===== SAFE AREA INSETS (NOTCH SUPPORT) ===== */
+
+/* iOS Safe Areas for notched devices */
+@supports (padding: max(0px)) {
+    body {
+        padding-left: max(0px, env(safe-area-inset-left));
+        padding-right: max(0px, env(safe-area-inset-right));
+    }
+    
+    .header {
+        padding-left: max(20px, calc(20px + env(safe-area-inset-left)));
+        padding-right: max(20px, calc(20px + env(safe-area-inset-right)));
+        padding-top: max(20px, calc(20px + env(safe-area-inset-top)));
+    }
+    
+    .container {
+        padding-left: max(20px, calc(20px + env(safe-area-inset-left)));
+        padding-right: max(20px, calc(20px + env(safe-area-inset-right)));
+        padding-bottom: max(20px, calc(20px + env(safe-area-inset-bottom)));
+    }
+    
+    .modal-content {
+        margin-top: max(20px, env(safe-area-inset-top));
+        margin-bottom: max(20px, env(safe-area-inset-bottom));
+    }
+}
+
+/* ===== LANDSCAPE ORIENTATION OPTIMIZATIONS ===== */
+
+@media (max-height: 500px) and (orientation: landscape) {
+    /* Compact layout for landscape mode */
+    .welcome-section {
+        padding: 12px 16px;
+        margin-bottom: 12px;
+    }
+    
+    .welcome-title {
+        font-size: 18px;
+        margin-bottom: 4px;
+    }
+    
+    .welcome-subtitle {
+        font-size: 12px;
+    }
+    
+    /* Horizontal scroll for stats in landscape */
+    .stats-grid {
+        display: flex;
+        overflow-x: auto;
+        gap: 10px;
+        padding-bottom: 10px;
+        scroll-snap-type: x mandatory;
+    }
+    
+    .stat-card {
+        flex: 0 0 auto;
+        min-width: 150px;
+        scroll-snap-align: start;
+    }
+    
+    /* Reduce modal height in landscape */
+    .modal-content {
+        max-height: 85vh;
+        overflow-y: auto;
+    }
+}
+
+/* ===== DARK MODE SUPPORT ===== */
+
+@media (prefers-color-scheme: dark) {
+    /* Already using dark theme, ensure consistency */
+    body {
+        background: linear-gradient(135deg, #0a5f62 0%, #0d7377 25%, #14919b 50%, #0d7377 75%, #0a5f62 100%);
+    }
+}
+
+/* ===== REDUCED MOTION SUPPORT ===== */
+
+@media (prefers-reduced-motion: reduce) {
+    /* Disable animations for users who prefer reduced motion */
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    
+    .floating-circle,
+    .bg-gradient {
+        animation: none !important;
+    }
+}
+
+/* ===== HIGH CONTRAST MODE ===== */
+
+@media (prefers-contrast: high) {
+    /* Improve contrast for accessibility */
+    .glass-card,
+    .modal-content,
+    .stat-card,
+    .category-card {
+        border-width: 2px;
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .primary-button,
+    .join-button {
+        border: 2px solid rgba(255, 255, 255, 0.8);
+    }
+    
+    body {
+        color: #ffffff;
+    }
+}
+
+/* ===== VIEWPORT HEIGHT FIX FOR MOBILE BROWSERS ===== */
+
+/* Fix for mobile browsers address bar */
+.full-height {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+}
+
+/* iOS Safari viewport fix */
+@supports (-webkit-touch-callout: none) {
+    .full-height {
+        min-height: -webkit-fill-available;
+    }
+}
+
+/* ===== PREVENT ZOOM ON INPUT FOCUS (iOS) ===== */
+
+@media screen and (max-width: 768px) {
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="tel"],
+    input[type="number"],
+    select,
+    textarea {
+        font-size: 16px !important;
+    }
+}
+
+/* ===== STICKY ELEMENTS OPTIMIZATION ===== */
+
+.header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    /* Prevent flickering on iOS */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+}
+
+/* ===== BUTTON ACTIVE STATES FOR TOUCH ===== */
+
+@media (hover: none) and (pointer: coarse) {
+    /* Visual feedback on tap */
+    button:active,
+    .nav-tab:active,
+    .stat-card:active,
+    .category-card:active,
+    .join-button:active {
+        transform: scale(0.97);
+        opacity: 0.9;
+        transition: transform 0.1s ease, opacity 0.1s ease;
+    }
+    
+    /* Disable hover effects on touch devices */
+    button:hover,
+    .nav-tab:hover,
+    .stat-card:hover,
+    .category-card:hover {
+        transform: none;
+    }
+}
+
+/* ===== LOADING STATES ===== */
+
+/* Skeleton loading animation for better perceived performance */
+@keyframes skeleton-loading {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.05) 25%,
+        rgba(255, 255, 255, 0.1) 50%,
+        rgba(255, 255, 255, 0.05) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+/* ===== PULL TO REFRESH (DISABLE) ===== */
+
+/* Prevent pull-to-refresh on mobile */
+body {
+    overscroll-behavior-y: contain;
+}
+
+/* ===== IMPROVED MODAL ON MOBILE ===== */
+
+@media (max-width: 768px) {
+    .modal {
+        align-items: flex-end;
+    }
+    
+    .modal-content {
+        width: 100%;
+        max-width: 100%;
+        border-radius: 20px 20px 0 0;
+        max-height: 90vh;
+        animation: slideUpModal 0.3s ease-out;
+    }
+    
+    @keyframes slideUpModal {
+        from {
+            transform: translateY(100%);
+        }
+        to {
+            transform: translateY(0);
+        }
+    }
+}
+
+/* ===== OPTIMIZED IMAGES ===== */
+
+img {
+    /* Prevent image drag on mobile */
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+    
+    /* Smooth image rendering */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+}
+
+/* ===== FOCUS VISIBLE IMPROVEMENTS ===== */
+
+/* Better focus indicators for keyboard navigation */
+*:focus-visible {
+    outline: 2px solid #2dd4bf;
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Remove focus outline for mouse users */
+*:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* ===== PRINT STYLES ===== */
+
+@media print {
+    /* Hide interactive elements when printing */
+    .header,
+    .nav-tabs,
+    button,
+    .user-menu {
+        display: none !important;
+    }
+    
+    /* Expand content for printing */
+    .container {
+        max-width: 100%;
+        padding: 0;
+    }
+    
+    /* Ensure good contrast for printing */
+    body {
+        background: white;
+        color: black;
+    }
+}
+
+/* ===== NETWORK STATUS INDICATOR ===== */
+
+.offline-indicator {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(239, 68, 68, 0.95);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+    display: none;
+}
+
+.offline-indicator.show {
+    display: block;
+    animation: slideUpFade 0.3s ease-out;
+}
+
+@keyframes slideUpFade {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* ===== SWIPE GESTURES HINT ===== */
+
+@media (hover: none) and (pointer: coarse) and (max-width: 768px) {
+    /* Visual hint for swipeable content */
+    .swipeable::after {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 40px;
+        background: linear-gradient(to left, rgba(13, 115, 119, 0.8), transparent);
+        pointer-events: none;
+    }
+}

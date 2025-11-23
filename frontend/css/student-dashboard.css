@@ -1825,11 +1825,82 @@ textarea {
     transform: translateY(0);
 }
 
-/* Responsive Design */
+/* ============================================
+   RESPONSIVE DESIGN - MOBILE OPTIMIZATION
+   ============================================ */
+
+/* Tablet Landscape - 1024px */
+@media (max-width: 1024px) {
+    .container {
+        padding: 20px 30px;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .modal-content {
+        max-width: 90%;
+        max-height: 85vh;
+    }
+}
+
+/* Tablet Portrait - 768px */
 @media (max-width: 768px) {
+    .container {
+        padding: 15px 20px;
+    }
+    
+    .header {
+        flex-direction: column;
+        gap: 15px;
+        padding: 16px 20px;
+    }
+    
+    .logo-section {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .header-info {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .welcome-section {
+        padding: 24px 20px;
+    }
+    
+    .welcome-title {
+        font-size: 26px;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .stat-card {
+        padding: 20px;
+    }
+    
+    .nav-tabs {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .nav-tab {
+        flex-shrink: 0;
+    }
+    
+    .courses-grid {
+        grid-template-columns: 1fr;
+    }
+    
     .messages-container {
         grid-template-columns: 1fr;
         height: auto;
+        gap: 16px;
     }
     
     .conversations-panel {
@@ -1839,7 +1910,332 @@ textarea {
     .chat-panel {
         height: 500px;
     }
+    
+    .modal-content {
+        width: 95%;
+        max-width: 95%;
+        padding: 28px 24px;
+    }
+    
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
 }
+
+/* Mobile Landscape - 640px */
+@media (max-width: 640px) {
+    .container {
+        padding: 12px 16px;
+    }
+    
+    .header {
+        padding: 14px 18px;
+    }
+    
+    .logo-circle {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .logo-text {
+        font-size: 24px;
+    }
+    
+    .welcome-section {
+        padding: 20px 18px;
+    }
+    
+    .welcome-title {
+        font-size: 24px;
+    }
+    
+    .stat-card {
+        padding: 18px 16px;
+    }
+}
+
+/* Mobile Portrait - 480px */
+@media (max-width: 480px) {
+    .container {
+        padding: 10px 12px;
+    }
+    
+    .header {
+        padding: 12px 16px;
+        border-radius: 20px;
+    }
+    
+    .logo-circle {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .logo-icon {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .logo-text {
+        font-size: 20px;
+    }
+    
+    .student-badge {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+    
+    .user-avatar {
+        width: 38px;
+        height: 38px;
+        font-size: 15px;
+    }
+    
+    .welcome-section {
+        padding: 18px 16px;
+        margin-bottom: 24px;
+        border-radius: 18px;
+    }
+    
+    .welcome-title {
+        font-size: 22px;
+        margin-bottom: 8px;
+    }
+    
+    .welcome-subtitle {
+        font-size: 14px;
+    }
+    
+    .stats-grid {
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+    
+    .stat-card {
+        padding: 16px 14px;
+        gap: 14px;
+        border-radius: 14px;
+    }
+    
+    .stat-icon {
+        font-size: 32px;
+        width: 50px;
+        height: 50px;
+    }
+    
+    .stat-value {
+        font-size: 26px;
+    }
+    
+    .stat-label {
+        font-size: 13px;
+    }
+    
+    .nav-tabs {
+        padding: 8px;
+        gap: 8px;
+        border-radius: 12px;
+    }
+    
+    .nav-tab {
+        padding: 10px 18px;
+        font-size: 13px;
+    }
+    
+    .course-card {
+        border-radius: 14px;
+    }
+    
+    .course-image {
+        height: 140px;
+        font-size: 40px;
+    }
+    
+    .course-content {
+        padding: 16px 14px;
+    }
+    
+    .course-title {
+        font-size: 16px;
+    }
+    
+    .course-meta {
+        font-size: 12px;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    
+    .course-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .course-actions button {
+        width: 100%;
+        padding: 10px;
+        font-size: 13px;
+    }
+    
+    .messages-container {
+        gap: 12px;
+    }
+    
+    .conversations-panel,
+    .chat-panel {
+        border-radius: 14px;
+        padding: 14px;
+    }
+    
+    .conversations-panel {
+        height: 350px;
+    }
+    
+    .chat-panel {
+        height: 450px;
+    }
+    
+    .calendar-wrapper {
+        padding: 18px 14px;
+        border-radius: 14px;
+    }
+    
+    .calendar-header {
+        padding: 12px;
+        margin-bottom: 16px;
+    }
+    
+    .calendar-header h3,
+    .calendar-header h4 {
+        font-size: 18px;
+    }
+    
+    .calendar-header button {
+        width: 38px;
+        height: 38px;
+        font-size: 18px;
+    }
+    
+    .modal-content {
+        width: 95%;
+        padding: 24px 20px;
+        border-radius: 20px;
+    }
+    
+    .modal-title {
+        font-size: 20px;
+        margin-bottom: 18px;
+    }
+    
+    .form-group label {
+        font-size: 13px;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        font-size: 14px;
+        padding: 10px 14px;
+    }
+    
+    .modal-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .modal-button {
+        width: 100%;
+        padding: 12px;
+        font-size: 14px;
+    }
+}
+
+/* Small Mobile - 375px */
+@media (max-width: 375px) {
+    .container {
+        padding: 8px 10px;
+    }
+    
+    .header {
+        padding: 10px 14px;
+    }
+    
+    .logo-text {
+        font-size: 18px;
+    }
+    
+    .welcome-title {
+        font-size: 20px;
+    }
+    
+    .stat-value {
+        font-size: 24px;
+    }
+    
+    .nav-tab {
+        padding: 8px 14px;
+        font-size: 12px;
+    }
+}
+
+/* Landscape Orientation Mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+    .header {
+        padding: 10px 16px;
+    }
+    
+    .welcome-section {
+        padding: 14px;
+        margin-bottom: 16px;
+    }
+    
+    .welcome-title {
+        font-size: 18px;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+    
+    .stat-card {
+        padding: 12px;
+    }
+    
+    .modal-content {
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+}
+
+/* Touch Device Optimizations */
+@media (hover: none) and (pointer: coarse) {
+    /* Larger touch targets */
+    .user-avatar,
+    .nav-tab,
+    .course-actions button {
+        min-height: 44px;
+    }
+    
+    .calendar-header button {
+        min-width: 44px;
+        min-height: 44px;
+    }
+    
+    /* Remove hover effects */
+    .stat-card:hover,
+    .nav-tab:hover,
+    .course-card:hover {
+        transform: none;
+    }
+    
+    /* Add active states for touch feedback */
+    .stat-card:active,
+    .nav-tab:active,
+    .course-card:active {
+        transform: scale(0.98);
+    }
+}
+
 
 /* Calendar */
 .calendar-wrapper {
@@ -2113,55 +2509,9 @@ textarea {
     left: 20%;
 }
 
-/* Responsive */
-@media (max-width: 1024px) {
-    .messages-container {
-        grid-template-columns: 1fr;
-    }
-    
-    .messages-sidebar {
-        max-height: 300px;
-        overflow-y: auto;
-    }
-}
+/* Legacy responsive styles merged into main responsive section above */
 
-@media (max-width: 768px) {
-    .header {
-        padding: 15px 20px;
-    }
-    
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .nav-tabs {
-        overflow-x: auto;
-    }
-    
-    .section-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .search-box input {
-        width: 100%;
-    }
-    
-    /* Header Progress Section - Mobile */
-    .header-progress-section {
-        padding: 20px;
-    }
-    
-    .progress-header-label {
-        font-size: 14px;
-    }
-    
-    .progress-header-percentage {
-        font-size: 24px;
-    }
-    
-    .progress-header-bar {
-        height: 14px;
+.user-menu {
     }
     
     .progress-header-details {
