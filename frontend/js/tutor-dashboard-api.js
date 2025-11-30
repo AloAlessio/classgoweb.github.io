@@ -1064,6 +1064,12 @@ async function loadStudents() {
     try {
         const studentsTableBody = document.getElementById('studentsTableBody');
         
+        // If the element doesn't exist, skip loading students
+        if (!studentsTableBody) {
+            console.log('ℹ️ Students table not found in this view, skipping');
+            return;
+        }
+        
         // Get all students from enrolled classes
         const studentsMap = new Map();
         

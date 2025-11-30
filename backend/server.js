@@ -37,7 +37,7 @@ app.use(helmet({
             styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
             fontSrc: ["'self'", "https://fonts.gstatic.com"],
             scriptSrc: ["'self'", "'unsafe-inline'", "https://www.gstatic.com", "https://*.firebaseio.com"],
-            connectSrc: ["'self'", "http://localhost:3001", "https://fonts.googleapis.com", "https://fonts.gstatic.com", "https://*.googleapis.com", "https://*.firebaseio.com", "wss://*.firebaseio.com", "https://firestore.googleapis.com"],
+            connectSrc: ["'self'", "http://localhost:3001", "https://fonts.googleapis.com", "https://fonts.gstatic.com", "https://www.gstatic.com", "https://*.googleapis.com", "https://*.firebaseio.com", "wss://*.firebaseio.com", "https://firestore.googleapis.com"],
             imgSrc: ["'self'", "data:", "https:"],
             frameSrc: ["'none'"],
             objectSrc: ["'none'"],
