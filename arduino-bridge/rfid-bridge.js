@@ -1,5 +1,6 @@
 // Arduino RFID Bridge - Conecta Arduino con el backend de ClassGo
 // Este servidor lee del puerto serial y envía las asistencias al backend
+// NUEVO: Auto-detección de puerto Arduino + Auto-inicio
 
 const { SerialPort } = require('serialport');
 const { ReadlineParser } = require('@serialport/parser-readline');
@@ -10,15 +11,15 @@ const http = require('http'); // Para servidor HTTP
 // ============= CONFIGURACIÓN =============
 
 const CONFIG = {
-    // Puerto serial del Arduino (ajusta según tu sistema)
+    // Puerto serial del Arduino - AUTO-DETECTA si no se especifica
     // Windows: 'COM3', 'COM4', etc.
     // Linux/Mac: '/dev/ttyUSB0', '/dev/cu.usbmodem14101', etc.
-    SERIAL_PORT: process.env.SERIAL_PORT || 'COM16',
+    SERIAL_PORT: process.env.SERIAL_PORT || 'AUTO',
     BAUD_RATE: 9600,
     
-    // URL del backend - Usa variable de entorno o detecta automáticamente
+    // URL del backend - Detecta automáticamente local vs producción
     BACKEND_URL: process.env.BACKEND_URL || 'http://localhost:3000/api',
-    // En producción: 'https://tu-app.onrender.com/api'
+    // En producción Render: 'https://classgo-app.onrender.com/api'
     
     // ID de la clase activa (se puede cambiar en runtime)
     ACTIVE_CLASS_ID: null,
@@ -27,7 +28,13 @@ const CONFIG = {
     HTTP_PORT: process.env.HTTP_PORT || 3001,
     
     // Mapeo de UIDs a formato correcto
-    AUTO_FORMAT_UID: true
+    AUTO_FORMAT_UID: true,
+    
+    // Intervalo de reconexión (ms)
+    RECONNECT_INTERVAL: 5000,
+    
+    // Auto-scan de puertos
+    AUTO_SCAN_INTERVAL: 10000
 };
 
 // ============= MAPEO UID → USUARIO =============
@@ -42,39 +49,115 @@ const UID_MAP = {
 let port;
 let parser;
 let isConnected = false;
+let autoScanInterval = null;
+let detectedPort = null;
 
 console.log('🎓 ClassGo - Arduino RFID Bridge');
-console.log('================================\n');
+console.log('================================');
+console.log('🔌 Modo: Auto-detección de Arduino');
+console.log('');
+
+// ============= AUTO-DETECCIÓN DE PUERTO =============
+
+async function autoDetectArduino() {
+    try {
+        const ports = await SerialPort.list();
+        
+        // Buscar puertos que parezcan Arduino
+        const arduinoPorts = ports.filter(p => {
+            const isArduino = 
+                (p.manufacturer && p.manufacturer.toLowerCase().includes('arduino')) ||
+                (p.manufacturer && p.manufacturer.toLowerCase().includes('ch340')) ||
+                (p.manufacturer && p.manufacturer.toLowerCase().includes('ftdi')) ||
+                (p.vendorId && ['2341', '1a86', '0403'].includes(p.vendorId.toLowerCase())) ||
+                (p.path && p.path.includes('usbmodem')) ||
+                (p.path && p.path.includes('ttyUSB')) ||
+                (p.path && p.path.includes('ttyACM'));
+            return isArduino;
+        });
+        
+        if (arduinoPorts.length > 0) {
+            // Usar el primer Arduino encontrado
+            const selectedPort = arduinoPorts[0].path;
+            console.log(`🔍 Arduino detectado automáticamente: ${selectedPort}`);
+            if (arduinoPorts[0].manufacturer) {
+                console.log(`   Fabricante: ${arduinoPorts[0].manufacturer}`);
+            }
+            return selectedPort;
+        }
+        
+        // Si no encontró Arduino específico, buscar cualquier puerto COM disponible
+        const comPorts = ports.filter(p => p.path.startsWith('COM') || p.path.includes('tty'));
+        if (comPorts.length > 0) {
+            console.log('⚠️ No se detectó Arduino específico, puertos disponibles:');
+            comPorts.forEach(p => console.log(`   ${p.path} ${p.manufacturer || ''}`));
+        }
+        
+        return null;
+    } catch (error) {
+        console.error('❌ Error al escanear puertos:', error.message);
+        return null;
+    }
+}
 
 // ============= CONEXIÓN SERIAL =============
 
-function initSerial() {
+async function initSerial() {
+    // Si está configurado en AUTO, detectar automáticamente
+    if (CONFIG.SERIAL_PORT === 'AUTO' || !detectedPort) {
+        console.log('🔍 Buscando Arduino...');
+        detectedPort = await autoDetectArduino();
+        
+        if (!detectedPort) {
+            console.log('⏳ Arduino no encontrado. Reintentando en 10 segundos...');
+            console.log('   💡 Conecta el Arduino vía USB');
+            
+            // Programar reintento
+            if (!autoScanInterval) {
+                autoScanInterval = setTimeout(async () => {
+                    autoScanInterval = null;
+                    await initSerial();
+                }, CONFIG.AUTO_SCAN_INTERVAL);
+            }
+            return;
+        }
+    }
+    
+    const portToUse = CONFIG.SERIAL_PORT === 'AUTO' ? detectedPort : CONFIG.SERIAL_PORT;
+    
     try {
         port = new SerialPort({
-            path: CONFIG.SERIAL_PORT,
+            path: portToUse,
             baudRate: CONFIG.BAUD_RATE
         });
 
         parser = port.pipe(new ReadlineParser({ delimiter: '\r\n' }));
 
         port.on('open', () => {
-            console.log(`✅ Conectado a Arduino en ${CONFIG.SERIAL_PORT}`);
+            console.log(`✅ Conectado a Arduino en ${portToUse}`);
             isConnected = true;
+            // Cancelar auto-scan si estaba activo
+            if (autoScanInterval) {
+                clearTimeout(autoScanInterval);
+                autoScanInterval = null;
+            }
         });
 
         port.on('error', (err) => {
             console.error('❌ Error en puerto serial:', err.message);
             isConnected = false;
+            detectedPort = null; // Resetear para re-escanear
         });
 
         port.on('close', () => {
             console.log('⚠️  Conexión serial cerrada');
             isConnected = false;
+            detectedPort = null; // Resetear para re-escanear
             // Intentar reconectar después de 5 segundos
-            setTimeout(() => {
+            setTimeout(async () => {
                 console.log('🔄 Intentando reconectar...');
-                initSerial();
-            }, 5000);
+                await initSerial();
+            }, CONFIG.RECONNECT_INTERVAL);
         });
 
         // Escuchar datos del Arduino
@@ -412,7 +495,8 @@ function startHttpServer() {
                 success: true,
                 serial: {
                     connected: isConnected,
-                    port: CONFIG.SERIAL_PORT
+                    port: detectedPort || CONFIG.SERIAL_PORT,
+                    autoDetect: CONFIG.SERIAL_PORT === 'AUTO'
                 },
                 backend: CONFIG.BACKEND_URL,
                 activeClass: CONFIG.ACTIVE_CLASS_ID,
