@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' http://localhost:3000 http://localhost:3001 https://*.onrender.com https://fonts.googleapis.com https://fonts.gstatic.com; font-src 'self' https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline'; img-src 'self' data:;">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; connect-src 'self' http://localhost:3000 http://localhost:3001 https://*.onrender.com https://fonts.googleapis.com https://fonts.gstatic.com; font-src 'self' https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline'; img-src 'self' data:;">
     <title>ClassGo - Mi Aprendizaje</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="stylesheet" href="/css/student-dashboard.css?v=101">
@@ -28,12 +30,19 @@
             z-index: 10000 !important;
             animation: slideDownMenu 0.3s ease-out !important;
         }
-        
+
         @keyframes slideDownMenu {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        
+
         @media (max-width: 768px) {
             #userMenu {
                 top: 70px !important;
@@ -42,7 +51,7 @@
                 max-width: none !important;
             }
         }
-        
+
         @media (max-width: 480px) {
             #userMenu {
                 top: 60px !important;
@@ -52,6 +61,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Decorative Background -->
     <div class="bg-circle bg-circle-1"></div>
@@ -144,7 +154,7 @@
         <!-- Explore Courses Section -->
         <section id="exploreSection" class="content-section active">
             <h3>Explorar Cursos Disponibles</h3>
-            
+
             <div class="filters">
                 <div class="category-filters">
                     <button class="category-btn active" data-category="all">Todos</button>
@@ -164,7 +174,7 @@
         <!-- My Courses Section -->
         <section id="myCoursesSection" class="content-section">
             <h3>Mis Cursos Inscritos</h3>
-            
+
             <div class="filters">
                 <select id="myCoursesFilter" class="filter-select">
                     <option value="all">Todos los cursos</option>
@@ -182,7 +192,7 @@
         <!-- Progress Section -->
         <section id="progressSection" class="content-section">
             <h3>Detalle de Progreso por Curso</h3>
-            
+
             <div id="progressGrid" class="progress-grid">
                 <!-- Progress cards will be loaded here -->
             </div>
@@ -191,7 +201,7 @@
         <!-- Calendar Section -->
         <section id="calendarSection" class="content-section">
             <h3>Calendario de Clases</h3>
-            
+
             <div class="calendar-legend">
                 <div class="legend-item">
                     <span class="legend-dot open"></span>
@@ -206,7 +216,7 @@
                     <span>Clase vencida</span>
                 </div>
             </div>
-            
+
             <div class="calendar-container">
                 <div class="calendar-header">
                     <button onclick="previousMonth()">‹</button>
@@ -222,15 +232,16 @@
         <!-- Messages Section -->
         <section id="messagesSection" class="content-section">
             <h3>Mensajes</h3>
-            
+
             <div class="messages-container">
                 <div class="conversations-panel">
-                    <input type="text" id="searchConversations" placeholder="🔍 Buscar contactos..." class="search-input">
+                    <input type="text" id="searchConversations" placeholder="🔍 Buscar contactos..."
+                        class="search-input">
                     <div id="conversationsList" class="conversations-list">
                         <!-- Contacts will be loaded here -->
                     </div>
                 </div>
-                
+
                 <div class="chat-panel">
                     <div class="chat-header" style="display: none;">
                         <h4>Selecciona un contacto</h4>
@@ -250,14 +261,22 @@
     <!-- User Menu (Dropdown) -->
     <!-- Version 2.1 - Menu simplified, removed Mi Perfil -->
     <div id="userMenu" class="user-menu" style="display: none;">
-        <div style="padding: 12px; cursor: pointer; border-radius: 8px; margin-bottom: 6px; transition: all 0.2s; color: #e0f7f7;" onclick="window.location.href='/home'" onmouseover="this.style.background='rgba(255,255,255,0.08)'; this.style.color='#ffffff';" onmouseout="this.style.background='transparent'; this.style.color='#e0f7f7';">
+        <div style="padding: 12px; cursor: pointer; border-radius: 8px; margin-bottom: 6px; transition: all 0.2s; color: #e0f7f7;"
+            onclick="window.location.href='/home'"
+            onmouseover="this.style.background='rgba(255,255,255,0.08)'; this.style.color='#ffffff';"
+            onmouseout="this.style.background='transparent'; this.style.color='#e0f7f7';">
             🏠 Inicio
         </div>
-        <div style="padding: 12px; cursor: pointer; border-radius: 8px; margin-bottom: 6px; transition: all 0.2s; color: #e0f7f7;" onclick="reconfigureArduinoBridge()" onmouseover="this.style.background='rgba(255,255,255,0.08)'; this.style.color='#ffffff';" onmouseout="this.style.background='transparent'; this.style.color='#e0f7f7';">
+        <div style="padding: 12px; cursor: pointer; border-radius: 8px; margin-bottom: 6px; transition: all 0.2s; color: #e0f7f7;"
+            onclick="reconfigureArduinoBridge()"
+            onmouseover="this.style.background='rgba(255,255,255,0.08)'; this.style.color='#ffffff';"
+            onmouseout="this.style.background='transparent'; this.style.color='#e0f7f7';">
             🔧 Configurar Lector RFID
         </div>
         <hr style="border: none; height: 1px; background: rgba(255,255,255,0.2); margin: 10px 0;">
-        <div style="padding: 12px; cursor: pointer; border-radius: 8px; color: #ff6b6b; transition: all 0.2s;" onclick="logout()" onmouseover="this.style.background='rgba(255,107,107,0.1)';" onmouseout="this.style.background='transparent';">
+        <div style="padding: 12px; cursor: pointer; border-radius: 8px; color: #ff6b6b; transition: all 0.2s;"
+            onclick="logout()" onmouseover="this.style.background='rgba(255,107,107,0.1)';"
+            onmouseout="this.style.background='transparent';">
             🚪 Cerrar Sesión
         </div>
     </div>
@@ -284,17 +303,17 @@
         function toggleUserMenu(event) {
             event.stopPropagation();
             const menu = document.getElementById('userMenu');
-            
+
             if (menu.style.display === 'none' || !menu.style.display) {
                 menu.style.display = 'block';
-                
+
                 // FORCE positioning - remove any inline styles that might interfere
                 menu.style.position = '';
                 menu.style.top = '';
                 menu.style.right = '';
                 menu.style.left = '';
                 menu.style.bottom = '';
-                
+
                 // Debug info
                 console.log('Menu opened');
                 console.log('Position:', window.getComputedStyle(menu).position);
@@ -305,13 +324,13 @@
                 menu.style.display = 'none';
             }
         }
-        
+
         // Close menu when clicking outside
         document.addEventListener('click', () => {
             const menu = document.getElementById('userMenu');
             if (menu) menu.style.display = 'none';
         });
-        
+
         // Ensure menu has correct positioning on page load
         document.addEventListener('DOMContentLoaded', () => {
             const menu = document.getElementById('userMenu');
@@ -324,12 +343,12 @@
                 menu.style.bottom = '';
             }
         });
-        
+
         // Debug function to check menu position
         function debugMenuPosition() {
             const menu = document.getElementById('userMenu');
             const styles = window.getComputedStyle(menu);
-            
+
             const info = `
 MENU DEBUG INFO:
 ================
@@ -349,17 +368,17 @@ Viewport Width: ${window.innerWidth}px
 Inline styles on element:
 ${menu.getAttribute('style')}
             `;
-            
+
             alert(info);
             console.log(info);
         }
-        
+
         // Function to navigate to user's profile/dashboard
         function goToMyProfile() {
             // El estudiante ya está en su dashboard, solo cerramos el menú
             const menu = document.getElementById('userMenu');
             if (menu) menu.style.display = 'none';
-            
+
             // Scroll to top para mostrar la información del perfil
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -372,7 +391,7 @@ ${menu.getAttribute('style')}
                 <h2 id="attendanceClassName">Clase</h2>
                 <button class="attendance-close-btn" onclick="closeAttendanceModal()">×</button>
             </div>
-            
+
             <!-- Estado: Esperando tarjeta -->
             <div class="attendance-waiting" id="attendanceWaiting">
                 <div class="rfid-card-animation">
@@ -381,14 +400,14 @@ ${menu.getAttribute('style')}
                 </div>
                 <h3>Pasa tu tarjeta RFID</h3>
                 <p>Acerca tu tarjeta al lector para registrar tu asistencia</p>
-                
+
                 <div class="loading-dots">
                     <span></span>
                     <span></span>
                     <span></span>
                 </div>
             </div>
-            
+
             <!-- Estado: Éxito -->
             <div class="attendance-success hidden" id="attendanceSuccess">
                 <div class="success-animation">
@@ -401,7 +420,7 @@ ${menu.getAttribute('style')}
                 <p class="success-time" id="attendanceTime">Hora</p>
                 <div class="confetti-container" id="confettiContainer"></div>
             </div>
-            
+
             <!-- Estado: Error -->
             <div class="attendance-error hidden" id="attendanceError">
                 <div class="error-animation">
@@ -413,7 +432,7 @@ ${menu.getAttribute('style')}
                     🔄 Reintentar
                 </button>
             </div>
-            
+
             <!-- Estado: Tarjeta Rechazada -->
             <div class="attendance-rejected hidden" id="attendanceRejected">
                 <div class="rejected-animation">
@@ -433,10 +452,11 @@ ${menu.getAttribute('style')}
             </div>
         </div>
     </div>
-    
+
     <!-- Load API version without Firebase -->
     <script src="/js/api-service.js?v=24"></script>
     <script src="/js/student-dashboard-api.js?v=109"></script>
     <script src="/js/student-attendance.js?v=13"></script>
 </body>
+
 </html>

@@ -1,0 +1,148 @@
+/* ============================================
+   MEJORAS AL LOGIN - BUTTON ANIMATIONS  
+   ============================================ */
+
+/* Button loading state */
+.primary-button.loading {
+    pointer-events: none;
+    animation: buttonPulse 1.5s ease-in-out infinite;
+}
+
+.primary-button.loading span {
+    opacity: 0.6;
+}
+
+/* Button success state */
+.primary-button.success {
+    background: linear-gradient(118deg, rgba(16, 225, 185, 0.96), rgba(0, 200, 140, 0.96));
+    animation: buttonSuccess 0.6s ease-out;
+}
+
+/* Hide button text when showing success */
+.primary-button.success span {
+    opacity: 0;
+}
+
+.primary-button.success::before {
+    content: '✓';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    color: white;
+    animation: checkmarkPop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    z-index: 10;
+}
+
+/* Button pressed animation */
+.primary-button.pressed {
+    transform: scale(0.97);
+    transition: transform 0.1s ease;
+}
+
+@keyframes buttonPulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.85;
+        transform: scale(0.98);
+    }
+}
+
+@keyframes buttonSuccess {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes checkmarkPop {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0);
+    }
+
+    50% {
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+/* ============================================
+   MEJORAS AL LOGIN - ERROR ANIMATIONS  
+   ============================================ */
+
+/* Intensified shake + pulse for errors */
+.input-container.invalid {
+    border-color: rgba(255, 120, 140, 0.9);
+    box-shadow: 0 0 0 3px rgba(255, 120, 140, 0.15),
+        inset 0 1px 0 rgba(255, 120, 140, 0.12),
+        0 12px 22px rgba(180, 50, 80, 0.08);
+    animation: shakeErrorIntense 0.5s ease, errorPulse 2s ease-in-out infinite;
+}
+
+@keyframes shakeErrorIntense {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
+        transform: translateX(-8px);
+    }
+
+    20%,
+    40%,
+    60%,
+    80% {
+        transform: translateX(8px);
+    }
+}
+
+@keyframes errorPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 3px rgba(255, 120, 140, 0.15),
+            inset 0 1px 0 rgba(255, 120, 140, 0.12),
+            0 12px 22px rgba(180, 50, 80, 0.08);
+    }
+
+    50% {
+        box-shadow: 0 0 0 5px rgba(255, 120, 140, 0.3),
+            inset 0 1px 0 rgba(255, 120, 140, 0.2),
+            0 12px 28px rgba(180, 50, 80, 0.15);
+    }
+}
+
+/* ============================================
+   MEJORAS AL LOGIN - LOADING OVERLAY  
+   ============================================ */
+
+.loading-overlay {
+    background: rgba(1, 26, 38, 0.65);
+    backdrop-filter: blur(16px);
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}

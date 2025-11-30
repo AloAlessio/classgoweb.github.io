@@ -1,0 +1,222 @@
+/* ============================================
+   LIQUID GLASS - iOS STYLE ENHANCEMENTS
+   Mejoras inspiradas en iOS 18+
+   ============================================ */
+
+/* Enhanced Glass Card with Intense Blur */
+.glass-card {
+    /* Blur ultra-intenso para efecto líquido */
+    backdrop-filter: blur(50px) saturate(200%) brightness(110%);
+    -webkit-backdrop-filter: blur(50px) saturate(200%) brightness(110%);
+
+    /* Gradiente más sutil y refinado */
+    background: linear-gradient(155deg,
+            rgba(0, 35, 54, 0.28),
+            rgba(4, 110, 128, 0.22) 42%,
+            rgba(12, 190, 182, 0.18) 100%);
+
+    /* Sombras multi-nivel para profundidad */
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.25),
+        0 32px 80px rgba(0, 26, 45, 0.4),
+        0 60px 120px rgba(0, 26, 45, 0.3),
+        0 0 0 0.5px rgba(255, 255, 255, 0.2) inset,
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+
+    /* Borde luminoso estilo iOS */
+    border: 0.5px solid rgba(255, 255, 255, 0.45);
+    border-top-color: rgba(255, 255, 255, 0.6);
+    border-left-color: rgba(255, 255, 255, 0.55);
+}
+
+/* Reflejo superior más intenso */
+.glass-card::before {
+    background: linear-gradient(165deg,
+            rgba(255, 255, 255, 0.5) 0%,
+            rgba(255, 255, 255, 0.15) 35%,
+            rgba(255, 255, 255, 0.02) 65%,
+            transparent 100%);
+    opacity: 0.75;
+}
+
+/* Aurora glow más sutil */
+.glass-card::after {
+    background: radial-gradient(circle at 50% 20%,
+            rgba(0, 255, 209, 0.12),
+            rgba(0, 180, 255, 0.08) 40%,
+            transparent 70%);
+    opacity: 0.5;
+}
+
+/* Input containers con efecto liquid glass */
+.input-container {
+    /* Blur intenso en inputs */
+    backdrop-filter: blur(25px) saturate(150%);
+    -webkit-backdrop-filter: blur(25px) saturate(150%);
+
+    /* Gradiente más suave */
+    background: linear-gradient(145deg,
+            rgba(255, 255, 255, 0.15),
+            rgba(0, 196, 214, 0.10));
+
+    /* Sombras profundas multi-nivel */
+    box-shadow:
+        0 2px 4px rgba(0, 0, 0, 0.1) inset,
+        0 1px 0 rgba(255, 255, 255, 0.4) inset,
+        0 12px 24px rgba(0, 45, 63, 0.25),
+        0 24px 48px rgba(0, 45, 63, 0.15);
+
+    /* Borde con efecto de vidrio */
+    border: 0.5px solid rgba(255, 255, 255, 0.5);
+    border-top-color: rgba(255, 255, 255, 0.65);
+}
+
+/* Reflejo dinámico en inputs */
+.input-container::after {
+    background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.3) 0%,
+            rgba(255, 255, 255, 0.1) 40%,
+            rgba(255, 255, 255, 0.02) 65%,
+            transparent 100%);
+    opacity: 0.8;
+}
+
+/* Focus state mejorado */
+.input-container.focused,
+.input-container:focus-within {
+    background: linear-gradient(145deg,
+            rgba(255, 255, 255, 0.22),
+            rgba(0, 220, 255, 0.18));
+
+    border-color: rgba(255, 255, 255, 0.7);
+    border-top-color: rgba(255, 255, 255, 0.85);
+
+    box-shadow:
+        0 2px 6px rgba(0, 220, 255, 0.15) inset,
+        0 1px 0 rgba(255, 255, 255, 0.5) inset,
+        0 12px 28px rgba(0, 170, 204, 0.35),
+        0 28px 56px rgba(0, 170, 204, 0.25),
+        0 0 20px rgba(0, 255, 255, 0.15);
+
+    transform: translateY(-1px);
+}
+
+/* Primary button con liquid glass effect */
+.primary-button {
+    /* Blur sutil en el botón */
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+
+    /* Sombras multi-nivel */
+    box-shadow:
+        0 2px 4px rgba(0, 0, 0, 0.1) inset,
+        0 1px 0 rgba(255, 255, 255, 0.4) inset,
+        0 20px 40px rgba(0, 160, 196, 0.4),
+        0 40px 80px rgba(0, 160, 196, 0.25),
+        0 0 30px rgba(0, 255, 255, 0.3);
+
+    /* Borde luminoso */
+    border: 0.5px solid rgba(255, 255, 255, 0.6);
+    border-top-color: rgba(255, 255, 255, 0.75);
+}
+
+.primary-button:hover {
+    backdrop-filter: blur(12px) saturate(200%);
+    -webkit-backdrop-filter: blur(12px) saturate(200%);
+
+    box-shadow:
+        0 2px 6px rgba(0, 0, 0, 0.15) inset,
+        0 1px 0 rgba(255, 255, 255, 0.5) inset,
+        0 24px 48px rgba(0, 196, 226, 0.45),
+        0 48px 96px rgba(0, 196, 226, 0.3),
+        0 0 40px rgba(0, 255, 255, 0.4);
+}
+
+/* Button overlay más suave */
+.button-overlay {
+    background: linear-gradient(95deg,
+            transparent,
+            rgba(255, 255, 255, 0.4) 30%,
+            rgba(255, 255, 255, 0.7) 50%,
+            rgba(255, 255, 255, 0.4) 70%,
+            transparent);
+    mix-blend-mode: overlay;
+}
+
+/* Loading overlay con liquid glass */
+.loading-overlay {
+    backdrop-filter: blur(30px) saturate(150%);
+    -webkit-backdrop-filter: blur(30px) saturate(150%);
+    background: rgba(1, 26, 38, 0.55);
+}
+
+/* Message container con efecto glass */
+.message {
+    backdrop-filter: blur(30px) saturate(160%);
+    -webkit-backdrop-filter: blur(30px) saturate(160%);
+
+    box-shadow:
+        0 8px 24px rgba(0, 48, 73, 0.35),
+        0 16px 48px rgba(0, 48, 73, 0.25),
+        0 0 0 0.5px rgba(255, 255, 255, 0.2) inset;
+
+    border: 0.5px solid rgba(255, 255, 255, 0.35);
+    border-top-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Form container con efecto profundo */
+.form-container {
+    backdrop-filter: blur(12px) saturate(140%);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+}
+
+/* Checkmark con liquid glass */
+.checkmark {
+    backdrop-filter: blur(15px) saturate(150%);
+    -webkit-backdrop-filter: blur(15px) saturate(150%);
+
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.15),
+        0 0 0 0.5px rgba(255, 255, 255, 0.25) inset;
+
+    border: 0.5px solid rgba(255, 255, 255, 0.4);
+}
+
+/* Secondary button con glass effect */
+.secondary-button {
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+
+    box-shadow:
+        0 8px 20px rgba(0, 0, 0, 0.15),
+        0 0 0 0.5px rgba(255, 255, 255, 0.15) inset;
+
+    border: 0.5px solid rgba(255, 255, 255, 0.35);
+}
+
+.secondary-button:hover {
+    backdrop-filter: blur(25px) saturate(160%);
+    -webkit-backdrop-filter: blur(25px) saturate(160%);
+
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Animación de aparición más suave */
+@keyframes cardSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px) scale(0.96);
+        filter: blur(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0px);
+    }
+}
+
+/* Mejora en transiciones globales */
+* {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}

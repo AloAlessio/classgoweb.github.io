@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,12 +13,14 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <meta name="description" content="Accede a ClassGo: plataforma educativa. Inicia sesión o crea una cuenta para acceder a tu espacio personal.">
+    <meta name="description"
+        content="Accede a ClassGo: plataforma educativa. Inicia sesión o crea una cuenta para acceder a tu espacio personal.">
     <meta property="og:title" content="ClassGo - Acceso">
     <meta property="og:description" content="Inicia sesión en ClassGo para acceder a tus cursos y material educativo.">
     <meta property="og:type" content="website">
     <meta property="og:image" content="/track.jpg">
     <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/liquid-glass-ios.css">
     <!-- Firebase JS SDK (compat) -->
     <!-- Firebase temporarily disabled to avoid CSP issues -->
     <!-- 
@@ -27,11 +30,12 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
     -->
 </head>
+
 <body>
     <!-- Background animated gradient -->
     <div class="bg-gradient"></div>
     <div class="bg-overlay"></div>
-    
+
     <!-- Floating elements for ambient effect -->
     <div class="floating-elements">
         <div class="floating-circle circle-1"></div>
@@ -46,13 +50,13 @@
         <div class="brand-container">
             <div class="brand-logo">
                 <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                    <rect width="40" height="40" rx="12" fill="url(#brandGradient)"/>
-                    <path d="M20 8L32 20L20 32L8 20L20 8Z" fill="white" fill-opacity="0.9"/>
+                    <rect width="40" height="40" rx="12" fill="url(#brandGradient)" />
+                    <path d="M20 8L32 20L20 32L8 20L20 8Z" fill="white" fill-opacity="0.9" />
                     <defs>
                         <linearGradient id="brandGradient" x1="0" y1="0" x2="40" y2="40">
-                            <stop offset="0" stop-color="#00f0ff"/>
-                            <stop offset="0.55" stop-color="#00cfff"/>
-                            <stop offset="1" stop-color="#00ffd6"/>
+                            <stop offset="0" stop-color="#00f0ff" />
+                            <stop offset="0.55" stop-color="#00cfff" />
+                            <stop offset="1" stop-color="#00ffd6" />
                         </linearGradient>
                     </defs>
                 </svg>
@@ -60,8 +64,8 @@
             <h1 class="brand-title">ClassGo</h1>
         </div>
 
-    <!-- Glass card container -->
-    <div class="glass-card hide-scrollbar">
+        <!-- Glass card container -->
+        <div class="glass-card hide-scrollbar">
             <!-- Login Form -->
             <div class="form-container active hide-scrollbar" id="loginForm">
                 <div class="form-header">
@@ -83,14 +87,18 @@
                         <div class="input-container password-field">
                             <input type="password" id="loginPassword" required autocomplete="new-password">
                             <label for="loginPassword">Contraseña</label>
-                            <button type="button" class="password-toggle" onclick="togglePassword('loginPassword')" aria-label="Mostrar contraseña">
-                                <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                                    <circle cx="12" cy="12" r="3"/>
+                            <button type="button" class="password-toggle" onclick="togglePassword('loginPassword')"
+                                aria-label="Mostrar contraseña">
+                                <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                    <circle cx="12" cy="12" r="3" />
                                 </svg>
-                                <svg class="eye-off-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="display: none;">
-                                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-                                    <line x1="1" y1="1" x2="23" y2="23"/>
+                                <svg class="eye-off-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" style="display: none;">
+                                    <path
+                                        d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                                    <line x1="1" y1="1" x2="23" y2="23" />
                                 </svg>
                             </button>
                             <div class="field-error" id="error-loginPassword" aria-live="polite"></div>
@@ -154,14 +162,18 @@
                         <div class="input-container password-field">
                             <input type="password" id="registerPassword" required autocomplete="new-password">
                             <label for="registerPassword">Contraseña</label>
-                            <button type="button" class="password-toggle" onclick="togglePassword('registerPassword')" aria-label="Mostrar contraseña">
-                                <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                                    <circle cx="12" cy="12" r="3"/>
+                            <button type="button" class="password-toggle" onclick="togglePassword('registerPassword')"
+                                aria-label="Mostrar contraseña">
+                                <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                    <circle cx="12" cy="12" r="3" />
                                 </svg>
-                                <svg class="eye-off-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="display: none;">
-                                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-                                    <line x1="1" y1="1" x2="23" y2="23"/>
+                                <svg class="eye-off-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" style="display: none;">
+                                    <path
+                                        d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                                    <line x1="1" y1="1" x2="23" y2="23" />
                                 </svg>
                             </button>
                             <div class="field-error" id="error-registerPassword" aria-live="polite"></div>
@@ -178,14 +190,18 @@
                         <div class="input-container password-field">
                             <input type="password" id="confirmPassword" required autocomplete="new-password">
                             <label for="confirmPassword">Confirmar contraseña</label>
-                            <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword')" aria-label="Mostrar contraseña">
-                                <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                                    <circle cx="12" cy="12" r="3"/>
+                            <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword')"
+                                aria-label="Mostrar contraseña">
+                                <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                    <circle cx="12" cy="12" r="3" />
                                 </svg>
-                                <svg class="eye-off-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="display: none;">
-                                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-                                    <line x1="1" y1="1" x2="23" y2="23"/>
+                                <svg class="eye-off-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" style="display: none;">
+                                    <path
+                                        d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                                    <line x1="1" y1="1" x2="23" y2="23" />
                                 </svg>
                             </button>
                             <div class="field-error" id="error-confirmPassword" aria-live="polite"></div>
@@ -199,7 +215,8 @@
                             <span class="checkmark"></span>
                             Acepto los términos y condiciones
                         </label>
-                        <div class="field-error" id="error-acceptTerms" aria-live="polite" style="margin-left:0.5rem; width:100%"></div>
+                        <div class="field-error" id="error-acceptTerms" aria-live="polite"
+                            style="margin-left:0.5rem; width:100%"></div>
                         </label>
                     </div>
 
@@ -251,13 +268,17 @@
         <div class="message-container" id="messageContainer">
             <div class="message success" id="successMessage">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                    <path fill-rule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clip-rule="evenodd" />
                 </svg>
                 <span id="successText"></span>
             </div>
             <div class="message error" id="errorMessage">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                    <path fill-rule="evenodd"
+                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                        clip-rule="evenodd" />
                 </svg>
                 <span id="errorText"></span>
             </div>
@@ -277,4 +298,5 @@
     <script src="/js/navigation.js"></script>
     <script src="/js/app.js"></script>
 </body>
+
 </html>

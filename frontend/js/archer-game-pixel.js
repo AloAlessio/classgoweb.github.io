@@ -13,6 +13,510 @@ let currentQuestionIndex = 0;
 let canShoot = true; // Controls if player can shoot
 let isPaused = false;
 
+// =====================================================
+// 🔊 SOUND SYSTEM - 8-bit Retro Sounds (Web Audio API)
+// =====================================================
+let audioContext = null;
+let soundEnabled = true;
+let musicEnabled = true;
+let masterVolume = 0.5;
+let bgMusicOscillator = null;
+let bgMusicGain = null;
+
+// Initialize Audio Context (must be called after user interaction)
+function initAudioContext() {
+    if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
+}
+
+// Play a retro 8-bit beep sound
+function playTone(frequency, duration, type = 'square', volume = 0.3) {
+    if (!soundEnabled || !audioContext) return;
+    
+    try {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.type = type;
+        oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+        
+        gainNode.gain.setValueAtTime(volume * masterVolume, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + duration);
+    } catch (e) {
+        console.log('Audio error:', e);
+    }
+}
+
+// 🏹 Arrow Shoot Sound - Quick whoosh
+function playSoundShoot() {
+    if (!soundEnabled || !audioContext) return;
+    
+    try {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.type = 'sawtooth';
+        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.15);
+        
+        gainNode.gain.setValueAtTime(0.2 * masterVolume, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.15);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.15);
+    } catch (e) {}
+}
+
+// ✅ Correct Answer Sound - Happy ascending melody
+function playSoundCorrect() {
+    if (!soundEnabled || !audioContext) return;
+    
+    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+    notes.forEach((freq, i) => {
+        setTimeout(() => playTone(freq, 0.15, 'square', 0.25), i * 80);
+    });
+}
+
+// ❌ Wrong Answer Sound - Sad descending buzzer
+function playSoundWrong() {
+    if (!soundEnabled || !audioContext) return;
+    
+    try {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.type = 'sawtooth';
+        oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.4);
+        
+        gainNode.gain.setValueAtTime(0.25 * masterVolume, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.4);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.4);
+    } catch (e) {}
+}
+
+// 🎯 Target Hit Sound - Impact thud
+function playSoundHit() {
+    if (!soundEnabled || !audioContext) return;
+    
+    try {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.type = 'triangle';
+        oscillator.frequency.setValueAtTime(150, audioContext.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(50, audioContext.currentTime + 0.1);
+        
+        gainNode.gain.setValueAtTime(0.4 * masterVolume, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.1);
+    } catch (e) {}
+}
+
+// 🔥 Combo Sound - Exciting rising tone
+function playSoundCombo(comboLevel) {
+    if (!soundEnabled || !audioContext) return;
+    
+    const baseFreq = 400 + (comboLevel * 50);
+    const notes = [baseFreq, baseFreq * 1.25, baseFreq * 1.5];
+    
+    notes.forEach((freq, i) => {
+        setTimeout(() => playTone(freq, 0.1, 'square', 0.2), i * 50);
+    });
+}
+
+// ⏰ Timer Warning Sound - Urgent beeps
+function playSoundTimerWarning() {
+    if (!soundEnabled || !audioContext) return;
+    playTone(880, 0.1, 'square', 0.15);
+}
+
+// 🎮 Game Start Sound - Fanfare
+function playSoundGameStart() {
+    if (!soundEnabled || !audioContext) return;
+    
+    const notes = [392, 523.25, 659.25, 783.99]; // G4, C5, E5, G5
+    notes.forEach((freq, i) => {
+        setTimeout(() => playTone(freq, 0.2, 'square', 0.25), i * 120);
+    });
+}
+
+// 🏆 Game Over Sound - Dramatic ending
+function playSoundGameOver() {
+    if (!soundEnabled || !audioContext) return;
+    
+    const notes = [523.25, 392, 329.63, 261.63]; // C5, G4, E4, C4 (descending)
+    notes.forEach((freq, i) => {
+        setTimeout(() => playTone(freq, 0.3, 'triangle', 0.3), i * 200);
+    });
+}
+
+// 🎉 Victory Sound - Triumphant melody
+function playSoundVictory() {
+    if (!soundEnabled || !audioContext) return;
+    
+    const melody = [
+        { freq: 523.25, dur: 0.15 }, // C5
+        { freq: 523.25, dur: 0.15 }, // C5
+        { freq: 523.25, dur: 0.15 }, // C5
+        { freq: 523.25, dur: 0.4 },  // C5 (held)
+        { freq: 415.30, dur: 0.15 }, // Ab4
+        { freq: 466.16, dur: 0.15 }, // Bb4
+        { freq: 523.25, dur: 0.4 },  // C5
+        { freq: 466.16, dur: 0.15 }, // Bb4
+        { freq: 523.25, dur: 0.5 }   // C5 (final)
+    ];
+    
+    let time = 0;
+    melody.forEach(note => {
+        setTimeout(() => playTone(note.freq, note.dur, 'square', 0.25), time);
+        time += note.dur * 600;
+    });
+}
+
+// 🔘 Button Click Sound
+function playSoundClick() {
+    if (!soundEnabled || !audioContext) return;
+    playTone(600, 0.05, 'square', 0.15);
+}
+
+// ⏸️ Pause Sound
+function playSoundPause() {
+    if (!soundEnabled || !audioContext) return;
+    playTone(400, 0.1, 'triangle', 0.2);
+    setTimeout(() => playTone(300, 0.15, 'triangle', 0.15), 100);
+}
+
+// ▶️ Resume Sound
+function playSoundResume() {
+    if (!soundEnabled || !audioContext) return;
+    playTone(300, 0.1, 'triangle', 0.2);
+    setTimeout(() => playTone(400, 0.15, 'triangle', 0.15), 100);
+}
+
+// 🎵 Background Music - African Festival Style (8-bit original)
+// Inspired by festive African rhythms - upbeat, percussive, celebratory!
+let musicInterval = null;
+
+function startBackgroundMusic() {
+    if (!musicEnabled || !audioContext) return;
+    stopBackgroundMusic(); // Stop any existing music
+    musicEnabled = true;
+    
+    try {
+        bgMusicGain = audioContext.createGain();
+        bgMusicGain.connect(audioContext.destination);
+        bgMusicGain.gain.setValueAtTime(0.12 * masterVolume, audioContext.currentTime);
+        
+        // Play a melodic note with envelope
+        const playMelody = (freq, startTime, duration, type = 'square', vol = 0.25) => {
+            const osc = audioContext.createOscillator();
+            const noteGain = audioContext.createGain();
+            
+            osc.connect(noteGain);
+            noteGain.connect(bgMusicGain);
+            
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, startTime);
+            
+            noteGain.gain.setValueAtTime(vol, startTime);
+            noteGain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+            
+            osc.start(startTime);
+            osc.stop(startTime + duration);
+        };
+        
+        // African percussion - djembe-like hits
+        const playDrum = (startTime, isAccent = false) => {
+            const osc = audioContext.createOscillator();
+            const drumGain = audioContext.createGain();
+            
+            osc.connect(drumGain);
+            drumGain.connect(bgMusicGain);
+            
+            osc.type = 'triangle';
+            const baseFreq = isAccent ? 120 : 80;
+            osc.frequency.setValueAtTime(baseFreq, startTime);
+            osc.frequency.exponentialRampToValueAtTime(40, startTime + 0.1);
+            
+            const vol = isAccent ? 0.5 : 0.35;
+            drumGain.gain.setValueAtTime(vol, startTime);
+            drumGain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.15);
+            
+            osc.start(startTime);
+            osc.stop(startTime + 0.15);
+        };
+        
+        // High percussion - shaker/hi-hat style
+        const playShaker = (startTime) => {
+            const bufferSize = audioContext.sampleRate * 0.05;
+            const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+            const data = buffer.getChannelData(0);
+            
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = (Math.random() * 2 - 1) * 0.3;
+            }
+            
+            const noise = audioContext.createBufferSource();
+            const noiseGain = audioContext.createGain();
+            const filter = audioContext.createBiquadFilter();
+            
+            noise.buffer = buffer;
+            filter.type = 'highpass';
+            filter.frequency.value = 5000;
+            
+            noise.connect(filter);
+            filter.connect(noiseGain);
+            noiseGain.connect(bgMusicGain);
+            
+            noiseGain.gain.setValueAtTime(0.15, startTime);
+            noiseGain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.05);
+            
+            noise.start(startTime);
+            noise.stop(startTime + 0.05);
+        };
+        
+        // ============================================
+        // 🌍 AFRICAN FESTIVAL MELODY - Original 8-bit
+        // Key: A minor / C major feel - uplifting & festive
+        // ============================================
+        
+        // Main melody notes (frequencies)
+        const A4 = 440.00, B4 = 493.88, C5 = 523.25, D5 = 587.33, E5 = 659.25;
+        const F5 = 698.46, G5 = 783.99, A5 = 880.00;
+        const G4 = 392.00, E4 = 329.63, C4 = 261.63, D4 = 293.66;
+        
+        // Festive African-style melody pattern (original composition)
+        // Energetic, call-and-response feel, ascending triumphant phrases
+        const melodyPattern = [
+            // Bar 1 - Uplifting call (Tsamina mina feel - rising energy)
+            { note: E4, time: 0.00, dur: 0.15 },
+            { note: G4, time: 0.15, dur: 0.15 },
+            { note: A4, time: 0.30, dur: 0.20 },
+            { note: A4, time: 0.55, dur: 0.10 },
+            { note: G4, time: 0.70, dur: 0.15 },
+            { note: A4, time: 0.85, dur: 0.25 },
+            
+            // Bar 2 - Response (celebratory answer)
+            { note: C5, time: 1.15, dur: 0.15 },
+            { note: C5, time: 1.30, dur: 0.10 },
+            { note: B4, time: 0.45, dur: 0.15 },
+            { note: A4, time: 1.55, dur: 0.20 },
+            { note: G4, time: 1.80, dur: 0.30 },
+            
+            // Bar 3 - Building energy (this time for Africa feel)
+            { note: A4, time: 2.20, dur: 0.12 },
+            { note: A4, time: 2.35, dur: 0.12 },
+            { note: C5, time: 2.50, dur: 0.15 },
+            { note: D5, time: 2.70, dur: 0.15 },
+            { note: E5, time: 2.90, dur: 0.25 },
+            
+            // Bar 4 - Triumphant resolution
+            { note: D5, time: 3.20, dur: 0.15 },
+            { note: C5, time: 3.40, dur: 0.15 },
+            { note: A4, time: 3.60, dur: 0.30 },
+            { note: G4, time: 3.95, dur: 0.20 },
+            
+            // Bar 5 - Repeat call with variation
+            { note: E4, time: 4.20, dur: 0.12 },
+            { note: E4, time: 4.35, dur: 0.12 },
+            { note: G4, time: 4.50, dur: 0.15 },
+            { note: A4, time: 4.70, dur: 0.25 },
+            { note: C5, time: 5.00, dur: 0.15 },
+            { note: A4, time: 5.20, dur: 0.20 },
+            
+            // Bar 6 - Energetic response
+            { note: G4, time: 5.45, dur: 0.10 },
+            { note: A4, time: 5.60, dur: 0.10 },
+            { note: C5, time: 5.75, dur: 0.20 },
+            { note: D5, time: 6.00, dur: 0.30 },
+            
+            // Bar 7 - Peak celebration
+            { note: E5, time: 6.35, dur: 0.15 },
+            { note: E5, time: 6.55, dur: 0.15 },
+            { note: D5, time: 6.75, dur: 0.15 },
+            { note: C5, time: 6.95, dur: 0.20 },
+            
+            // Bar 8 - Resolve to home
+            { note: A4, time: 7.20, dur: 0.20 },
+            { note: G4, time: 7.45, dur: 0.15 },
+            { note: A4, time: 7.65, dur: 0.35 }
+        ];
+        
+        // African drum pattern - syncopated, driving rhythm
+        const drumPattern = [
+            // Strong beats with syncopation (djembe-style)
+            { time: 0.00, accent: true },
+            { time: 0.25, accent: false },
+            { time: 0.40, accent: false },
+            { time: 0.55, accent: true },
+            { time: 0.85, accent: false },
+            
+            { time: 1.00, accent: true },
+            { time: 1.25, accent: false },
+            { time: 1.55, accent: true },
+            { time: 1.70, accent: false },
+            { time: 1.85, accent: false },
+            
+            { time: 2.00, accent: true },
+            { time: 2.30, accent: false },
+            { time: 2.55, accent: true },
+            { time: 2.70, accent: false },
+            { time: 2.85, accent: false },
+            
+            { time: 3.00, accent: true },
+            { time: 3.25, accent: false },
+            { time: 3.55, accent: true },
+            { time: 3.85, accent: false },
+            
+            { time: 4.00, accent: true },
+            { time: 4.25, accent: false },
+            { time: 4.40, accent: false },
+            { time: 4.55, accent: true },
+            { time: 4.85, accent: false },
+            
+            { time: 5.00, accent: true },
+            { time: 5.30, accent: false },
+            { time: 5.55, accent: true },
+            { time: 5.70, accent: false },
+            { time: 5.85, accent: false },
+            
+            { time: 6.00, accent: true },
+            { time: 6.25, accent: false },
+            { time: 6.55, accent: true },
+            { time: 6.85, accent: false },
+            
+            { time: 7.00, accent: true },
+            { time: 7.30, accent: false },
+            { time: 7.55, accent: true },
+            { time: 7.85, accent: false }
+        ];
+        
+        // Shaker pattern - constant 8th notes for energy
+        const shakerTimes = [];
+        for (let t = 0; t < 8; t += 0.2) {
+            shakerTimes.push(t);
+        }
+        
+        const patternLength = 8.0; // 8 seconds per loop
+        
+        const playFullPattern = () => {
+            if (!musicEnabled || gameState !== 'playing') return;
+            
+            const now = audioContext.currentTime;
+            
+            // Play melody
+            melodyPattern.forEach(m => {
+                playMelody(m.note, now + m.time, m.dur, 'square', 0.22);
+            });
+            
+            // Play bass line (lower octave accents)
+            [0, 1, 2, 3, 4, 5, 6, 7].forEach(bar => {
+                playMelody(110, now + bar, 0.2, 'triangle', 0.3); // A2 bass
+                playMelody(130.81, now + bar + 0.5, 0.15, 'triangle', 0.25); // C3
+            });
+            
+            // Play drums
+            drumPattern.forEach(d => {
+                playDrum(now + d.time, d.accent);
+            });
+            
+            // Play shaker
+            shakerTimes.forEach(t => {
+                playShaker(now + t);
+            });
+            
+            // Schedule next loop
+            musicInterval = setTimeout(playFullPattern, patternLength * 1000);
+        };
+        
+        playFullPattern();
+        
+    } catch (e) {
+        console.log('Music error:', e);
+    }
+}
+
+function stopBackgroundMusic() {
+    musicEnabled = false;
+    if (musicInterval) {
+        clearTimeout(musicInterval);
+        musicInterval = null;
+    }
+    if (bgMusicGain) {
+        try {
+            bgMusicGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
+        } catch (e) {}
+    }
+}
+
+// Toggle sound effects
+function toggleSound() {
+    soundEnabled = !soundEnabled;
+    if (soundEnabled) {
+        initAudioContext();
+        playSoundClick();
+    }
+    updateSoundButton();
+    return soundEnabled;
+}
+
+// Toggle background music
+function toggleMusic() {
+    musicEnabled = !musicEnabled;
+    if (musicEnabled && gameState === 'playing') {
+        startBackgroundMusic();
+    } else {
+        stopBackgroundMusic();
+    }
+    updateMusicButton();
+    return musicEnabled;
+}
+
+// Update UI buttons for sound controls
+function updateSoundButton() {
+    const btn = document.getElementById('soundToggle');
+    if (btn) {
+        btn.textContent = soundEnabled ? '🔊' : '🔇';
+        btn.title = soundEnabled ? 'Silenciar efectos' : 'Activar efectos';
+    }
+}
+
+function updateMusicButton() {
+    const btn = document.getElementById('musicToggle');
+    if (btn) {
+        btn.textContent = musicEnabled ? '🎵' : '🎵❌';
+        btn.title = musicEnabled ? 'Silenciar música' : 'Activar música';
+    }
+}
+
+// =====================================================
+// END SOUND SYSTEM
+// =====================================================
+
 // Game settings
 let classSubject = 'General';
 let difficulty = 'medium';
@@ -211,6 +715,10 @@ function selectCharacter(index) {
     // Ignore locked characters
     if (index > 2) return;
     
+    // Play click sound
+    initAudioContext();
+    playSoundClick();
+    
     // Update selected character
     currentCharacter = index;
     
@@ -226,6 +734,10 @@ function selectCharacter(index) {
 }
 
 function startGame() {
+    // Initialize audio and play start sound
+    initAudioContext();
+    playSoundGameStart();
+    
     document.getElementById('startScreen').style.display = 'none';
     gameState = 'playing';
     isPaused = false;
@@ -240,6 +752,9 @@ function startGame() {
     arrows = [];
     particles = [];
     
+    // Enable music for gameplay
+    musicEnabled = true;
+    
     updateScore();
     loadNextQuestion();
     gameLoop();
@@ -251,8 +766,12 @@ function togglePause() {
     isPaused = !isPaused;
     
     if (isPaused) {
+        // Play pause sound
+        playSoundPause();
+        
         // Pause the game
         clearInterval(timerInterval);
+        stopBackgroundMusic();
         
         // Update pause screen stats
         document.getElementById('pauseScore').textContent = score;
@@ -261,7 +780,11 @@ function togglePause() {
         
         document.getElementById('pauseOverlay').classList.add('active');
     } else {
+        // Play resume sound
+        playSoundResume();
+        
         // Resume the game
+        musicEnabled = true;
         startTimer();
         document.getElementById('pauseOverlay').classList.remove('active');
         gameLoop();
@@ -1732,6 +2255,9 @@ function shootArrow(event) {
         trail: []
     });
     
+    // Play shoot sound
+    playSoundShoot();
+    
     // Shoot animation
     createShootParticles(arrowX, arrowY);
 }
@@ -1750,6 +2276,7 @@ function updateArrows() {
         targets.forEach(target => {
             if (!target.hit && checkCollision(arrow, target)) {
                 target.hit = true;
+                playSoundHit(); // Play hit sound
                 handleAnswer(target.optionIndex);
                 createHitParticles(target.x, target.y, target.color.rings[0]);
                 arrows.splice(index, 1);
@@ -1816,12 +2343,21 @@ function handleAnswer(optionIndex) {
     canShoot = false;
     
     if (isCorrect) {
+        // Play correct sound with combo
+        playSoundCorrect();
+        if (combo >= 2) {
+            setTimeout(() => playSoundCombo(combo), 300);
+        }
+        
         correctAnswers++;
         score += 100 * combo;
         combo++;
         if (combo > bestCombo) bestCombo = combo;
         showFeedback('¡CORRECTO! +' + (100 * (combo - 1)), '#4CAF50');
     } else {
+        // Play wrong sound
+        playSoundWrong();
+        
         combo = 1;
         showFeedback('✗ INCORRECTO', '#FF5252');
     }
@@ -1898,10 +2434,14 @@ function startTimer() {
         const percentage = (timeLeft / timeLimit) * 100;
         timerFill.style.width = percentage + '%';
         
-        // Color changes
+        // Color changes and warning sound
         if (percentage <= 25) {
             timerFill.style.background = 'linear-gradient(90deg, #FF5252 0%, #FF8A80 100%)';
             timerFill.style.boxShadow = '0 0 15px rgba(255, 82, 82, 0.8)';
+            // Play warning beep for last 3 seconds
+            if (timeLeft <= 3 && timeLeft > 0) {
+                playSoundTimerWarning();
+            }
         } else if (percentage <= 50) {
             timerFill.style.background = 'linear-gradient(90deg, #FFD93D 0%, #FFE066 100%)';
             timerFill.style.boxShadow = '0 0 12px rgba(255, 217, 61, 0.6)';
@@ -1933,9 +2473,17 @@ function updateScore() {
 async function endGame() {
     gameState = 'gameover';
     clearInterval(timerInterval);
+    stopBackgroundMusic();
     
     // Calculate accuracy percentage
     const accuracy = Math.round((correctAnswers / totalQuestions) * 100);
+    
+    // Play appropriate end sound based on performance
+    if (accuracy >= 70) {
+        playSoundVictory();
+    } else {
+        playSoundGameOver();
+    }
     
     // Calculate grade on a 0-10 scale based on accuracy
     // 0-59% = 0-5.9, 60-100% = 6-10
@@ -2180,43 +2728,66 @@ function generateQuestions() {
     console.log('Class subject:', classSubject);
     console.log('Difficulty:', difficulty);
     
-    // Expanded subject mapping for all categories
+    // MAPEO EXACTO - Cada tema tiene su propia categoría exclusiva
     const subjectKeywords = {
+        // Ciencias (solo ciencias generales)
+        'ciencias': 'Ciencias',
+        'ciencia': 'Ciencias',
+        'science': 'Ciencias',
+        'sciences': 'Ciencias',
+        
+        // Astronomía (EXCLUSIVO)
+        'astronomía': 'Astronomía',
+        'astronomia': 'Astronomía',
+        'astronomy': 'Astronomía',
+        
+        // Biología (EXCLUSIVO)
+        'biología': 'Biología',
+        'biologia': 'Biología',
+        'biology': 'Biología',
+        
+        // Química (EXCLUSIVO)
+        'química': 'Química',
+        'quimica': 'Química',
+        'chemistry': 'Química',
+        
+        // Física (mantener bajo ciencias por ahora)
+        'física': 'Ciencias',
+        'fisica': 'Ciencias',
+        'physics': 'Ciencias',
+        
+        // Arte (EXCLUSIVO - sin música)
+        'arte': 'Arte',
+        'art': 'Arte',
+        'pintura': 'Arte',
+        'dibujo': 'Arte',
+        
+        // Música (EXCLUSIVO)
+        'música': 'Música',
+        'musica': 'Música',
+        'music': 'Música',
+        
+        // Inglés (EXCLUSIVO)
+        'inglés': 'Inglés',
+        'ingles': 'Inglés',
+        'english': 'Inglés',
+        
+        // Francés (EXCLUSIVO)
+        'francés': 'Francés',
+        'frances': 'Francés',
+        'french': 'Francés',
+        
         // Matemáticas
         'matemáticas': 'Matemáticas',
         'matematicas': 'Matemáticas',
         'math': 'Matemáticas',
+        'mathematics': 'Matemáticas',
         'álgebra': 'Matemáticas',
         'algebra': 'Matemáticas',
         'geometría': 'Matemáticas',
         'geometria': 'Matemáticas',
         'cálculo': 'Matemáticas',
         'calculo': 'Matemáticas',
-        
-        // Ciencias (General)
-        'ciencias': 'Ciencias',
-        'ciencia': 'Ciencias',
-        'science': 'Ciencias',
-        
-        // Biología
-        'biología': 'Ciencias',
-        'biologia': 'Ciencias',
-        'biology': 'Ciencias',
-        
-        // Física
-        'física': 'Ciencias',
-        'fisica': 'Ciencias',
-        'physics': 'Ciencias',
-        
-        // Química
-        'química': 'Ciencias',
-        'quimica': 'Ciencias',
-        'chemistry': 'Ciencias',
-        
-        // Astronomía
-        'astronomía': 'Ciencias',
-        'astronomia': 'Ciencias',
-        'astronomy': 'Ciencias',
         
         // Historia
         'historia': 'Historia',
@@ -2227,28 +2798,6 @@ function generateQuestions() {
         'geografia': 'Geografía',
         'geography': 'Geografía',
         
-        // Idiomas (Inglés)
-        'inglés': 'Idiomas',
-        'ingles': 'Idiomas',
-        'english': 'Idiomas',
-        'idiomas': 'Idiomas',
-        'languages': 'Idiomas',
-        
-        // Francés
-        'francés': 'Idiomas',
-        'frances': 'Idiomas',
-        'french': 'Idiomas',
-        
-        // Español
-        'español': 'Idiomas',
-        'espanol': 'Idiomas',
-        'spanish': 'Idiomas',
-        
-        // Alemán
-        'alemán': 'Idiomas',
-        'aleman': 'Idiomas',
-        'german': 'Idiomas',
-        
         // Programación
         'programación': 'Programación',
         'programacion': 'Programación',
@@ -2257,18 +2806,7 @@ function generateQuestions() {
         'informatica': 'Programación',
         'tecnología': 'Programación',
         'tecnologia': 'Programación',
-        'coding': 'Programación',
-        
-        // Arte
-        'arte': 'Arte',
-        'art': 'Arte',
-        'pintura': 'Arte',
-        'dibujo': 'Arte',
-        
-        // Música
-        'música': 'Arte',
-        'musica': 'Arte',
-        'music': 'Arte'
+        'coding': 'Programación'
     };
     
     // Try to match class name to a subject
@@ -2585,6 +3123,246 @@ function getQuestionBank() {
         { subject: 'Arte', difficulty: 'hard', question: '¿Quién creó los "ready-made"?', options: ['Picasso', 'Duchamp', 'Warhol', 'Pollock'], correctAnswer: 1 },
         { subject: 'Arte', difficulty: 'hard', question: '¿Qué es el action painting?', options: ['Pintura gestual', 'Pintura realista', 'Pintura digital', 'Pintura abstracta'], correctAnswer: 0 },
         { subject: 'Arte', difficulty: 'hard', question: '¿Quién pintó "Composición con rojo, amarillo y azul"?', options: ['Kandinsky', 'Mondrian', 'Malevich', 'Rothko'], correctAnswer: 1 },
-        { subject: 'Arte', difficulty: 'hard', question: '¿Qué es el divisionismo?', options: ['Puntos de color', 'Líneas', 'Formas geométricas', 'Manchas'], correctAnswer: 0 }
+        { subject: 'Arte', difficulty: 'hard', question: '¿Qué es el divisionismo?', options: ['Puntos de color', 'Líneas', 'Formas geométricas', 'Manchas'], correctAnswer: 0 },
+        
+        // =====================================================
+        // ASTRONOMÍA - PREGUNTAS EXCLUSIVAS
+        // =====================================================
+        
+        // Astronomía - Fácil
+        { subject: 'Astronomía', difficulty: 'easy', question: '¿Cuál es el planeta más cercano al Sol?', options: ['Venus', 'Mercurio', 'Tierra', 'Marte'], correctAnswer: 1 },
+        { subject: 'Astronomía', difficulty: 'easy', question: '¿Cuántos planetas tiene el Sistema Solar?', options: ['7', '8', '9', '10'], correctAnswer: 1 },
+        { subject: 'Astronomía', difficulty: 'easy', question: '¿Qué estrella está más cerca de la Tierra?', options: ['Sirio', 'El Sol', 'Alfa Centauri', 'Vega'], correctAnswer: 1 },
+        { subject: 'Astronomía', difficulty: 'easy', question: '¿Cuál es el satélite natural de la Tierra?', options: ['Fobos', 'La Luna', 'Europa', 'Titán'], correctAnswer: 1 },
+        { subject: 'Astronomía', difficulty: 'easy', question: '¿Qué planeta es conocido como el planeta rojo?', options: ['Venus', 'Júpiter', 'Marte', 'Saturno'], correctAnswer: 2 },
+        { subject: 'Astronomía', difficulty: 'easy', question: '¿Qué planeta tiene anillos visibles?', options: ['Júpiter', 'Saturno', 'Urano', 'Neptuno'], correctAnswer: 1 },
+        { subject: 'Astronomía', difficulty: 'easy', question: '¿Cuál es el planeta más grande del Sistema Solar?', options: ['Saturno', 'Júpiter', 'Urano', 'Neptuno'], correctAnswer: 1 },
+        { subject: 'Astronomía', difficulty: 'easy', question: '¿Qué causa las fases de la Luna?', options: ['Eclipses', 'Posición respecto al Sol', 'Nubes', 'Rotación'], correctAnswer: 1 },
+        { subject: 'Astronomía', difficulty: 'easy', question: '¿Cuánto tarda la Tierra en dar una vuelta al Sol?', options: ['30 días', '365 días', '24 horas', '7 días'], correctAnswer: 1 },
+        { subject: 'Astronomía', difficulty: 'easy', question: '¿Qué es una constelación?', options: ['Un planeta', 'Grupo de estrellas', 'Un satélite', 'Un cometa'], correctAnswer: 1 },
+        
+        // Astronomía - Media
+        { subject: 'Astronomía', difficulty: 'medium', question: '¿Cuál es la galaxia más cercana a la Vía Láctea?', options: ['Andrómeda', 'Triángulo', 'Sombrero', 'Remolino'], correctAnswer: 0 },
+        { subject: 'Astronomía', difficulty: 'medium', question: '¿Qué es un año luz?', options: ['Tiempo', 'Distancia', 'Velocidad', 'Energía'], correctAnswer: 1 },
+        { subject: 'Astronomía', difficulty: 'medium', question: '¿Cuántas lunas tiene Júpiter aproximadamente?', options: ['16', '53', '79', '95'], correctAnswer: 3 },
+        { subject: 'Astronomía', difficulty: 'medium', question: '¿Qué planeta rota sobre su lado?', options: ['Venus', 'Urano', 'Neptuno', 'Saturno'], correctAnswer: 1 },
+        { subject: 'Astronomía', difficulty: 'medium', question: '¿Qué es un eclipse solar?', options: ['Luna entre Sol y Tierra', 'Tierra entre Sol y Luna', 'Sol entre Tierra y Luna', 'Alineación de planetas'], correctAnswer: 0 },
+        { subject: 'Astronomía', difficulty: 'medium', question: '¿Cuál es la luna más grande de nuestro Sistema Solar?', options: ['Luna', 'Europa', 'Ganímedes', 'Titán'], correctAnswer: 2 },
+        { subject: 'Astronomía', difficulty: 'medium', question: '¿Qué es el cinturón de asteroides?', options: ['Anillo de Saturno', 'Zona entre Marte y Júpiter', 'Lluvia de meteoros', 'Órbita de cometas'], correctAnswer: 1 },
+        { subject: 'Astronomía', difficulty: 'medium', question: '¿Qué tipo de estrella es el Sol?', options: ['Gigante roja', 'Enana blanca', 'Enana amarilla', 'Supergigante'], correctAnswer: 2 },
+        { subject: 'Astronomía', difficulty: 'medium', question: '¿Cuánto tarda la luz del Sol en llegar a la Tierra?', options: ['1 segundo', '8 minutos', '1 hora', '1 día'], correctAnswer: 1 },
+        { subject: 'Astronomía', difficulty: 'medium', question: '¿Qué planeta tiene la Gran Mancha Roja?', options: ['Marte', 'Júpiter', 'Saturno', 'Neptuno'], correctAnswer: 1 },
+        
+        // Astronomía - Difícil
+        { subject: 'Astronomía', difficulty: 'hard', question: '¿Qué es una enana blanca?', options: ['Planeta pequeño', 'Estrella en muerte', 'Asteroide', 'Agujero negro pequeño'], correctAnswer: 1 },
+        { subject: 'Astronomía', difficulty: 'hard', question: '¿Cuál es la temperatura del núcleo del Sol?', options: ['1 millón °C', '5 millones °C', '15 millones °C', '100 millones °C'], correctAnswer: 2 },
+        { subject: 'Astronomía', difficulty: 'hard', question: '¿Qué es la materia oscura?', options: ['Agujeros negros', 'Materia invisible que afecta gravedad', 'Polvo cósmico', 'Antimateria'], correctAnswer: 1 },
+        { subject: 'Astronomía', difficulty: 'hard', question: '¿Qué es una supernova?', options: ['Estrella naciente', 'Explosión estelar', 'Galaxia pequeña', 'Planeta gaseoso'], correctAnswer: 1 },
+        { subject: 'Astronomía', difficulty: 'hard', question: '¿Cuántas estrellas tiene la Vía Láctea aproximadamente?', options: ['1 millón', '100 millones', '100-400 mil millones', '1 billón'], correctAnswer: 2 },
+        { subject: 'Astronomía', difficulty: 'hard', question: '¿Qué es un púlsar?', options: ['Estrella giratoria que emite radiación', 'Tipo de cometa', 'Galaxia activa', 'Nebulosa'], correctAnswer: 0 },
+        { subject: 'Astronomía', difficulty: 'hard', question: '¿Qué es el horizonte de eventos?', options: ['Límite de agujero negro', 'Línea del horizonte', 'Eclipse total', 'Órbita planetaria'], correctAnswer: 0 },
+        { subject: 'Astronomía', difficulty: 'hard', question: '¿Cuál es la edad aproximada del universo?', options: ['4.5 mil millones años', '10 mil millones años', '13.8 mil millones años', '20 mil millones años'], correctAnswer: 2 },
+        { subject: 'Astronomía', difficulty: 'hard', question: '¿Qué es la radiación cósmica de fondo?', options: ['Luz de estrellas', 'Eco del Big Bang', 'Radiación solar', 'Rayos gamma'], correctAnswer: 1 },
+        { subject: 'Astronomía', difficulty: 'hard', question: '¿Qué es un cuásar?', options: ['Tipo de estrella', 'Núcleo galáctico superactivo', 'Planeta errante', 'Cometa grande'], correctAnswer: 1 },
+        
+        // =====================================================
+        // BIOLOGÍA - PREGUNTAS EXCLUSIVAS
+        // =====================================================
+        
+        // Biología - Fácil
+        { subject: 'Biología', difficulty: 'easy', question: '¿Cuántos huesos tiene el cuerpo humano adulto?', options: ['186', '196', '206', '216'], correctAnswer: 2 },
+        { subject: 'Biología', difficulty: 'easy', question: '¿Cuál es el órgano que bombea sangre?', options: ['Hígado', 'Corazón', 'Pulmón', 'Riñón'], correctAnswer: 1 },
+        { subject: 'Biología', difficulty: 'easy', question: '¿Qué gas respiramos?', options: ['Oxígeno', 'Nitrógeno', 'Hidrógeno', 'Helio'], correctAnswer: 0 },
+        { subject: 'Biología', difficulty: 'easy', question: '¿Cuántas patas tiene una araña?', options: ['6', '8', '10', '12'], correctAnswer: 1 },
+        { subject: 'Biología', difficulty: 'easy', question: '¿Qué animal es el rey de la selva?', options: ['Tigre', 'León', 'Elefante', 'Gorila'], correctAnswer: 1 },
+        { subject: 'Biología', difficulty: 'easy', question: '¿Qué necesitan las plantas para crecer?', options: ['Luz', 'Agua', 'Tierra', 'Todas'], correctAnswer: 3 },
+        { subject: 'Biología', difficulty: 'easy', question: '¿Cuántos sentidos tiene el ser humano?', options: ['3', '4', '5', '6'], correctAnswer: 2 },
+        { subject: 'Biología', difficulty: 'easy', question: '¿Cuál es el órgano más grande del cuerpo?', options: ['Hígado', 'Piel', 'Intestino', 'Cerebro'], correctAnswer: 1 },
+        { subject: 'Biología', difficulty: 'easy', question: '¿Qué tipo de animal es la ballena?', options: ['Pez', 'Mamífero', 'Reptil', 'Anfibio'], correctAnswer: 1 },
+        { subject: 'Biología', difficulty: 'easy', question: '¿Dónde se produce la fotosíntesis?', options: ['Raíz', 'Tallo', 'Hojas', 'Flores'], correctAnswer: 2 },
+        
+        // Biología - Media
+        { subject: 'Biología', difficulty: 'medium', question: '¿Qué es el ADN?', options: ['Una proteína', 'Ácido desoxirribonucleico', 'Un carbohidrato', 'Una enzima'], correctAnswer: 1 },
+        { subject: 'Biología', difficulty: 'medium', question: '¿Cuántos cromosomas tiene el ser humano?', options: ['23', '46', '48', '50'], correctAnswer: 1 },
+        { subject: 'Biología', difficulty: 'medium', question: '¿Qué órgano produce la insulina?', options: ['Hígado', 'Páncreas', 'Riñón', 'Bazo'], correctAnswer: 1 },
+        { subject: 'Biología', difficulty: 'medium', question: '¿Cuál es el hueso más largo del cuerpo humano?', options: ['Húmero', 'Tibia', 'Fémur', 'Radio'], correctAnswer: 2 },
+        { subject: 'Biología', difficulty: 'medium', question: '¿Qué produce la fotosíntesis?', options: ['CO2', 'Oxígeno', 'Nitrógeno', 'Metano'], correctAnswer: 1 },
+        { subject: 'Biología', difficulty: 'medium', question: '¿Qué es la mitosis?', options: ['División celular', 'Reproducción sexual', 'Respiración', 'Digestión'], correctAnswer: 0 },
+        { subject: 'Biología', difficulty: 'medium', question: '¿Cuántos tipos de células sanguíneas hay?', options: ['2', '3', '4', '5'], correctAnswer: 1 },
+        { subject: 'Biología', difficulty: 'medium', question: '¿Qué es el sistema inmunológico?', options: ['Sistema digestivo', 'Sistema de defensa', 'Sistema nervioso', 'Sistema muscular'], correctAnswer: 1 },
+        { subject: 'Biología', difficulty: 'medium', question: '¿Cuál es la función del riñón?', options: ['Producir sangre', 'Filtrar desechos', 'Producir hormonas', 'Almacenar energía'], correctAnswer: 1 },
+        { subject: 'Biología', difficulty: 'medium', question: '¿Qué son los glóbulos rojos?', options: ['Células de defensa', 'Células que transportan oxígeno', 'Células nerviosas', 'Células musculares'], correctAnswer: 1 },
+        
+        // Biología - Difícil
+        { subject: 'Biología', difficulty: 'hard', question: '¿Qué es la mitocondria?', options: ['Núcleo celular', 'Central energética', 'Membrana', 'Citoplasma'], correctAnswer: 1 },
+        { subject: 'Biología', difficulty: 'hard', question: '¿Cuántos genes tiene el ser humano aproximadamente?', options: ['5,000', '10,000', '20,000', '50,000'], correctAnswer: 2 },
+        { subject: 'Biología', difficulty: 'hard', question: '¿Qué es el ARN mensajero?', options: ['Copia del ADN', 'Proteína', 'Lípido', 'Carbohidrato'], correctAnswer: 0 },
+        { subject: 'Biología', difficulty: 'hard', question: '¿Qué es la meiosis?', options: ['División para gametos', 'División normal', 'Fusión celular', 'Muerte celular'], correctAnswer: 0 },
+        { subject: 'Biología', difficulty: 'hard', question: '¿Cuántos pares de cromosomas tiene el ser humano?', options: ['21', '22', '23', '24'], correctAnswer: 2 },
+        { subject: 'Biología', difficulty: 'hard', question: '¿Qué es el retículo endoplasmático?', options: ['Organelo de síntesis', 'Núcleo', 'Membrana exterior', 'Vacuola'], correctAnswer: 0 },
+        { subject: 'Biología', difficulty: 'hard', question: '¿Qué son los ribosomas?', options: ['Productores de proteínas', 'Productores de energía', 'Almacenes de lípidos', 'Digestores celulares'], correctAnswer: 0 },
+        { subject: 'Biología', difficulty: 'hard', question: '¿Qué es la apoptosis?', options: ['Muerte celular programada', 'División celular', 'Fusión celular', 'Crecimiento celular'], correctAnswer: 0 },
+        { subject: 'Biología', difficulty: 'hard', question: '¿Cuántas neuronas tiene el cerebro humano?', options: ['1 millón', '100 millones', '86 mil millones', '1 billón'], correctAnswer: 2 },
+        { subject: 'Biología', difficulty: 'hard', question: '¿Qué es CRISPR?', options: ['Proteína', 'Técnica de edición genética', 'Tipo de célula', 'Hormona'], correctAnswer: 1 },
+        
+        // =====================================================
+        // QUÍMICA - PREGUNTAS EXCLUSIVAS
+        // =====================================================
+        
+        // Química - Fácil
+        { subject: 'Química', difficulty: 'easy', question: '¿Cuál es el símbolo del agua?', options: ['O2', 'CO2', 'H2O', 'NaCl'], correctAnswer: 2 },
+        { subject: 'Química', difficulty: 'easy', question: '¿Cuántos elementos hay en la tabla periódica?', options: ['100', '108', '118', '128'], correctAnswer: 2 },
+        { subject: 'Química', difficulty: 'easy', question: '¿Cuál es el símbolo del oro?', options: ['Ag', 'Au', 'Fe', 'Cu'], correctAnswer: 1 },
+        { subject: 'Química', difficulty: 'easy', question: '¿Qué gas usamos para respirar?', options: ['Nitrógeno', 'Oxígeno', 'Hidrógeno', 'Helio'], correctAnswer: 1 },
+        { subject: 'Química', difficulty: 'easy', question: '¿De qué está hecha la sal de mesa?', options: ['Sodio y cloro', 'Potasio', 'Calcio', 'Magnesio'], correctAnswer: 0 },
+        { subject: 'Química', difficulty: 'easy', question: '¿Cuál es el símbolo del hierro?', options: ['Hi', 'Ir', 'Fe', 'He'], correctAnswer: 2 },
+        { subject: 'Química', difficulty: 'easy', question: '¿Qué elemento es el más abundante en el universo?', options: ['Oxígeno', 'Carbono', 'Hidrógeno', 'Helio'], correctAnswer: 2 },
+        { subject: 'Química', difficulty: 'easy', question: '¿Cuántos estados de la materia hay?', options: ['2', '3', '4', '5'], correctAnswer: 2 },
+        { subject: 'Química', difficulty: 'easy', question: '¿Qué gas producen las plantas?', options: ['CO2', 'O2', 'N2', 'H2'], correctAnswer: 1 },
+        { subject: 'Química', difficulty: 'easy', question: '¿De qué color es el cobre?', options: ['Gris', 'Amarillo', 'Naranja-rojizo', 'Blanco'], correctAnswer: 2 },
+        
+        // Química - Media
+        { subject: 'Química', difficulty: 'medium', question: '¿Cuál es el número atómico del carbono?', options: ['4', '6', '8', '12'], correctAnswer: 1 },
+        { subject: 'Química', difficulty: 'medium', question: '¿Qué es un ion?', options: ['Átomo con carga', 'Molécula', 'Elemento', 'Compuesto'], correctAnswer: 0 },
+        { subject: 'Química', difficulty: 'medium', question: '¿Cuál es la fórmula del agua oxigenada?', options: ['H2O', 'H2O2', 'HO2', 'H3O'], correctAnswer: 1 },
+        { subject: 'Química', difficulty: 'medium', question: '¿Qué tipo de enlace tiene el agua?', options: ['Iónico', 'Covalente', 'Metálico', 'Van der Waals'], correctAnswer: 1 },
+        { subject: 'Química', difficulty: 'medium', question: '¿Cuántos enlaces puede formar el carbono?', options: ['2', '3', '4', '5'], correctAnswer: 2 },
+        { subject: 'Química', difficulty: 'medium', question: '¿Qué es el pH?', options: ['Presión', 'Medida de acidez', 'Temperatura', 'Densidad'], correctAnswer: 1 },
+        { subject: 'Química', difficulty: 'medium', question: '¿Cuál es el gas más abundante en la atmósfera?', options: ['Oxígeno', 'CO2', 'Nitrógeno', 'Argón'], correctAnswer: 2 },
+        { subject: 'Química', difficulty: 'medium', question: '¿Qué es una reacción exotérmica?', options: ['Absorbe calor', 'Libera calor', 'Sin cambio de calor', 'Cambio de estado'], correctAnswer: 1 },
+        { subject: 'Química', difficulty: 'medium', question: '¿Cuántos electrones tiene el oxígeno?', options: ['6', '8', '10', '12'], correctAnswer: 1 },
+        { subject: 'Química', difficulty: 'medium', question: '¿Qué es un catalizador?', options: ['Acelera reacciones', 'Frena reacciones', 'Produce energía', 'Absorbe gases'], correctAnswer: 0 },
+        
+        // Química - Difícil
+        { subject: 'Química', difficulty: 'hard', question: '¿Qué es la electronegatividad?', options: ['Capacidad de atraer electrones', 'Número de protones', 'Número de neutrones', 'Masa atómica'], correctAnswer: 0 },
+        { subject: 'Química', difficulty: 'hard', question: '¿Cuál es el número de Avogadro?', options: ['3.14 × 10²³', '6.022 × 10²³', '9.8 × 10²³', '1.6 × 10²³'], correctAnswer: 1 },
+        { subject: 'Química', difficulty: 'hard', question: '¿Qué es un isótopo?', options: ['Mismo elemento, diferente masa', 'Diferente elemento', 'Molécula', 'Ion'], correctAnswer: 0 },
+        { subject: 'Química', difficulty: 'hard', question: '¿Qué es la entalpía?', options: ['Presión', 'Contenido de calor', 'Volumen', 'Temperatura'], correctAnswer: 1 },
+        { subject: 'Química', difficulty: 'hard', question: '¿Cuál elemento tiene el símbolo W?', options: ['Wolframio', 'Vanadio', 'Zinc', 'Xenón'], correctAnswer: 0 },
+        { subject: 'Química', difficulty: 'hard', question: '¿Qué es la hibridación sp³?', options: ['Enlace simple', 'Configuración tetraédrica', 'Enlace doble', 'Enlace triple'], correctAnswer: 1 },
+        { subject: 'Química', difficulty: 'hard', question: '¿Qué es un mol?', options: ['6.022 × 10²³ partículas', 'Unidad de masa', 'Unidad de volumen', 'Unidad de presión'], correctAnswer: 0 },
+        { subject: 'Química', difficulty: 'hard', question: '¿Cuál es el ácido más fuerte?', options: ['HCl', 'H2SO4', 'HF', 'HClO4'], correctAnswer: 3 },
+        { subject: 'Química', difficulty: 'hard', question: '¿Qué es la ley de conservación de la masa?', options: ['Masa se crea', 'Masa se destruye', 'Masa se conserva', 'Masa varía'], correctAnswer: 2 },
+        { subject: 'Química', difficulty: 'hard', question: '¿Qué son los lantánidos?', options: ['Gases nobles', 'Tierras raras', 'Metales alcalinos', 'Halógenos'], correctAnswer: 1 },
+        
+        // =====================================================
+        // MÚSICA - PREGUNTAS EXCLUSIVAS
+        // =====================================================
+        
+        // Música - Fácil
+        { subject: 'Música', difficulty: 'easy', question: '¿Cuántas notas musicales hay?', options: ['5', '6', '7', '8'], correctAnswer: 2 },
+        { subject: 'Música', difficulty: 'easy', question: '¿Cuál es la primera nota musical?', options: ['Re', 'Do', 'Mi', 'Sol'], correctAnswer: 1 },
+        { subject: 'Música', difficulty: 'easy', question: '¿Qué instrumento tiene teclas blancas y negras?', options: ['Guitarra', 'Piano', 'Violín', 'Flauta'], correctAnswer: 1 },
+        { subject: 'Música', difficulty: 'easy', question: '¿Qué instrumento se toca con un arco?', options: ['Guitarra', 'Piano', 'Violín', 'Flauta'], correctAnswer: 2 },
+        { subject: 'Música', difficulty: 'easy', question: '¿Cuántas cuerdas tiene una guitarra clásica?', options: ['4', '5', '6', '7'], correctAnswer: 2 },
+        { subject: 'Música', difficulty: 'easy', question: '¿Quién compuso "Para Elisa"?', options: ['Mozart', 'Beethoven', 'Bach', 'Chopin'], correctAnswer: 1 },
+        { subject: 'Música', difficulty: 'easy', question: '¿Qué es una orquesta?', options: ['Un instrumento', 'Grupo de músicos', 'Tipo de música', 'Una canción'], correctAnswer: 1 },
+        { subject: 'Música', difficulty: 'easy', question: '¿Qué instrumento es de viento?', options: ['Violín', 'Piano', 'Flauta', 'Guitarra'], correctAnswer: 2 },
+        { subject: 'Música', difficulty: 'easy', question: '¿Cómo se llama quien dirige una orquesta?', options: ['Cantante', 'Director', 'Músico', 'Compositor'], correctAnswer: 1 },
+        { subject: 'Música', difficulty: 'easy', question: '¿Qué instrumento es de percusión?', options: ['Piano', 'Tambor', 'Violín', 'Trompeta'], correctAnswer: 1 },
+        
+        // Música - Media
+        { subject: 'Música', difficulty: 'medium', question: '¿Qué es un pentagrama?', options: ['5 líneas para notas', 'Instrumento', 'Tipo de música', 'Ritmo'], correctAnswer: 0 },
+        { subject: 'Música', difficulty: 'medium', question: '¿Quién compuso las "Cuatro Estaciones"?', options: ['Mozart', 'Bach', 'Vivaldi', 'Beethoven'], correctAnswer: 2 },
+        { subject: 'Música', difficulty: 'medium', question: '¿Qué es una sinfonía?', options: ['Canción corta', 'Composición orquestal larga', 'Solo de piano', 'Dúo vocal'], correctAnswer: 1 },
+        { subject: 'Música', difficulty: 'medium', question: '¿Cuántas cuerdas tiene un violín?', options: ['3', '4', '5', '6'], correctAnswer: 1 },
+        { subject: 'Música', difficulty: 'medium', question: '¿Qué es el tempo en música?', options: ['Volumen', 'Velocidad', 'Tono', 'Ritmo'], correctAnswer: 1 },
+        { subject: 'Música', difficulty: 'medium', question: '¿Qué significa "forte"?', options: ['Suave', 'Fuerte', 'Lento', 'Rápido'], correctAnswer: 1 },
+        { subject: 'Música', difficulty: 'medium', question: '¿Qué es un acorde?', options: ['Una nota', 'Varias notas juntas', 'Un silencio', 'Un instrumento'], correctAnswer: 1 },
+        { subject: 'Música', difficulty: 'medium', question: '¿De qué país era Mozart?', options: ['Alemania', 'Italia', 'Austria', 'Francia'], correctAnswer: 2 },
+        { subject: 'Música', difficulty: 'medium', question: '¿Qué es la clave de sol?', options: ['Símbolo para notas agudas', 'Nota musical', 'Instrumento', 'Ritmo'], correctAnswer: 0 },
+        { subject: 'Música', difficulty: 'medium', question: '¿Cuántas teclas tiene un piano estándar?', options: ['52', '66', '76', '88'], correctAnswer: 3 },
+        
+        // Música - Difícil
+        { subject: 'Música', difficulty: 'hard', question: '¿Qué es el contrapunto?', options: ['Técnica de melodías simultáneas', 'Tipo de instrumento', 'Género musical', 'Ritmo rápido'], correctAnswer: 0 },
+        { subject: 'Música', difficulty: 'hard', question: '¿Cuántas sinfonías compuso Beethoven?', options: ['5', '7', '9', '12'], correctAnswer: 2 },
+        { subject: 'Música', difficulty: 'hard', question: '¿Qué es la escala cromática?', options: ['7 notas', '12 semitonos', '5 notas', '8 notas'], correctAnswer: 1 },
+        { subject: 'Música', difficulty: 'hard', question: '¿Qué significa "pianissimo"?', options: ['Muy fuerte', 'Muy suave', 'Muy rápido', 'Muy lento'], correctAnswer: 1 },
+        { subject: 'Música', difficulty: 'hard', question: '¿Quién compuso "El Mesías"?', options: ['Bach', 'Händel', 'Mozart', 'Haydn'], correctAnswer: 1 },
+        { subject: 'Música', difficulty: 'hard', question: '¿Qué es una fuga?', options: ['Composición polifónica', 'Instrumento', 'Nota larga', 'Silencio'], correctAnswer: 0 },
+        { subject: 'Música', difficulty: 'hard', question: '¿Cuántos movimientos tiene una sonata clásica?', options: ['2', '3', '4', '5'], correctAnswer: 2 },
+        { subject: 'Música', difficulty: 'hard', question: '¿Qué es el leitmotiv?', options: ['Tema musical recurrente', 'Instrumento', 'Tipo de compás', 'Danza'], correctAnswer: 0 },
+        { subject: 'Música', difficulty: 'hard', question: '¿Qué compositor quedó sordo?', options: ['Mozart', 'Beethoven', 'Bach', 'Chopin'], correctAnswer: 1 },
+        { subject: 'Música', difficulty: 'hard', question: '¿Qué es un requiem?', options: ['Ópera cómica', 'Misa de difuntos', 'Danza barroca', 'Concierto para solista'], correctAnswer: 1 },
+        
+        // =====================================================
+        // INGLÉS - PREGUNTAS EXCLUSIVAS
+        // =====================================================
+        
+        // Inglés - Fácil
+        { subject: 'Inglés', difficulty: 'easy', question: '¿Cómo se dice "Hola" en inglés?', options: ['Goodbye', 'Hello', 'Thanks', 'Please'], correctAnswer: 1 },
+        { subject: 'Inglés', difficulty: 'easy', question: '¿Qué significa "Dog"?', options: ['Gato', 'Perro', 'Ratón', 'Caballo'], correctAnswer: 1 },
+        { subject: 'Inglés', difficulty: 'easy', question: '¿Cómo se dice "Gracias" en inglés?', options: ['Please', 'Sorry', 'Thank you', 'Welcome'], correctAnswer: 2 },
+        { subject: 'Inglés', difficulty: 'easy', question: '¿Qué significa "Blue"?', options: ['Rojo', 'Verde', 'Azul', 'Amarillo'], correctAnswer: 2 },
+        { subject: 'Inglés', difficulty: 'easy', question: '¿Cómo se dice "Agua" en inglés?', options: ['Water', 'Fire', 'Earth', 'Air'], correctAnswer: 0 },
+        { subject: 'Inglés', difficulty: 'easy', question: '¿Qué significa "House"?', options: ['Carro', 'Casa', 'Árbol', 'Camino'], correctAnswer: 1 },
+        { subject: 'Inglés', difficulty: 'easy', question: '¿Cómo se dice "Madre" en inglés?', options: ['Father', 'Mother', 'Sister', 'Brother'], correctAnswer: 1 },
+        { subject: 'Inglés', difficulty: 'easy', question: '¿Qué significa "Happy"?', options: ['Triste', 'Enojado', 'Feliz', 'Cansado'], correctAnswer: 2 },
+        { subject: 'Inglés', difficulty: 'easy', question: '¿Cómo se dice "Uno" en inglés?', options: ['Two', 'One', 'Three', 'Four'], correctAnswer: 1 },
+        { subject: 'Inglés', difficulty: 'easy', question: '¿Qué significa "Big"?', options: ['Pequeño', 'Grande', 'Mediano', 'Alto'], correctAnswer: 1 },
+        
+        // Inglés - Media
+        { subject: 'Inglés', difficulty: 'medium', question: 'What is the past tense of "go"?', options: ['Goed', 'Went', 'Gone', 'Going'], correctAnswer: 1 },
+        { subject: 'Inglés', difficulty: 'medium', question: '¿Qué significa "However"?', options: ['Porque', 'Sin embargo', 'Entonces', 'Además'], correctAnswer: 1 },
+        { subject: 'Inglés', difficulty: 'medium', question: 'What is the plural of "Child"?', options: ['Childs', 'Children', 'Childes', 'Childer'], correctAnswer: 1 },
+        { subject: 'Inglés', difficulty: 'medium', question: '¿Qué significa "Hopefully"?', options: ['Tristemente', 'Ojalá', 'Ciertamente', 'Difícilmente'], correctAnswer: 1 },
+        { subject: 'Inglés', difficulty: 'medium', question: 'Choose correct: "She ___ to school every day"', options: ['go', 'goes', 'going', 'gone'], correctAnswer: 1 },
+        { subject: 'Inglés', difficulty: 'medium', question: '¿Qué significa "Achieve"?', options: ['Perder', 'Lograr', 'Olvidar', 'Fallar'], correctAnswer: 1 },
+        { subject: 'Inglés', difficulty: 'medium', question: 'What is the opposite of "Ancient"?', options: ['Old', 'Modern', 'Historic', 'Classic'], correctAnswer: 1 },
+        { subject: 'Inglés', difficulty: 'medium', question: '¿Qué significa "Improve"?', options: ['Empeorar', 'Mejorar', 'Mantener', 'Cambiar'], correctAnswer: 1 },
+        { subject: 'Inglés', difficulty: 'medium', question: 'Complete: "I have ___ my homework"', options: ['do', 'did', 'done', 'doing'], correctAnswer: 2 },
+        { subject: 'Inglés', difficulty: 'medium', question: '¿Qué significa "Although"?', options: ['Porque', 'Aunque', 'Cuando', 'Si'], correctAnswer: 1 },
+        
+        // Inglés - Difícil
+        { subject: 'Inglés', difficulty: 'hard', question: 'What does "Ubiquitous" mean?', options: ['Rare', 'Omnipresent', 'Ancient', 'Modern'], correctAnswer: 1 },
+        { subject: 'Inglés', difficulty: 'hard', question: 'Choose correct: "If I ___ rich, I would travel"', options: ['am', 'was', 'were', 'be'], correctAnswer: 2 },
+        { subject: 'Inglés', difficulty: 'hard', question: '¿Qué significa "Quintessential"?', options: ['Raro', 'Típico/esencial', 'Antiguo', 'Moderno'], correctAnswer: 1 },
+        { subject: 'Inglés', difficulty: 'hard', question: 'What is a synonym for "Meticulous"?', options: ['Careless', 'Thorough', 'Fast', 'Simple'], correctAnswer: 1 },
+        { subject: 'Inglés', difficulty: 'hard', question: '¿Qué significa "Ephemeral"?', options: ['Eterno', 'Efímero', 'Antiguo', 'Permanente'], correctAnswer: 1 },
+        { subject: 'Inglés', difficulty: 'hard', question: 'Past perfect of "to write":', options: ['Wrote', 'Written', 'Had written', 'Was writing'], correctAnswer: 2 },
+        { subject: 'Inglés', difficulty: 'hard', question: '¿Qué significa "Exacerbate"?', options: ['Mejorar', 'Empeorar', 'Mantener', 'Ignorar'], correctAnswer: 1 },
+        { subject: 'Inglés', difficulty: 'hard', question: 'What does "Paradox" mean?', options: ['Agreement', 'Contradiction', 'Example', 'Theory'], correctAnswer: 1 },
+        { subject: 'Inglés', difficulty: 'hard', question: '¿Qué significa "Corroborate"?', options: ['Negar', 'Confirmar', 'Dudar', 'Ignorar'], correctAnswer: 1 },
+        { subject: 'Inglés', difficulty: 'hard', question: 'Choose: "She wished she ___ studied more"', options: ['has', 'have', 'had', 'having'], correctAnswer: 2 },
+        
+        // =====================================================
+        // FRANCÉS - PREGUNTAS EXCLUSIVAS
+        // =====================================================
+        
+        // Francés - Fácil
+        { subject: 'Francés', difficulty: 'easy', question: '¿Cómo se dice "Hola" en francés?', options: ['Au revoir', 'Bonjour', 'Merci', 'Oui'], correctAnswer: 1 },
+        { subject: 'Francés', difficulty: 'easy', question: '¿Qué significa "Merci"?', options: ['Hola', 'Adiós', 'Gracias', 'Por favor'], correctAnswer: 2 },
+        { subject: 'Francés', difficulty: 'easy', question: '¿Cómo se dice "Sí" en francés?', options: ['Non', 'Oui', 'Peut-être', 'Si'], correctAnswer: 1 },
+        { subject: 'Francés', difficulty: 'easy', question: '¿Qué significa "Chat"?', options: ['Perro', 'Gato', 'Pájaro', 'Ratón'], correctAnswer: 1 },
+        { subject: 'Francés', difficulty: 'easy', question: '¿Cómo se dice "Agua" en francés?', options: ['Vin', 'Lait', 'Eau', 'Café'], correctAnswer: 2 },
+        { subject: 'Francés', difficulty: 'easy', question: '¿Qué significa "Maison"?', options: ['Carro', 'Casa', 'Mesa', 'Silla'], correctAnswer: 1 },
+        { subject: 'Francés', difficulty: 'easy', question: '¿Cómo se dice "Buenos días" en francés?', options: ['Bonne nuit', 'Bonjour', 'Bonsoir', 'Au revoir'], correctAnswer: 1 },
+        { subject: 'Francés', difficulty: 'easy', question: '¿Qué significa "Rouge"?', options: ['Azul', 'Verde', 'Rojo', 'Amarillo'], correctAnswer: 2 },
+        { subject: 'Francés', difficulty: 'easy', question: '¿Cómo se dice "Uno" en francés?', options: ['Deux', 'Un', 'Trois', 'Quatre'], correctAnswer: 1 },
+        { subject: 'Francés', difficulty: 'easy', question: '¿Qué significa "Jour"?', options: ['Noche', 'Día', 'Mes', 'Año'], correctAnswer: 1 },
+        
+        // Francés - Media
+        { subject: 'Francés', difficulty: 'medium', question: '¿Cómo se dice "Me llamo" en francés?', options: ['Je suis', 'Je m\'appelle', 'J\'ai', 'Je veux'], correctAnswer: 1 },
+        { subject: 'Francés', difficulty: 'medium', question: '¿Qué significa "Aujourd\'hui"?', options: ['Ayer', 'Mañana', 'Hoy', 'Siempre'], correctAnswer: 2 },
+        { subject: 'Francés', difficulty: 'medium', question: 'Complete: "Je ___ français"', options: ['suis', 'parle', 'mange', 'bois'], correctAnswer: 1 },
+        { subject: 'Francés', difficulty: 'medium', question: '¿Qué significa "Travail"?', options: ['Viaje', 'Trabajo', 'Casa', 'Escuela'], correctAnswer: 1 },
+        { subject: 'Francés', difficulty: 'medium', question: '¿Cómo se dice "Por favor" en francés?', options: ['Merci', 'Pardon', 'S\'il vous plaît', 'De rien'], correctAnswer: 2 },
+        { subject: 'Francés', difficulty: 'medium', question: '¿Qué significa "Bibliothèque"?', options: ['Librería', 'Biblioteca', 'Escuela', 'Universidad'], correctAnswer: 1 },
+        { subject: 'Francés', difficulty: 'medium', question: 'Conjugue "être" en "nous":', options: ['sommes', 'êtes', 'sont', 'suis'], correctAnswer: 0 },
+        { subject: 'Francés', difficulty: 'medium', question: '¿Qué significa "Semaine"?', options: ['Mes', 'Semana', 'Día', 'Año'], correctAnswer: 1 },
+        { subject: 'Francés', difficulty: 'medium', question: '¿Cómo se dice "¿Cuánto cuesta?" en francés?', options: ['Où est?', 'Combien ça coûte?', 'Qu\'est-ce que c\'est?', 'Comment?'], correctAnswer: 1 },
+        { subject: 'Francés', difficulty: 'medium', question: '¿Qué significa "Boulangerie"?', options: ['Carnicería', 'Panadería', 'Pescadería', 'Farmacia'], correctAnswer: 1 },
+        
+        // Francés - Difícil
+        { subject: 'Francés', difficulty: 'hard', question: '¿Qué es el "passé composé"?', options: ['Futuro', 'Pretérito compuesto', 'Presente', 'Imperfecto'], correctAnswer: 1 },
+        { subject: 'Francés', difficulty: 'hard', question: 'Conjugue "avoir" en subjonctif (je):', options: ['ai', 'aie', 'avais', 'aurai'], correctAnswer: 1 },
+        { subject: 'Francés', difficulty: 'hard', question: '¿Qué significa "Néanmoins"?', options: ['Por lo tanto', 'Sin embargo', 'Además', 'Porque'], correctAnswer: 1 },
+        { subject: 'Francés', difficulty: 'hard', question: 'Complete: "Il faut que tu ___ (être)"', options: ['es', 'sois', 'soit', 'seras'], correctAnswer: 1 },
+        { subject: 'Francés', difficulty: 'hard', question: '¿Qué significa "Éphémère"?', options: ['Eterno', 'Efímero', 'Antiguo', 'Permanente'], correctAnswer: 1 },
+        { subject: 'Francés', difficulty: 'hard', question: '¿Cuál es el plural de "œil"?', options: ['œils', 'yeux', 'œux', 'yeils'], correctAnswer: 1 },
+        { subject: 'Francés', difficulty: 'hard', question: '¿Qué significa "Bouleversant"?', options: ['Aburrido', 'Conmovedor', 'Triste', 'Alegre'], correctAnswer: 1 },
+        { subject: 'Francés', difficulty: 'hard', question: 'Complete: "Si j\'avais su, je ___ venu"', options: ['suis', 'serais', 'serai', 'étais'], correctAnswer: 1 },
+        { subject: 'Francés', difficulty: 'hard', question: '¿Qué es una "liaison" en francés?', options: ['Enlace de sonidos', 'Tipo de acento', 'Conjugación', 'Género'], correctAnswer: 0 },
+        { subject: 'Francés', difficulty: 'hard', question: '¿Qué significa "Atterrir"?', options: ['Despegar', 'Aterrizar', 'Volar', 'Caer'], correctAnswer: 1 }
     ];
 }

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <link rel="stylesheet" href="/css/tutor-dashboard.css?v=101">
     <link rel="stylesheet" href="/css/mobile-optimizations.css?v=1">
 </head>
+
 <body>
     <!-- Decorative Background -->
     <div class="bg-circle bg-circle-1"></div>
@@ -125,15 +127,16 @@
         <!-- Mensajes Section -->
         <div id="messagesSection" class="content-section">
             <h2>Mensajes</h2>
-            
+
             <div class="messages-container">
                 <div class="conversations-panel">
-                    <input type="text" id="searchConversations" placeholder="🔍 Buscar contactos..." class="search-input">
+                    <input type="text" id="searchConversations" placeholder="🔍 Buscar contactos..."
+                        class="search-input">
                     <div id="conversationsList" class="conversations-list">
                         <!-- Contacts will be loaded here -->
                     </div>
                 </div>
-                
+
                 <div class="chat-panel">
                     <div class="chat-header" style="display: none;">
                         <h4>Selecciona un contacto</h4>
@@ -157,15 +160,20 @@
             </div>
         </div>
     </div>
-    
+
     <!-- User Menu -->
     <!-- Version 2.1 - Menu simplified, removed Mi Perfil -->
     <div id="userMenu" class="user-menu" style="display: none;">
-        <div style="padding: 12px; cursor: pointer; border-radius: 8px; margin-bottom: 6px; transition: all 0.2s; color: #e0f7f7;" onclick="window.location.href='/home'" onmouseover="this.style.background='rgba(255,255,255,0.08)'; this.style.color='#ffffff';" onmouseout="this.style.background='transparent'; this.style.color='#e0f7f7';">
+        <div style="padding: 12px; cursor: pointer; border-radius: 8px; margin-bottom: 6px; transition: all 0.2s; color: #e0f7f7;"
+            onclick="window.location.href='/home'"
+            onmouseover="this.style.background='rgba(255,255,255,0.08)'; this.style.color='#ffffff';"
+            onmouseout="this.style.background='transparent'; this.style.color='#e0f7f7';">
             🏠 Inicio
         </div>
         <hr style="border: none; height: 1px; background: rgba(255,255,255,0.2); margin: 10px 0;">
-        <div style="padding: 12px; cursor: pointer; border-radius: 8px; color: #ff6b6b; transition: all 0.2s;" onclick="logout()" onmouseover="this.style.background='rgba(255,107,107,0.1)';" onmouseout="this.style.background='transparent';">
+        <div style="padding: 12px; cursor: pointer; border-radius: 8px; color: #ff6b6b; transition: all 0.2s;"
+            onclick="logout()" onmouseover="this.style.background='rgba(255,107,107,0.1)';"
+            onmouseout="this.style.background='transparent';">
             🚪 Cerrar Sesión
         </div>
     </div>
@@ -175,7 +183,7 @@
         <div class="modal-content modal-large">
             <span class="close" onclick="closeCreateCourseModal()">&times;</span>
             <h2>📚 Crear Nueva Clase</h2>
-            
+
             <form id="createCourseForm" onsubmit="submitCreateCourse(event)">
                 <!-- Step 1: Seleccionar Materia -->
                 <div class="form-step active" id="step1">
@@ -190,7 +198,7 @@
                                 <span>📖 45</span>
                             </div>
                         </div>
-                        
+
                         <div class="subject-card" onclick="selectSubject('astronomia', '🌌', 'Astronomía')">
                             <div class="subject-icon">🌌</div>
                             <div class="subject-name">Astronomía</div>
@@ -199,7 +207,7 @@
                                 <span>📖 28</span>
                             </div>
                         </div>
-                        
+
                         <div class="subject-card" onclick="selectSubject('biologia', '🧬', 'Biología')">
                             <div class="subject-icon">🧬</div>
                             <div class="subject-name">Biología</div>
@@ -208,7 +216,7 @@
                                 <span>📖 52</span>
                             </div>
                         </div>
-                        
+
                         <div class="subject-card" onclick="selectSubject('arte', '🎨', 'Arte')">
                             <div class="subject-icon">🎨</div>
                             <div class="subject-name">Arte</div>
@@ -217,7 +225,7 @@
                                 <span>📖 67</span>
                             </div>
                         </div>
-                        
+
                         <!-- Row 2 -->
                         <div class="subject-card" onclick="selectSubject('ingles', '🗣️', 'Inglés')">
                             <div class="subject-icon">🗣️</div>
@@ -227,7 +235,7 @@
                                 <span>📖 89</span>
                             </div>
                         </div>
-                        
+
                         <div class="subject-card" onclick="selectSubject('matematicas', '📐', 'Matemáticas')">
                             <div class="subject-icon">📐</div>
                             <div class="subject-name">Matemáticas</div>
@@ -236,7 +244,7 @@
                                 <span>📖 73</span>
                             </div>
                         </div>
-                        
+
                         <div class="subject-card" onclick="selectSubject('historia', '📚', 'Historia')">
                             <div class="subject-icon">📚</div>
                             <div class="subject-name">Historia</div>
@@ -245,7 +253,7 @@
                                 <span>📖 41</span>
                             </div>
                         </div>
-                        
+
                         <div class="subject-card" onclick="selectSubject('musica', '🎵', 'Música')">
                             <div class="subject-icon">🎵</div>
                             <div class="subject-name">Música</div>
@@ -254,7 +262,7 @@
                                 <span>📖 35</span>
                             </div>
                         </div>
-                        
+
                         <!-- Row 3 -->
                         <div class="subject-card" onclick="selectSubject('programacion', '💻', 'Programación')">
                             <div class="subject-icon">💻</div>
@@ -264,7 +272,7 @@
                                 <span>📖 95</span>
                             </div>
                         </div>
-                        
+
                         <div class="subject-card" onclick="selectSubject('geografia', '🌍', 'Geografía')">
                             <div class="subject-icon">🌍</div>
                             <div class="subject-name">Geografía</div>
@@ -273,7 +281,7 @@
                                 <span>📖 32</span>
                             </div>
                         </div>
-                        
+
                         <div class="subject-card" onclick="selectSubject('frances', 'FR', 'Francés')">
                             <div class="subject-icon subject-text">FR</div>
                             <div class="subject-name">Francés</div>
@@ -282,7 +290,7 @@
                                 <span>📖 44</span>
                             </div>
                         </div>
-                        
+
                         <div class="subject-card" onclick="selectSubject('quimica', '⚗️', 'Química')">
                             <div class="subject-icon">⚗️</div>
                             <div class="subject-name">Química</div>
@@ -292,31 +300,34 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <input type="hidden" id="selectedSubject" name="subject" required>
                     <input type="hidden" id="selectedSubjectIcon" name="subjectIcon">
-                    
+
                     <div class="step-actions">
                         <button type="button" class="btn-secondary" onclick="closeCreateCourseModal()">Cancelar</button>
-                        <button type="button" class="btn-primary" onclick="nextStep(2)" disabled id="btnStep1">Siguiente →</button>
+                        <button type="button" class="btn-primary" onclick="nextStep(2)" disabled id="btnStep1">Siguiente
+                            →</button>
                     </div>
                 </div>
-                
+
                 <!-- Step 2: Detalles de la Clase -->
                 <div class="form-step" id="step2">
                     <h3>2️⃣ Detalles de la Clase</h3>
                     <div id="selectedSubjectDisplay" class="selected-subject-display"></div>
-                    
+
                     <div class="form-group">
                         <label for="title">Título de la Clase *</label>
-                        <input type="text" id="title" name="title" placeholder="Ej: Introducción a la Física Cuántica" required>
+                        <input type="text" id="title" name="title" placeholder="Ej: Introducción a la Física Cuántica"
+                            required>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="description">Descripción *</label>
-                        <textarea id="description" name="description" rows="3" placeholder="Describe brevemente el contenido de la clase..." required></textarea>
+                        <textarea id="description" name="description" rows="3"
+                            placeholder="Describe brevemente el contenido de la clase..." required></textarea>
                     </div>
-                    
+
                     <div class="form-row">
                         <div class="form-group">
                             <label for="difficulty">Dificultad *</label>
@@ -327,48 +338,53 @@
                                 <option value="avanzado">🔴 Avanzado</option>
                             </select>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="deadline">Fecha Límite de Entrega *</label>
                             <input type="datetime-local" id="deadline" name="deadline" required>
                         </div>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="objectives">Objetivos de Aprendizaje</label>
-                        <textarea id="objectives" name="objectives" rows="2" placeholder="¿Qué aprenderán los estudiantes? (Opcional)"></textarea>
+                        <textarea id="objectives" name="objectives" rows="2"
+                            placeholder="¿Qué aprenderán los estudiantes? (Opcional)"></textarea>
                     </div>
-                    
+
                     <div class="step-actions">
                         <button type="button" class="btn-secondary" onclick="previousStep(1)">← Anterior</button>
                         <button type="button" class="btn-primary" onclick="nextStep(3)">Siguiente →</button>
                     </div>
                 </div>
-                
+
                 <!-- Step 3: Asignar Estudiantes -->
                 <div class="form-step" id="step3">
                     <h3>3️⃣ Asignar Estudiantes (Opcional)</h3>
-                    <p style="margin-bottom: 15px; opacity: 0.8;">Los estudiantes también pueden inscribirse por sí mismos después de crear el curso.</p>
-                    
+                    <p style="margin-bottom: 15px; opacity: 0.8;">Los estudiantes también pueden inscribirse por sí
+                        mismos después de crear el curso.</p>
+
                     <div class="students-selection">
                         <div class="search-students">
-                            <input type="text" id="searchStudents" placeholder="🔍 Buscar estudiante por nombre..." onkeyup="filterStudents()">
+                            <input type="text" id="searchStudents" placeholder="🔍 Buscar estudiante por nombre..."
+                                onkeyup="filterStudents()">
                             <div class="selection-actions">
-                                <button type="button" class="btn-sm" onclick="selectAllStudents()">Seleccionar Todos</button>
-                                <button type="button" class="btn-sm" onclick="deselectAllStudents()">Deseleccionar Todos</button>
+                                <button type="button" class="btn-sm" onclick="selectAllStudents()">Seleccionar
+                                    Todos</button>
+                                <button type="button" class="btn-sm" onclick="deselectAllStudents()">Deseleccionar
+                                    Todos</button>
                             </div>
                         </div>
-                        
+
                         <div class="students-list" id="studentsList">
                             <!-- Students will be loaded here -->
                             <div class="loading">Cargando estudiantes...</div>
                         </div>
-                        
+
                         <div class="selected-count">
                             <span id="selectedCount">0</span> estudiante(s) seleccionado(s)
                         </div>
                     </div>
-                    
+
                     <div class="step-actions">
                         <button type="button" class="btn-secondary" onclick="previousStep(2)">← Anterior</button>
                         <button type="submit" class="btn-primary">✅ Crear Clase</button>
@@ -383,23 +399,25 @@
         <div class="modal-content modal-large">
             <span class="close" onclick="closeEditCourseModal()">&times;</span>
             <h2>✏️ Editar Clase</h2>
-            
+
             <form id="editCourseForm" onsubmit="submitEditCourse(event)">
                 <input type="hidden" id="editCourseId" name="courseId">
-                
+
                 <div class="form-section">
                     <h3>📝 Información de la Clase</h3>
-                    
+
                     <div class="form-group">
                         <label for="editTitle">Título de la Clase *</label>
-                        <input type="text" id="editTitle" name="title" placeholder="Ej: Introducción a la Física Cuántica" required>
+                        <input type="text" id="editTitle" name="title"
+                            placeholder="Ej: Introducción a la Física Cuántica" required>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="editDescription">Descripción *</label>
-                        <textarea id="editDescription" name="description" rows="3" placeholder="Describe brevemente el contenido de la clase..." required></textarea>
+                        <textarea id="editDescription" name="description" rows="3"
+                            placeholder="Describe brevemente el contenido de la clase..." required></textarea>
                     </div>
-                    
+
                     <div class="form-row">
                         <div class="form-group">
                             <label for="editCategory">Categoría *</label>
@@ -419,25 +437,27 @@
                                 <option value="fisica">Física</option>
                             </select>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="editDuration">Duración (minutos) *</label>
-                            <input type="number" id="editDuration" name="duration" min="15" max="240" step="15" value="60" required>
+                            <input type="number" id="editDuration" name="duration" min="15" max="240" step="15"
+                                value="60" required>
                         </div>
                     </div>
-                    
+
                     <div class="form-row">
                         <div class="form-group">
                             <label for="editScheduledAt">Fecha y Hora *</label>
                             <input type="datetime-local" id="editScheduledAt" name="scheduledAt" required>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="editMaxStudents">Estudiantes Máx. *</label>
-                            <input type="number" id="editMaxStudents" name="maxStudents" min="1" max="100" value="20" required>
+                            <input type="number" id="editMaxStudents" name="maxStudents" min="1" max="100" value="20"
+                                required>
                         </div>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="editStatus">Estado *</label>
                         <select id="editStatus" name="status" required>
@@ -448,15 +468,16 @@
                         </select>
                     </div>
                 </div>
-                
+
                 <div class="form-section">
                     <h3>👥 Gestión de Estudiantes</h3>
-                    
+
                     <div class="student-management-help">
-                        <p>💡 <strong>Agregar estudiantes:</strong> Dale acceso al curso. Podrán verlo en su dashboard.</p>
+                        <p>💡 <strong>Agregar estudiantes:</strong> Dale acceso al curso. Podrán verlo en su dashboard.
+                        </p>
                         <p>🗑️ <strong>Quitar estudiantes:</strong> Elimina el acceso. Ya no podrán ver el curso.</p>
                     </div>
-                    
+
                     <div class="current-students-info">
                         <div class="info-badge">
                             <span class="info-label">Estudiantes actuales:</span>
@@ -467,7 +488,7 @@
                             <span class="info-value" id="maxStudentsDisplay">20</span>
                         </div>
                     </div>
-                    
+
                     <div class="students-tabs">
                         <button type="button" class="student-tab active" onclick="switchStudentTab('enrolled')">
                             Estudiantes Inscritos (<span id="enrolledCount">0</span>)
@@ -476,25 +497,29 @@
                             Agregar Estudiantes (<span id="availableCount">0</span>)
                         </button>
                     </div>
-                    
+
                     <div class="students-tab-content">
                         <!-- Enrolled Students Tab -->
                         <div id="enrolledStudentsTab" class="tab-pane active">
                             <div class="search-box">
-                                <input type="text" id="searchEnrolled" placeholder="🔍 Buscar estudiante inscrito..." onkeyup="filterEnrolledStudents()">
+                                <input type="text" id="searchEnrolled" placeholder="🔍 Buscar estudiante inscrito..."
+                                    onkeyup="filterEnrolledStudents()">
                             </div>
                             <div class="enrolled-students-list" id="enrolledStudentsList">
                                 <div class="loading">Cargando estudiantes...</div>
                             </div>
                         </div>
-                        
+
                         <!-- Available Students Tab -->
                         <div id="availableStudentsTab" class="tab-pane">
                             <div class="search-box">
-                                <input type="text" id="searchAvailable" placeholder="🔍 Buscar estudiante..." onkeyup="filterAvailableStudents()">
+                                <input type="text" id="searchAvailable" placeholder="🔍 Buscar estudiante..."
+                                    onkeyup="filterAvailableStudents()">
                                 <div class="selection-actions">
-                                    <button type="button" class="btn-sm" onclick="selectAllAvailable()">Seleccionar Todos</button>
-                                    <button type="button" class="btn-sm" onclick="deselectAllAvailable()">Deseleccionar Todos</button>
+                                    <button type="button" class="btn-sm" onclick="selectAllAvailable()">Seleccionar
+                                        Todos</button>
+                                    <button type="button" class="btn-sm" onclick="deselectAllAvailable()">Deseleccionar
+                                        Todos</button>
                                 </div>
                             </div>
                             <div class="available-students-list" id="availableStudentsList">
@@ -506,7 +531,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="form-actions">
                     <button type="button" class="btn-secondary" onclick="closeEditCourseModal()">Cancelar</button>
                     <button type="submit" class="btn-primary">💾 Guardar Cambios</button>
@@ -520,7 +545,7 @@
         <div class="modal-content modal-large">
             <span class="close" onclick="closeManageClassModal()">&times;</span>
             <h2>📊 Gestión de Clase</h2>
-            
+
             <div class="class-overview">
                 <h3 id="manageClassName">Nombre de la Clase</h3>
                 <div class="class-overview-stats">
@@ -606,7 +631,7 @@
         function toggleUserMenu(event) {
             event.stopPropagation();
             const menu = document.getElementById('userMenu');
-            
+
             if (menu.style.display === 'none' || !menu.style.display) {
                 menu.style.display = 'block';
                 // El CSS maneja el posicionamiento
@@ -614,25 +639,26 @@
                 menu.style.display = 'none';
             }
         }
-        
+
         // Function to navigate to user's profile/dashboard
         function goToMyProfile() {
             // El tutor ya está en su dashboard, solo cerramos el menú
             const menu = document.getElementById('userMenu');
             if (menu) menu.style.display = 'none';
-            
+
             // Scroll to top para mostrar la información del perfil
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-        
+
         document.addEventListener('click', () => {
             const menu = document.getElementById('userMenu');
             if (menu) menu.style.display = 'none';
         });
     </script>
-    
+
     <!-- Load API version without Firebase -->
     <script src="/js/api-service.js?v=22"></script>
     <script src="/js/tutor-dashboard-api.js?v=22"></script>
 </body>
+
 </html>

@@ -11,10 +11,13 @@ yarn-error.log*
 backend/.env
 backend/.env.local
 .render.env
+*.env
+*.env.*
 
 # Firebase credentials
 *-firebase-adminsdk-*.json
 serviceAccountKey.json
+firebase-service-account.json
 
 # IDE
 .vscode/
@@ -30,6 +33,7 @@ Thumbs.db
 # Logs
 logs/
 *.log
+npm-debug.log*
 
 # Build files
 dist/
@@ -45,3 +49,4 @@ coverage/
 *.temp
 .temp/
 .tmp/
+
