@@ -29,15 +29,15 @@ initFirebaseAdmin();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Security middleware with CSP adjustments for frontend assets
+// Security middleware with CSP adjustments for frontend assets and Firebase
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
             styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
             fontSrc: ["'self'", "https://fonts.gstatic.com"],
-            scriptSrc: ["'self'", "'unsafe-inline'"],
-            connectSrc: ["'self'", "http://localhost:3001", "https://fonts.googleapis.com", "https://fonts.gstatic.com"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://www.gstatic.com", "https://*.firebaseio.com"],
+            connectSrc: ["'self'", "http://localhost:3001", "https://fonts.googleapis.com", "https://fonts.gstatic.com", "https://*.googleapis.com", "https://*.firebaseio.com", "wss://*.firebaseio.com", "https://firestore.googleapis.com"],
             imgSrc: ["'self'", "data:", "https:"],
             frameSrc: ["'none'"],
             objectSrc: ["'none'"],
