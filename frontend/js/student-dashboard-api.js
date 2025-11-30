@@ -855,8 +855,8 @@ async function startConversation(otherUserId, otherUserName) {
             chatHeader.style.display = 'block';
             chatHeader.innerHTML = `
                 <h4>Chat con ${otherUserName}</h4>
-                <button class="btn-delete-chat" onclick="clearChatHistory('${conversationId}')" title="Eliminar historial">
-                    🗑️
+                <button class="btn-delete-chat" onclick="clearChatHistory('${conversationId}')">
+                    Eliminar historial
                 </button>
             `;
         }
