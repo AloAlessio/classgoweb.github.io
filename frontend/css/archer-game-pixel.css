@@ -89,8 +89,10 @@ body::before {
 
 .header-controls {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
 }
 
 .game-title {
@@ -1054,18 +1056,25 @@ body::before {
     
     .header-top {
         width: 100%;
-        justify-content: space-between;
+        justify-content: flex-start;
+        gap: 10px;
     }
     
     .header-stats {
         width: 100%;
         justify-content: center;
+        order: 3;
     }
     
     .header-controls {
-        position: absolute;
-        top: 10px;
-        right: 12px;
+        position: static;
+        width: 100%;
+        justify-content: center;
+        gap: 12px;
+        order: 2;
+        padding: 8px 0;
+        border-top: 2px solid #333;
+        margin-top: 5px;
     }
     
     .game-header {
@@ -1073,9 +1082,9 @@ body::before {
     }
     
     .game-title {
-        flex-direction: column;
-        gap: 6px;
-        align-items: flex-start;
+        flex-direction: row;
+        gap: 8px;
+        align-items: center;
     }
     
     .game-title h1 {
@@ -1089,9 +1098,9 @@ body::before {
     
     .back-button,
     .back-btn {
-        padding: 10px 14px;
+        padding: 8px 12px;
         font-size: 8px;
-        min-height: 44px;
+        min-height: 38px;
     }
     
     .stat-item {
@@ -1112,19 +1121,19 @@ body::before {
     }
     
     .music-controls {
-        padding: 3px 6px;
-        gap: 4px;
+        padding: 4px 8px;
+        gap: 6px;
     }
     
     .music-btn {
-        width: 28px;
-        height: 28px;
-        font-size: 14px;
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
     }
     
     .volume-slider {
-        width: 45px;
-        height: 6px;
+        width: 60px;
+        height: 8px;
     }
     
     .sound-btn,
@@ -1194,7 +1203,7 @@ body::before {
     }
     
     .game-header {
-        padding: 10px;
+        padding: 8px;
         margin-bottom: 10px;
         border-width: 2px;
         position: relative;
@@ -1202,28 +1211,33 @@ body::before {
     
     .header-top {
         width: 100%;
-        flex-wrap: wrap;
-        gap: 8px;
+        flex-wrap: nowrap;
+        gap: 6px;
     }
     
     .header-stats {
         width: 100%;
-        gap: 8px;
+        gap: 6px;
+        order: 3;
     }
     
     .header-controls {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        gap: 6px;
+        position: static;
+        width: 100%;
+        gap: 10px;
+        justify-content: center;
+        order: 2;
+        padding: 6px 0;
+        border-top: 2px solid #333;
     }
     
     .game-title {
-        width: calc(100% - 100px);
+        width: auto;
+        flex: 1;
     }
     
     .game-title h1 {
-        font-size: 9px;
+        font-size: 8px;
     }
     
     .subject-tag {
@@ -1233,16 +1247,16 @@ body::before {
     
     .back-button,
     .back-btn {
-        padding: 8px 10px;
+        padding: 6px 8px;
         font-size: 7px;
-        min-height: 38px;
+        min-height: 34px;
     }
     
     .stat-item {
-        padding: 6px 10px;
+        padding: 6px 8px;
         border-width: 2px;
         flex: 1;
-        min-height: 40px;
+        min-height: 36px;
         justify-content: center;
     }
     
@@ -1259,15 +1273,15 @@ body::before {
     }
     
     .music-controls {
-        padding: 2px 4px;
-        gap: 3px;
+        padding: 3px 6px;
+        gap: 5px;
         border-width: 2px;
     }
     
     .music-btn {
-        width: 24px;
-        height: 24px;
-        font-size: 12px;
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
     }
     
     .volume-slider {

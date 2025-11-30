@@ -25,8 +25,9 @@ let bgMusicGain = null;
 
 // 🎵 Background Music MP3
 let bgMusic = null;
-let musicVolume = 0.1; // Default 10% - música de fondo suave
+let musicVolume = 0.05; // Default 5% - música de fondo muy suave
 const BG_MUSIC_URL = '../assets/audio/waka-waka.mp3';
+const MAX_MUSIC_VOLUME = 0.05; // Volumen máximo permitido 5%
 
 // Initialize background music
 function initBackgroundMusic() {
@@ -38,9 +39,10 @@ function initBackgroundMusic() {
     }
 }
 
-// Set music volume (0-100)
+// Set music volume (0-100 in slider, but capped at MAX_MUSIC_VOLUME)
 function setMusicVolume(value) {
-    musicVolume = value / 100;
+    // Map 0-100 slider to 0-MAX_MUSIC_VOLUME
+    musicVolume = (value / 100) * MAX_MUSIC_VOLUME;
     if (bgMusic) {
         bgMusic.volume = musicVolume;
     }
