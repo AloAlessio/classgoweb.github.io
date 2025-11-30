@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Knowledge Arrow - ClassGo</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <link rel="stylesheet" href="../css/archer-game-pixel.css?v=86">
+    <link rel="stylesheet" href="../css/archer-game-pixel.css?v=87">
 </head>
 <body>
     <!-- SVG Filter for CRT Curve Effect -->
@@ -51,6 +51,13 @@
                 </div>
             </div>
             <div class="header-controls">
+                <div class="music-controls">
+                    <button class="music-btn" id="musicToggle" onclick="toggleMusic()" title="Música de fondo">
+                        🎵
+                    </button>
+                    <input type="range" id="musicVolume" class="volume-slider" min="0" max="100" value="30" 
+                           oninput="setMusicVolume(this.value)" title="Volumen de música">
+                </div>
                 <button class="sound-btn" id="soundToggle" onclick="toggleSound()" title="Efectos de sonido">
                     🔊
                 </button>
@@ -228,6 +235,6 @@
         </div>
     </div>
 
-        <script src="../js/archer-game-pixel.js?v=114"></script>
+        <script src="../js/archer-game-pixel.js?v=115"></script>
 </body>
 </html>

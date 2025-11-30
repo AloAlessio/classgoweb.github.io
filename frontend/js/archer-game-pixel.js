@@ -25,6 +25,7 @@ let bgMusicGain = null;
 
 // 🎵 Background Music MP3
 let bgMusic = null;
+let musicVolume = 0.3; // Default 30%
 const BG_MUSIC_URL = '../assets/audio/waka-waka.mp3';
 
 // Initialize background music
@@ -32,9 +33,24 @@ function initBackgroundMusic() {
     if (!bgMusic) {
         bgMusic = new Audio(BG_MUSIC_URL);
         bgMusic.loop = true;
-        bgMusic.volume = 0.3; // 30% volume for background
+        bgMusic.volume = musicVolume;
         bgMusic.preload = 'auto';
     }
+}
+
+// Set music volume (0-100)
+function setMusicVolume(value) {
+    musicVolume = value / 100;
+    if (bgMusic) {
+        bgMusic.volume = musicVolume;
+    }
+    // Update slider if exists
+    const slider = document.getElementById('musicVolume');
+    if (slider && parseInt(slider.value) !== parseInt(value)) {
+        slider.value = value;
+    }
+    // Update music button state
+    updateMusicButton();
 }
 
 // Initialize Audio Context (must be called after user interaction)
@@ -244,7 +260,7 @@ function startBackgroundMusic() {
         initBackgroundMusic();
         if (bgMusic) {
             bgMusic.currentTime = 0;
-            bgMusic.volume = 0.3;
+            bgMusic.volume = musicVolume;
             bgMusic.play().catch(e => {
                 console.log('Music autoplay blocked, will play on next interaction:', e);
             });
@@ -289,14 +305,17 @@ function updateSoundButton() {
     if (btn) {
         btn.textContent = soundEnabled ? '🔊' : '🔇';
         btn.title = soundEnabled ? 'Silenciar efectos' : 'Activar efectos';
+        btn.classList.toggle('muted', !soundEnabled);
     }
 }
 
 function updateMusicButton() {
     const btn = document.getElementById('musicToggle');
     if (btn) {
-        btn.textContent = musicEnabled ? '🎵' : '🎵❌';
+        const isMuted = !musicEnabled || musicVolume === 0;
+        btn.textContent = isMuted ? '🔇' : '🎵';
         btn.title = musicEnabled ? 'Silenciar música' : 'Activar música';
+        btn.classList.toggle('muted', isMuted);
     }
 }
 
