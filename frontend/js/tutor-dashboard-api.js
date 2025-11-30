@@ -1456,13 +1456,8 @@ async function startConversation(otherUserId, otherUserName) {
         // Update chat header with contact name and delete button
         const chatHeader = document.querySelector('.chat-header');
         if (chatHeader) {
-            chatHeader.style.display = 'block';
-            chatHeader.innerHTML = `
-                <h4>Chat con ${otherUserName}</h4>
-                <button class="btn-delete-chat" onclick="clearChatHistory('${conversationId}')">
-                    Eliminar historial
-                </button>
-            `;
+            chatHeader.style.display = 'flex';
+            chatHeader.innerHTML = `<h4>Chat con ${otherUserName}</h4><button class="btn-delete-chat" onclick="clearChatHistory('${conversationId}')">Eliminar historial</button>`;
         }
         
         // Open the conversation
