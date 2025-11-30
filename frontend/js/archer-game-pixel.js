@@ -217,8 +217,8 @@ function playSoundResume() {
     setTimeout(() => playTone(400, 0.15, 'triangle', 0.15), 100);
 }
 
-// 🎵 Background Music - African Festival Style (8-bit original)
-// Inspired by festive African rhythms - upbeat, percussive, celebratory!
+// 🎵 Background Music - WAKA WAKA (This Time for Africa) 8-bit Version
+// Shakira's iconic World Cup 2010 anthem - energetic and uplifting!
 let musicInterval = null;
 
 function startBackgroundMusic() {
@@ -229,7 +229,7 @@ function startBackgroundMusic() {
     try {
         bgMusicGain = audioContext.createGain();
         bgMusicGain.connect(audioContext.destination);
-        bgMusicGain.gain.setValueAtTime(0.12 * masterVolume, audioContext.currentTime);
+        bgMusicGain.gain.setValueAtTime(0.15 * masterVolume, audioContext.currentTime);
         
         // Play a melodic note with envelope
         const playMelody = (freq, startTime, duration, type = 'square', vol = 0.25) => {
@@ -300,128 +300,124 @@ function startBackgroundMusic() {
         };
         
         // ============================================
-        // 🌍 AFRICAN FESTIVAL MELODY - Original 8-bit
-        // Key: A minor / C major feel - uplifting & festive
+        // 🌍 WAKA WAKA - "Tsamina mina eh eh" 8-bit
+        // Key: G major - The iconic World Cup melody!
         // ============================================
         
-        // Main melody notes (frequencies)
-        const A4 = 440.00, B4 = 493.88, C5 = 523.25, D5 = 587.33, E5 = 659.25;
-        const F5 = 698.46, G5 = 783.99, A5 = 880.00;
-        const G4 = 392.00, E4 = 329.63, C4 = 261.63, D4 = 293.66;
+        // Note frequencies
+        const G3 = 196.00, A3 = 220.00, B3 = 246.94, C4 = 261.63, D4 = 293.66;
+        const E4 = 329.63, Fs4 = 369.99, G4 = 392.00, A4 = 440.00, B4 = 493.88;
+        const C5 = 523.25, D5 = 587.33, E5 = 659.25, G5 = 783.99;
         
-        // Festive African-style melody pattern (original composition)
-        // Energetic, call-and-response feel, ascending triumphant phrases
+        // WAKA WAKA Main Hook - "Tsamina mina eh eh, Waka waka eh eh"
+        // This is the iconic chorus melody everyone knows!
         const melodyPattern = [
-            // Bar 1 - Uplifting call (Tsamina mina feel - rising energy)
-            { note: E4, time: 0.00, dur: 0.15 },
-            { note: G4, time: 0.15, dur: 0.15 },
-            { note: A4, time: 0.30, dur: 0.20 },
-            { note: A4, time: 0.55, dur: 0.10 },
-            { note: G4, time: 0.70, dur: 0.15 },
-            { note: A4, time: 0.85, dur: 0.25 },
+            // "Tsa-mi-na mi-na eh eh" (rising phrase)
+            { note: G4, time: 0.00, dur: 0.12 },   // Tsa
+            { note: G4, time: 0.15, dur: 0.12 },   // mi
+            { note: G4, time: 0.30, dur: 0.12 },   // na
+            { note: A4, time: 0.45, dur: 0.12 },   // mi
+            { note: A4, time: 0.60, dur: 0.12 },   // na
+            { note: B4, time: 0.75, dur: 0.20 },   // eh
+            { note: B4, time: 1.00, dur: 0.20 },   // eh
             
-            // Bar 2 - Response (celebratory answer)
-            { note: C5, time: 1.15, dur: 0.15 },
-            { note: C5, time: 1.30, dur: 0.10 },
-            { note: B4, time: 0.45, dur: 0.15 },
-            { note: A4, time: 1.55, dur: 0.20 },
-            { note: G4, time: 1.80, dur: 0.30 },
+            // "Waka waka eh eh" (descending answer)
+            { note: B4, time: 1.30, dur: 0.12 },   // Wa
+            { note: A4, time: 1.45, dur: 0.12 },   // ka
+            { note: B4, time: 1.60, dur: 0.12 },   // wa
+            { note: A4, time: 1.75, dur: 0.12 },   // ka
+            { note: G4, time: 1.90, dur: 0.20 },   // eh
+            { note: G4, time: 2.15, dur: 0.20 },   // eh
             
-            // Bar 3 - Building energy (this time for Africa feel)
-            { note: A4, time: 2.20, dur: 0.12 },
-            { note: A4, time: 2.35, dur: 0.12 },
-            { note: C5, time: 2.50, dur: 0.15 },
-            { note: D5, time: 2.70, dur: 0.15 },
-            { note: E5, time: 2.90, dur: 0.25 },
+            // "Tsamina mina zangalewa" (variation)
+            { note: G4, time: 2.50, dur: 0.10 },
+            { note: G4, time: 2.62, dur: 0.10 },
+            { note: G4, time: 2.75, dur: 0.10 },
+            { note: A4, time: 2.88, dur: 0.10 },
+            { note: A4, time: 3.00, dur: 0.10 },
+            { note: B4, time: 3.12, dur: 0.12 },
+            { note: D5, time: 3.28, dur: 0.15 },   // zan
+            { note: B4, time: 3.48, dur: 0.12 },   // ga
+            { note: A4, time: 3.65, dur: 0.15 },   // le
+            { note: G4, time: 3.85, dur: 0.25 },   // wa
             
-            // Bar 4 - Triumphant resolution
-            { note: D5, time: 3.20, dur: 0.15 },
-            { note: C5, time: 3.40, dur: 0.15 },
-            { note: A4, time: 3.60, dur: 0.30 },
-            { note: G4, time: 3.95, dur: 0.20 },
+            // "This time for Africa!" (triumphant ending)
+            { note: D5, time: 4.20, dur: 0.15 },   // This
+            { note: D5, time: 4.40, dur: 0.12 },   // time
+            { note: B4, time: 4.55, dur: 0.12 },   // for
+            { note: D5, time: 4.70, dur: 0.30 },   // A-
+            { note: B4, time: 5.05, dur: 0.15 },   // fri-
+            { note: G4, time: 5.25, dur: 0.35 },   // ca!
             
-            // Bar 5 - Repeat call with variation
-            { note: E4, time: 4.20, dur: 0.12 },
-            { note: E4, time: 4.35, dur: 0.12 },
-            { note: G4, time: 4.50, dur: 0.15 },
-            { note: A4, time: 4.70, dur: 0.25 },
-            { note: C5, time: 5.00, dur: 0.15 },
-            { note: A4, time: 5.20, dur: 0.20 },
+            // Repeat hook - "Tsamina mina eh eh"
+            { note: G4, time: 5.70, dur: 0.12 },
+            { note: G4, time: 5.85, dur: 0.12 },
+            { note: G4, time: 6.00, dur: 0.12 },
+            { note: A4, time: 6.15, dur: 0.12 },
+            { note: A4, time: 6.30, dur: 0.12 },
+            { note: B4, time: 6.45, dur: 0.20 },
+            { note: B4, time: 6.70, dur: 0.20 },
             
-            // Bar 6 - Energetic response
-            { note: G4, time: 5.45, dur: 0.10 },
-            { note: A4, time: 5.60, dur: 0.10 },
-            { note: C5, time: 5.75, dur: 0.20 },
-            { note: D5, time: 6.00, dur: 0.30 },
-            
-            // Bar 7 - Peak celebration
-            { note: E5, time: 6.35, dur: 0.15 },
-            { note: E5, time: 6.55, dur: 0.15 },
-            { note: D5, time: 6.75, dur: 0.15 },
-            { note: C5, time: 6.95, dur: 0.20 },
-            
-            // Bar 8 - Resolve to home
-            { note: A4, time: 7.20, dur: 0.20 },
-            { note: G4, time: 7.45, dur: 0.15 },
-            { note: A4, time: 7.65, dur: 0.35 }
+            // "Waka waka eh eh"
+            { note: B4, time: 7.00, dur: 0.12 },
+            { note: A4, time: 7.15, dur: 0.12 },
+            { note: B4, time: 7.30, dur: 0.12 },
+            { note: A4, time: 7.45, dur: 0.12 },
+            { note: G4, time: 7.60, dur: 0.20 },
+            { note: G4, time: 7.85, dur: 0.20 }
         ];
         
-        // African drum pattern - syncopated, driving rhythm
+        // African drum pattern - the iconic Waka Waka beat
         const drumPattern = [
-            // Strong beats with syncopation (djembe-style)
+            // The driving African rhythm
             { time: 0.00, accent: true },
             { time: 0.25, accent: false },
-            { time: 0.40, accent: false },
-            { time: 0.55, accent: true },
-            { time: 0.85, accent: false },
+            { time: 0.50, accent: true },
+            { time: 0.75, accent: false },
             
             { time: 1.00, accent: true },
             { time: 1.25, accent: false },
-            { time: 1.55, accent: true },
-            { time: 1.70, accent: false },
-            { time: 1.85, accent: false },
+            { time: 1.50, accent: true },
+            { time: 1.75, accent: false },
             
             { time: 2.00, accent: true },
-            { time: 2.30, accent: false },
-            { time: 2.55, accent: true },
-            { time: 2.70, accent: false },
-            { time: 2.85, accent: false },
+            { time: 2.25, accent: false },
+            { time: 2.50, accent: true },
+            { time: 2.75, accent: false },
             
             { time: 3.00, accent: true },
             { time: 3.25, accent: false },
-            { time: 3.55, accent: true },
-            { time: 3.85, accent: false },
+            { time: 3.50, accent: true },
+            { time: 3.75, accent: false },
             
             { time: 4.00, accent: true },
             { time: 4.25, accent: false },
-            { time: 4.40, accent: false },
-            { time: 4.55, accent: true },
-            { time: 4.85, accent: false },
+            { time: 4.50, accent: true },
+            { time: 4.75, accent: false },
             
             { time: 5.00, accent: true },
-            { time: 5.30, accent: false },
-            { time: 5.55, accent: true },
-            { time: 5.70, accent: false },
-            { time: 5.85, accent: false },
+            { time: 5.25, accent: false },
+            { time: 5.50, accent: true },
+            { time: 5.75, accent: false },
             
             { time: 6.00, accent: true },
             { time: 6.25, accent: false },
-            { time: 6.55, accent: true },
-            { time: 6.85, accent: false },
+            { time: 6.50, accent: true },
+            { time: 6.75, accent: false },
             
             { time: 7.00, accent: true },
-            { time: 7.30, accent: false },
-            { time: 7.55, accent: true },
-            { time: 7.85, accent: false }
+            { time: 7.25, accent: false },
+            { time: 7.50, accent: true },
+            { time: 7.75, accent: false }
         ];
         
-        // Shaker pattern - constant 8th notes for energy
+        // Shaker pattern - energetic 16th notes
         const shakerTimes = [];
-        for (let t = 0; t < 8; t += 0.2) {
+        for (let t = 0; t < 8; t += 0.125) {
             shakerTimes.push(t);
         }
         
-        const patternLength = 8.0; // 8 seconds per loop
+        const patternLength = 8.2; // Loop length in seconds
         
         const playFullPattern = () => {
             if (!musicEnabled || gameState !== 'playing') return;
@@ -430,13 +426,23 @@ function startBackgroundMusic() {
             
             // Play melody
             melodyPattern.forEach(m => {
-                playMelody(m.note, now + m.time, m.dur, 'square', 0.22);
+                playMelody(m.note, now + m.time, m.dur, 'square', 0.28);
             });
             
-            // Play bass line (lower octave accents)
-            [0, 1, 2, 3, 4, 5, 6, 7].forEach(bar => {
-                playMelody(110, now + bar, 0.2, 'triangle', 0.3); // A2 bass
-                playMelody(130.81, now + bar + 0.5, 0.15, 'triangle', 0.25); // C3
+            // Bass line - G major groove
+            const bassPattern = [
+                { note: G3, time: 0 }, { note: G3, time: 0.5 },
+                { note: D4, time: 1 }, { note: G3, time: 1.5 },
+                { note: G3, time: 2 }, { note: B3, time: 2.5 },
+                { note: D4, time: 3 }, { note: G3, time: 3.5 },
+                { note: G3, time: 4 }, { note: G3, time: 4.5 },
+                { note: D4, time: 5 }, { note: G3, time: 5.5 },
+                { note: G3, time: 6 }, { note: B3, time: 6.5 },
+                { note: D4, time: 7 }, { note: G3, time: 7.5 }
+            ];
+            
+            bassPattern.forEach(b => {
+                playMelody(b.note, now + b.time, 0.2, 'triangle', 0.35);
             });
             
             // Play drums
