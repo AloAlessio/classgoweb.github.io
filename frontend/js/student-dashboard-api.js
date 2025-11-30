@@ -769,11 +769,22 @@ async function loadProgress() {
 }
 
 // ===================
-// MESSAGES SECTION
+// MESSAGES SECTION (Real-time con Firestore)
 // ===================
+
+// Flag para saber si estamos usando real-time o polling
+let useRealtimeChat = false;
 
 async function loadMessages() {
     try {
+        // Intentar inicializar el chat en tiempo real
+        if (window.realtimeChat) {
+            useRealtimeChat = await window.realtimeChat.init();
+            if (useRealtimeChat) {
+                console.log('✅ Usando mensajería en tiempo real');
+            }
+        }
+
         // Get contacts using APIService
         const data = await apiService.makeRequest('/conversations/contacts/list', {
             method: 'GET'
@@ -854,41 +865,74 @@ async function startConversation(otherUserId, otherUserName) {
     }
 }
 
-async function openConversation(conversationId, isPolling = false) {
+async function openConversation(conversationId, isInitialLoad = true) {
     currentConversation = conversationId;
     
     try {
-        // Get messages using APIService
-        const data = await apiService.makeRequest(`/conversations/${conversationId}/messages`, {
-            method: 'GET'
-        });
-        
-        if (!data.success) {
-            throw new Error(data.error || 'Failed to load messages');
-        }
-        
-        const messages = data.data?.messages || [];
-        
-        displayMessages(messages);
-        
-        // Mark as read using APIService (only on initial load, not during polling)
-        if (!isPolling) {
-            // Store message count for polling comparison
-            lastMessageCount = messages.length;
+        // Si tenemos real-time chat, usarlo
+        if (useRealtimeChat && window.realtimeChat) {
+            // Detener polling si estaba activo
+            stopMessagePolling();
             
-            apiService.makeRequest(`/conversations/${conversationId}/mark-read`, {
-                method: 'PATCH'
-            }).catch(err => console.error('Error marking as read:', err));
-            
-            // Start real-time polling
-            startMessagePolling();
+            // Suscribirse a la conversación en tiempo real
+            const subscribed = window.realtimeChat.subscribeToConversation(
+                conversationId,
+                (messages) => {
+                    displayMessages(messages);
+                    // Auto-scroll al recibir nuevos mensajes
+                    const messagesContainer = document.getElementById('messagesContainer');
+                    if (messagesContainer) {
+                        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                    }
+                }
+            );
+
+            if (subscribed && isInitialLoad) {
+                // Marcar como leído
+                window.realtimeChat.markAsRead(conversationId);
+                console.log('🔔 Escuchando mensajes en tiempo real');
+            }
+
+            // Si la suscripción falló, cargar mensajes manualmente como fallback
+            if (!subscribed) {
+                console.warn('⚠️ Fallback: cargando mensajes via API');
+                await loadMessagesViaAPI(conversationId, isInitialLoad);
+            }
+        } else {
+            // Modo polling (fallback)
+            await loadMessagesViaAPI(conversationId, isInitialLoad);
         }
         
     } catch (error) {
         console.error('Error loading conversation:', error);
-        if (!isPolling) {
+        if (isInitialLoad) {
             showNotification('Error al cargar mensajes', 'error');
         }
+    }
+}
+
+// Función auxiliar para cargar mensajes via API (modo polling)
+async function loadMessagesViaAPI(conversationId, isInitialLoad) {
+    const data = await apiService.makeRequest(`/conversations/${conversationId}/messages`, {
+        method: 'GET'
+    });
+    
+    if (!data.success) {
+        throw new Error(data.error || 'Failed to load messages');
+    }
+    
+    const messages = data.data?.messages || [];
+    displayMessages(messages);
+    
+    if (isInitialLoad) {
+        lastMessageCount = messages.length;
+        
+        apiService.makeRequest(`/conversations/${conversationId}/mark-read`, {
+            method: 'PATCH'
+        }).catch(err => console.error('Error marking as read:', err));
+        
+        // Iniciar polling como fallback
+        startMessagePolling();
     }
 }
 
@@ -928,24 +972,34 @@ async function sendMessage() {
     }
     
     try {
-        // Send message using APIService
-        const data = await apiService.makeRequest(`/conversations/${currentConversation}/messages`, {
-            method: 'POST',
-            body: JSON.stringify({ text })
-        });
-        
-        if (!data.success) {
-            throw new Error(data.error || 'Failed to send message');
-        }
-        
+        // Limpiar input inmediatamente para mejor UX
         messageInput.value = '';
-        
-        // Reload messages immediately after sending
-        await openConversation(currentConversation, false);
+
+        // Si tenemos real-time, el mensaje aparecerá automáticamente via listener
+        if (useRealtimeChat && window.realtimeChat) {
+            await window.realtimeChat.sendMessage(currentConversation, text);
+            // El listener de Firestore actualizará los mensajes automáticamente
+            console.log('✉️ Mensaje enviado (real-time)');
+        } else {
+            // Modo polling: enviar y recargar
+            const data = await apiService.makeRequest(`/conversations/${currentConversation}/messages`, {
+                method: 'POST',
+                body: JSON.stringify({ text })
+            });
+            
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to send message');
+            }
+            
+            // Recargar mensajes
+            await openConversation(currentConversation, false);
+        }
         
     } catch (error) {
         console.error('Error sending message:', error);
         showNotification('Error al enviar mensaje', 'error');
+        // Restaurar el texto si falló
+        messageInput.value = text;
     }
 }
 
@@ -954,15 +1008,23 @@ function filterConversations(searchTerm) {
     console.log('Filtering conversations:', searchTerm);
 }
 
-// Real-time message polling
+// Real-time message polling (fallback cuando Firestore no está disponible)
 let messagePollingInterval = null;
 let lastMessageCount = 0;
 
 function startMessagePolling() {
+    // Si estamos usando real-time, no necesitamos polling
+    if (useRealtimeChat && window.realtimeChat?.isRealtime()) {
+        console.log('⏭️ Polling omitido - usando real-time');
+        return;
+    }
+
     // Clear any existing interval
     if (messagePollingInterval) {
         clearInterval(messagePollingInterval);
     }
+    
+    console.log('🔄 Iniciando polling (fallback mode)');
     
     // Poll every 3 seconds for real-time feel
     messagePollingInterval = setInterval(async () => {
@@ -999,6 +1061,12 @@ function stopMessagePolling() {
         clearInterval(messagePollingInterval);
         messagePollingInterval = null;
         lastMessageCount = 0;
+        console.log('⏹️ Polling detenido');
+    }
+    
+    // También limpiar el listener de real-time si existe
+    if (window.realtimeChat) {
+        window.realtimeChat.unsubscribeFromConversation();
     }
 }
 

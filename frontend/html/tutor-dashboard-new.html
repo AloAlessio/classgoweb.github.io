@@ -656,9 +656,26 @@
         });
     </script>
 
+    <!-- Firebase SDK for Real-time Chat -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script>
+        // Initialize Firebase for real-time features
+        const firebaseConfig = {
+            apiKey: "AIzaSyA5D1UCIQ2nzNwVPHFoub46uflwM4PKzmo",
+            authDomain: "classgo-324dd.firebaseapp.com",
+            projectId: "classgo-324dd",
+            storageBucket: "classgo-324dd.firebasestorage.app",
+            messagingSenderId: "1079859024722",
+            appId: "1:1079859024722:web:13b56092cc678063c6e08b"
+        };
+        firebase.initializeApp(firebaseConfig);
+    </script>
+
     <!-- Load API version without Firebase -->
     <script src="/js/api-service.js?v=22"></script>
-    <script src="/js/tutor-dashboard-api.js?v=22"></script>
+    <script src="/js/realtime-chat.js?v=1"></script>
+    <script src="/js/tutor-dashboard-api.js?v=23"></script>
 </body>
 
 </html>
