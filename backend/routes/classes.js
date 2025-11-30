@@ -91,6 +91,7 @@ router.get('/', asyncHandler(async (req, res) => {
                 subject: classData.subject,
                 difficulty: classData.difficulty,
                 scheduledAt: classData.scheduledAt,
+                deadline: classData.deadline,
                 duration: classData.duration,
                 maxStudents: classData.maxStudents,
                 currentStudents: classData.students ? classData.students.length : 0,

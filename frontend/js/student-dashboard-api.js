@@ -344,8 +344,8 @@ function filterCourses(searchTerm = '') {
                         <span class="detail-value">${course.currentStudents || 0}/${course.maxStudents || 20} estudiantes</span>
                     </div>
                     <div class="detail-item">
-                        <span class="detail-label">Fecha programada</span>
-                        <span class="detail-value">${formatDate(course.scheduledAt)}</span>
+                        <span class="detail-label">Fecha de entrega</span>
+                        <span class="detail-value">${formatDate(course.deadline || course.scheduledAt)}</span>
                     </div>
                 </div>
                 
@@ -477,8 +477,8 @@ function displayMyCourses() {
                         <span class="detail-value">${course.currentStudents || 0} inscritos</span>
                     </div>
                     <div class="detail-item">
-                        <span class="detail-label">Fecha programada</span>
-                        <span class="detail-value">${formatDate(course.scheduledAt)}</span>
+                        <span class="detail-label">Fecha de entrega</span>
+                        <span class="detail-value">${formatDate(course.deadline || course.scheduledAt)}</span>
                     </div>
                 </div>
                 
@@ -1285,9 +1285,10 @@ function renderCalendar() {
                        currentMonth === today.getMonth() && 
                        currentYear === today.getFullYear();
         
-        // Check if there are classes on this day
+        // Check if there are classes with deadline on this day
         const classesThisDay = classesInMonth.filter(cls => {
-            const classDate = getDateFromScheduleStudent(cls.scheduledAt);
+            // Use deadline for calendar, fallback to scheduledAt
+            const classDate = getDateFromScheduleStudent(cls.deadline || cls.scheduledAt);
             if (!classDate) return false;
             return classDate.getDate() === day;
         });
@@ -1320,7 +1321,8 @@ function getClassesForMonthStudent(year, month) {
     }
     
     return myCourses.filter(course => {
-        const classDate = getDateFromScheduleStudent(course.scheduledAt);
+        // Use deadline for calendar, fallback to scheduledAt
+        const classDate = getDateFromScheduleStudent(course.deadline || course.scheduledAt);
         if (!classDate) return false;
         return classDate.getFullYear() === year && classDate.getMonth() === month;
     });
@@ -1351,20 +1353,20 @@ function getClassStatusStudent(classes, currentDate) {
     const now = new Date();
     now.setHours(0, 0, 0, 0);
     
-    // Check if any class is overdue (past and not completed)
+    // Check if any class is overdue (past deadline and not completed)
     const hasOverdue = classes.some(cls => {
-        const classDate = getDateFromScheduleStudent(cls.scheduledAt);
+        const classDate = getDateFromScheduleStudent(cls.deadline || cls.scheduledAt);
         return classDate < now && cls.status !== 'completed' && cls.status !== 'cancelled';
     });
     
     if (hasOverdue) return 'atrasada';
     
-    // Check if class is soon (within 2 days)
+    // Check if deadline is soon (within 2 days)
     const twoDaysFromNow = new Date(now);
     twoDaysFromNow.setDate(twoDaysFromNow.getDate() + 2);
     
     const isSoon = classes.some(cls => {
-        const classDate = getDateFromScheduleStudent(cls.scheduledAt);
+        const classDate = getDateFromScheduleStudent(cls.deadline || cls.scheduledAt);
         return classDate >= now && classDate <= twoDaysFromNow && cls.status === 'scheduled';
     });
     
@@ -1377,7 +1379,8 @@ function getClassStatusStudent(classes, currentDate) {
 function showDayClassesStudent(day, month, year) {
     const classesInMonth = getClassesForMonthStudent(year, month);
     const classesThisDay = classesInMonth.filter(cls => {
-        const classDate = getDateFromScheduleStudent(cls.scheduledAt);
+        // Use deadline for calendar, fallback to scheduledAt
+        const classDate = getDateFromScheduleStudent(cls.deadline || cls.scheduledAt);
         if (!classDate) return false;
         return classDate.getDate() === day;
     });
@@ -1389,7 +1392,7 @@ function showDayClassesStudent(day, month, year) {
     
     // Update modal title
     document.getElementById('dayClassesTitle').textContent = 
-        `Clases del ${day} de ${monthNames[month]} ${year}`;
+        `Entregas del ${day} de ${monthNames[month]} ${year}`;
     
     // Generate HTML for each class with status badge
     const classesHTML = classesThisDay.map(cls => {
@@ -1410,7 +1413,7 @@ function showDayClassesStudent(day, month, year) {
                     </span>
                 </div>
                 <div class="day-class-info">
-                    <span>🕒 ${formatDate(cls.scheduledAt)}</span>
+                    <span>📅 Fecha de entrega: ${formatDate(cls.deadline || cls.scheduledAt)}</span>
                 </div>
             </div>
         `;
