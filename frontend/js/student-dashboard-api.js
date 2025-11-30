@@ -504,6 +504,11 @@ function displayMyCourses() {
                             <span>🎮</span> Jugar
                         </button>`
                     }
+                    ${course.enrollmentStatus === 'completed' || (course.bestGradeOutOf10 && course.bestGradeOutOf10 >= 6) ? 
+                        `<button class="btn-certificate" onclick="generateCourseCertificate(${JSON.stringify(course).replace(/"/g, '&quot;')})">
+                            <span>🎓</span> Certificado
+                        </button>` : ''
+                    }
                     <button class="btn-leave-course" onclick="leaveCourse('${course.id}')">
                         <span>🚪</span> Abandonar
                     </button>
@@ -750,8 +755,8 @@ async function loadProgress() {
                                     <span>🎮</span> Practicar
                                 </button>`
                             }
-                            ${course.enrollmentStatus === 'completed' ? 
-                                `<button class="btn-progress-action btn-certificate">
+                            ${course.enrollmentStatus === 'completed' || (course.bestGradeOutOf10 && course.bestGradeOutOf10 >= 6) ? 
+                                `<button class="btn-progress-action btn-certificate" onclick="generateCourseCertificate(${JSON.stringify(course).replace(/"/g, '&quot;')})">
                                     <span>🏆</span> Certificado
                                 </button>` : ''
                             }
