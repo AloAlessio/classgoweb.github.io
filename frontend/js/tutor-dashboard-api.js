@@ -1825,11 +1825,11 @@ async function clearChatHistory(conversationId) {
     if (!confirmed) return;
 
     try {
-        const data = await apiService.makeRequest(`/conversations/${conversationId}/messages`, {
+        const response = await apiService.makeRequest(`/conversations/${conversationId}/messages`, {
             method: 'DELETE'
         });
 
-        if (data.success) {
+        if (response && response.success) {
             showNotification('success', 'Historial de chat eliminado');
             
             // Clear messages display
@@ -1845,11 +1845,12 @@ async function clearChatHistory(conversationId) {
             // Reload conversations list to update last message
             await loadConversations();
         } else {
-            throw new Error(data.error || 'Error al eliminar historial');
+            const errorMsg = response?.error || 'Error al eliminar historial';
+            throw new Error(typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg);
         }
     } catch (error) {
         console.error('Error clearing chat history:', error);
-        showNotification('error', 'Error al eliminar historial');
+        showNotification('error', error.message || 'Error al eliminar historial');
     }
 }
 
