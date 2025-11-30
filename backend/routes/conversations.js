@@ -467,4 +467,136 @@ router.patch('/:conversationId/mark-read', authenticateUser, asyncHandler(async 
     }
 }));
 
+/**
+ * @route   DELETE /api/conversations/:conversationId/messages
+ * @desc    Delete all messages in a conversation (clear chat history)
+ * @access  Private
+ */
+router.delete('/:conversationId/messages', authenticateUser, asyncHandler(async (req, res) => {
+    const { conversationId } = req.params;
+    const { uid } = req.user;
+
+    try {
+        const conversationRef = admin.firestore()
+            .collection('conversations')
+            .doc(conversationId);
+
+        const conversationDoc = await conversationRef.get();
+
+        if (!conversationDoc.exists) {
+            return res.status(404).json({
+                success: false,
+                error: 'Conversation not found'
+            });
+        }
+
+        const conversationData = conversationDoc.data();
+        if (!conversationData.participants.includes(uid)) {
+            return res.status(403).json({
+                success: false,
+                error: 'Access denied. You are not a participant in this conversation.'
+            });
+        }
+
+        // Get all messages in the conversation
+        const messagesSnapshot = await conversationRef
+            .collection('messages')
+            .get();
+
+        // Delete all messages in batches (Firestore limit is 500 per batch)
+        const batch = admin.firestore().batch();
+        let deleteCount = 0;
+
+        messagesSnapshot.docs.forEach((doc) => {
+            batch.delete(doc.ref);
+            deleteCount++;
+        });
+
+        if (deleteCount > 0) {
+            await batch.commit();
+        }
+
+        // Update conversation metadata
+        await conversationRef.update({
+            lastMessage: null,
+            lastMessageTime: admin.firestore.FieldValue.serverTimestamp(),
+            [`unreadCount.${conversationData.participants[0]}`]: 0,
+            [`unreadCount.${conversationData.participants[1]}`]: 0
+        });
+
+        console.log(`🗑️ Deleted ${deleteCount} messages from conversation ${conversationId}`);
+
+        res.json({
+            success: true,
+            message: `Chat history cleared. ${deleteCount} messages deleted.`,
+            data: {
+                deletedCount: deleteCount
+            }
+        });
+
+    } catch (error) {
+        console.error('Error deleting messages:', error);
+        throw error;
+    }
+}));
+
+/**
+ * @route   DELETE /api/conversations/:conversationId
+ * @desc    Delete entire conversation (including all messages)
+ * @access  Private
+ */
+router.delete('/:conversationId', authenticateUser, asyncHandler(async (req, res) => {
+    const { conversationId } = req.params;
+    const { uid } = req.user;
+
+    try {
+        const conversationRef = admin.firestore()
+            .collection('conversations')
+            .doc(conversationId);
+
+        const conversationDoc = await conversationRef.get();
+
+        if (!conversationDoc.exists) {
+            return res.status(404).json({
+                success: false,
+                error: 'Conversation not found'
+            });
+        }
+
+        const conversationData = conversationDoc.data();
+        if (!conversationData.participants.includes(uid)) {
+            return res.status(403).json({
+                success: false,
+                error: 'Access denied. You are not a participant in this conversation.'
+            });
+        }
+
+        // Delete all messages first
+        const messagesSnapshot = await conversationRef
+            .collection('messages')
+            .get();
+
+        const batch = admin.firestore().batch();
+        messagesSnapshot.docs.forEach((doc) => {
+            batch.delete(doc.ref);
+        });
+
+        // Delete the conversation document
+        batch.delete(conversationRef);
+
+        await batch.commit();
+
+        console.log(`🗑️ Deleted conversation ${conversationId} and all its messages`);
+
+        res.json({
+            success: true,
+            message: 'Conversation deleted successfully'
+        });
+
+    } catch (error) {
+        console.error('Error deleting conversation:', error);
+        throw error;
+    }
+}));
+
 module.exports = router;

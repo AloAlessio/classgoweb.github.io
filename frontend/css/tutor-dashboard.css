@@ -994,6 +994,7 @@ body {
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 15px;
 }
 
@@ -1005,12 +1006,39 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
+    flex: 1;
 }
 
 .chat-header h4::before {
     content: '💬';
     font-size: 22px;
     animation: pulse 2s ease-in-out infinite;
+}
+
+/* Delete Chat Button */
+.btn-delete-chat {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #fca5a5;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-delete-chat:hover {
+    background: rgba(239, 68, 68, 0.4);
+    border-color: rgba(239, 68, 68, 0.5);
+    color: #fecaca;
+    transform: scale(1.05);
+}
+
+.btn-delete-chat:active {
+    transform: scale(0.95);
 }
 
 @keyframes pulse {
@@ -1673,9 +1701,12 @@ body {
     flex-direction: column;
 }
 
-.chat-header {
+.messages-main .chat-header {
     padding: 20px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .chat-messages {

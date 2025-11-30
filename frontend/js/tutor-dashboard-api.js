@@ -1453,11 +1453,16 @@ async function startConversation(otherUserId, otherUserName) {
             throw new Error('No conversation ID returned');
         }
         
-        // Update chat header with contact name
+        // Update chat header with contact name and delete button
         const chatHeader = document.querySelector('.chat-header');
         if (chatHeader) {
             chatHeader.style.display = 'block';
-            chatHeader.innerHTML = `<h4>Chat con ${otherUserName}</h4>`;
+            chatHeader.innerHTML = `
+                <h4>Chat con ${otherUserName}</h4>
+                <button class="btn-delete-chat" onclick="clearChatHistory('${conversationId}')" title="Eliminar historial">
+                    🗑️
+                </button>
+            `;
         }
         
         // Open the conversation
@@ -1805,6 +1810,47 @@ function showNotification(type, message) {
         notification.classList.remove('show');
         setTimeout(() => notification.remove(), 300);
     }, 3000);
+}
+
+// Clear chat history function
+async function clearChatHistory(conversationId) {
+    if (!conversationId) {
+        showNotification('warning', 'No hay conversación activa');
+        return;
+    }
+
+    // Confirm before deleting
+    const confirmed = confirm('¿Estás seguro de que quieres eliminar todo el historial de este chat? Esta acción no se puede deshacer.');
+    
+    if (!confirmed) return;
+
+    try {
+        const data = await apiService.makeRequest(`/conversations/${conversationId}/messages`, {
+            method: 'DELETE'
+        });
+
+        if (data.success) {
+            showNotification('success', 'Historial de chat eliminado');
+            
+            // Clear messages display
+            const messagesContainer = document.getElementById('messagesContainer');
+            if (messagesContainer) {
+                messagesContainer.innerHTML = `
+                    <div class="no-messages">
+                        <p>💬 No hay mensajes. ¡Inicia la conversación!</p>
+                    </div>
+                `;
+            }
+            
+            // Reload conversations list to update last message
+            await loadConversations();
+        } else {
+            throw new Error(data.error || 'Error al eliminar historial');
+        }
+    } catch (error) {
+        console.error('Error clearing chat history:', error);
+        showNotification('error', 'Error al eliminar historial');
+    }
 }
 
 function logout() {
