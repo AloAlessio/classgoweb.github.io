@@ -2619,28 +2619,91 @@ function restartGame() {
 function saveScore() {
     const playerName = document.getElementById('playerName').value.trim() || 'Anónimo';
     
-    // Get existing scores
+    // Get existing scores for local leaderboard
     let scores = JSON.parse(localStorage.getItem('archerScores_' + classSubject) || '[]');
     
-    // Add new score
-    scores.push({
+    const scoreData = {
         name: playerName,
         score: score,
         correct: correctAnswers,
         total: totalQuestions,
         combo: bestCombo,
         date: new Date().toLocaleDateString()
-    });
+    };
+    
+    // Add new score to local storage
+    scores.push(scoreData);
     
     // Sort and keep top 10
     scores.sort((a, b) => b.score - a.score);
     scores = scores.slice(0, 10);
     
-    // Save
+    // Save locally
     localStorage.setItem('archerScores_' + classSubject, JSON.stringify(scores));
+    
+    // Also save to backend (for admin statistics)
+    saveScoreToBackend(playerName);
     
     alert('¡Puntuación guardada!');
     showLeaderboard();
+}
+
+// Save score to backend for admin panel
+async function saveScoreToBackend(playerName) {
+    try {
+        const API_BASE = window.location.origin;
+        const token = localStorage.getItem('authToken');
+        
+        console.log('📊 Saving score to backend...');
+        console.log('📊 Data:', {
+            playerName,
+            score,
+            correctAnswers,
+            totalQuestions,
+            bestCombo,
+            subject: classSubject,
+            difficulty
+        });
+        
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        
+        // Add auth token if user is logged in
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+            console.log('📊 User is logged in');
+        } else {
+            console.log('📊 Playing as guest');
+        }
+        
+        const response = await fetch(`${API_BASE}/api/stats/game-scores`, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({
+                playerName: playerName,
+                score: score,
+                correctAnswers: correctAnswers,
+                totalQuestions: totalQuestions,
+                bestCombo: bestCombo,
+                subject: classSubject,
+                difficulty: difficulty
+            })
+        });
+        
+        console.log('📊 Response status:', response.status);
+        const data = await response.json();
+        console.log('📊 Response data:', data);
+        
+        if (data.success) {
+            console.log('✅ Score saved to backend:', data.data.id);
+        } else {
+            console.warn('⚠️ Could not save score to backend:', data.error);
+        }
+    } catch (error) {
+        console.error('❌ Error saving score to backend:', error);
+        // Fail silently - local storage is the backup
+    }
 }
 
 function showLeaderboard() {
@@ -2740,6 +2803,16 @@ function generateQuestions() {
         'astronomía': 'Astronomía',
         'astronomia': 'Astronomía',
         'astronomy': 'Astronomía',
+        'espacio': 'Astronomía',
+        'planetas': 'Astronomía',
+        'universo': 'Astronomía',
+        
+        // Corridos Tumbados (EXCLUSIVO - Solo Home)
+        'corridos tumbados': 'Corridos Tumbados',
+        'corridos': 'Corridos Tumbados',
+        'tumbados': 'Corridos Tumbados',
+        'peso pluma': 'Corridos Tumbados',
+        'regional mexicano': 'Corridos Tumbados',
         
         // Biología (EXCLUSIVO)
         'biología': 'Biología',
@@ -2806,7 +2879,22 @@ function generateQuestions() {
         'informatica': 'Programación',
         'tecnología': 'Programación',
         'tecnologia': 'Programación',
-        'coding': 'Programación'
+        'coding': 'Programación',
+        
+        // Películas (EXCLUSIVO - Solo Home)
+        'películas': 'Películas',
+        'peliculas': 'Películas',
+        'movies': 'Películas',
+        'cine': 'Películas',
+        'films': 'Películas',
+        'marvel': 'Películas',
+        'dc': 'Películas',
+        
+        // Cultura General (EXCLUSIVO - Solo Home)
+        'cultura general': 'Cultura General',
+        'cultura': 'Cultura General',
+        'general knowledge': 'Cultura General',
+        'trivia': 'Cultura General'
     };
     
     // Try to match class name to a subject
@@ -3363,6 +3451,167 @@ function getQuestionBank() {
         { subject: 'Francés', difficulty: 'hard', question: '¿Qué significa "Bouleversant"?', options: ['Aburrido', 'Conmovedor', 'Triste', 'Alegre'], correctAnswer: 1 },
         { subject: 'Francés', difficulty: 'hard', question: 'Complete: "Si j\'avais su, je ___ venu"', options: ['suis', 'serais', 'serai', 'étais'], correctAnswer: 1 },
         { subject: 'Francés', difficulty: 'hard', question: '¿Qué es una "liaison" en francés?', options: ['Enlace de sonidos', 'Tipo de acento', 'Conjugación', 'Género'], correctAnswer: 0 },
-        { subject: 'Francés', difficulty: 'hard', question: '¿Qué significa "Atterrir"?', options: ['Despegar', 'Aterrizar', 'Volar', 'Caer'], correctAnswer: 1 }
+        { subject: 'Francés', difficulty: 'hard', question: '¿Qué significa "Atterrir"?', options: ['Despegar', 'Aterrizar', 'Volar', 'Caer'], correctAnswer: 1 },
+        
+        // =====================================================
+        // ASTRONOMÍA - PREGUNTAS EXCLUSIVAS
+        // =====================================================
+        
+        // Astronomía - Fácil
+        { subject: 'Astronomía', difficulty: 'easy', question: '¿Cuál es el planeta más cercano al Sol?', options: ['Venus', 'Mercurio', 'Tierra', 'Marte'], correctAnswer: 1 },
+        { subject: 'Astronomía', difficulty: 'easy', question: '¿Cómo se llama nuestra galaxia?', options: ['Andrómeda', 'Vía Láctea', 'Sombrero', 'Remolino'], correctAnswer: 1 },
+        { subject: 'Astronomía', difficulty: 'easy', question: '¿Cuántos planetas hay en el Sistema Solar?', options: ['7', '8', '9', '10'], correctAnswer: 1 },
+        { subject: 'Astronomía', difficulty: 'easy', question: '¿Qué planeta es conocido como el planeta rojo?', options: ['Venus', 'Júpiter', 'Marte', 'Saturno'], correctAnswer: 2 },
+        { subject: 'Astronomía', difficulty: 'easy', question: '¿Qué es el Sol?', options: ['Un planeta', 'Una estrella', 'Un satélite', 'Un cometa'], correctAnswer: 1 },
+        { subject: 'Astronomía', difficulty: 'easy', question: '¿Cuál es el satélite natural de la Tierra?', options: ['Fobos', 'Europa', 'Luna', 'Titán'], correctAnswer: 2 },
+        { subject: 'Astronomía', difficulty: 'easy', question: '¿Qué planeta tiene anillos visibles?', options: ['Marte', 'Júpiter', 'Urano', 'Saturno'], correctAnswer: 3 },
+        { subject: 'Astronomía', difficulty: 'easy', question: '¿Cuál es el planeta más grande?', options: ['Saturno', 'Júpiter', 'Urano', 'Neptuno'], correctAnswer: 1 },
+        { subject: 'Astronomía', difficulty: 'easy', question: '¿Qué estudia la astronomía?', options: ['Animales', 'Plantas', 'El universo', 'El clima'], correctAnswer: 2 },
+        { subject: 'Astronomía', difficulty: 'easy', question: '¿Qué es una constelación?', options: ['Un planeta', 'Grupo de estrellas', 'Un cometa', 'Una luna'], correctAnswer: 1 },
+        
+        // Astronomía - Media
+        { subject: 'Astronomía', difficulty: 'medium', question: '¿Cuánto tarda la Tierra en orbitar al Sol?', options: ['30 días', '365 días', '24 horas', '12 meses'], correctAnswer: 1 },
+        { subject: 'Astronomía', difficulty: 'medium', question: '¿Qué es un año luz?', options: ['Tiempo', 'Distancia', 'Velocidad', 'Energía'], correctAnswer: 1 },
+        { subject: 'Astronomía', difficulty: 'medium', question: '¿Cuál es la estrella más cercana a la Tierra?', options: ['Sirio', 'Alfa Centauri', 'El Sol', 'Betelgeuse'], correctAnswer: 2 },
+        { subject: 'Astronomía', difficulty: 'medium', question: '¿Qué causa las fases de la Luna?', options: ['Sombra de la Tierra', 'Posición relativa Sol-Luna', 'Rotación lunar', 'Eclipses'], correctAnswer: 1 },
+        { subject: 'Astronomía', difficulty: 'medium', question: '¿Qué es un agujero negro?', options: ['Estrella brillante', 'Región de gravedad extrema', 'Planeta oscuro', 'Nube de gas'], correctAnswer: 1 },
+        { subject: 'Astronomía', difficulty: 'medium', question: '¿Cuántas lunas tiene Júpiter?', options: ['4', '16', '79+', '2'], correctAnswer: 2 },
+        { subject: 'Astronomía', difficulty: 'medium', question: '¿Qué es una supernova?', options: ['Estrella naciente', 'Explosión de estrella', 'Planeta nuevo', 'Cometa grande'], correctAnswer: 1 },
+        { subject: 'Astronomía', difficulty: 'medium', question: '¿Por qué Plutón ya no es planeta?', options: ['Es muy frío', 'No limpia su órbita', 'Es muy pequeño', 'Está muy lejos'], correctAnswer: 1 },
+        { subject: 'Astronomía', difficulty: 'medium', question: '¿Qué es la Vía Láctea?', options: ['Una estrella', 'Nuestra galaxia', 'Un planeta', 'Un cometa'], correctAnswer: 1 },
+        { subject: 'Astronomía', difficulty: 'medium', question: '¿Qué planeta gira de lado?', options: ['Marte', 'Venus', 'Urano', 'Neptuno'], correctAnswer: 2 },
+        
+        // Astronomía - Difícil
+        { subject: 'Astronomía', difficulty: 'hard', question: '¿Cuál es la temperatura del núcleo del Sol?', options: ['1 millón °C', '5 millones °C', '15 millones °C', '100 millones °C'], correctAnswer: 2 },
+        { subject: 'Astronomía', difficulty: 'hard', question: '¿Qué es la materia oscura?', options: ['Polvo espacial', 'Materia que no emite luz', 'Agujeros negros', 'Estrellas muertas'], correctAnswer: 1 },
+        { subject: 'Astronomía', difficulty: 'hard', question: '¿Cuántos años tiene el universo aproximadamente?', options: ['4.5 mil millones', '10 mil millones', '13.8 mil millones', '20 mil millones'], correctAnswer: 2 },
+        { subject: 'Astronomía', difficulty: 'hard', question: '¿Qué es una enana blanca?', options: ['Estrella en formación', 'Resto de estrella muerta', 'Planeta pequeño', 'Satélite'], correctAnswer: 1 },
+        { subject: 'Astronomía', difficulty: 'hard', question: '¿Qué es el horizonte de eventos?', options: ['Amanecer en Marte', 'Límite de agujero negro', 'Eclipse solar', 'Zona habitable'], correctAnswer: 1 },
+        { subject: 'Astronomía', difficulty: 'hard', question: '¿Qué luna de Saturno tiene atmósfera densa?', options: ['Encélado', 'Titán', 'Mimas', 'Rea'], correctAnswer: 1 },
+        { subject: 'Astronomía', difficulty: 'hard', question: '¿Qué es un púlsar?', options: ['Cometa brillante', 'Estrella de neutrones giratoria', 'Planeta de gas', 'Asteroide magnético'], correctAnswer: 1 },
+        { subject: 'Astronomía', difficulty: 'hard', question: '¿Qué sonda llegó a Plutón en 2015?', options: ['Voyager 1', 'Cassini', 'New Horizons', 'Juno'], correctAnswer: 2 },
+        { subject: 'Astronomía', difficulty: 'hard', question: '¿Cuánto tarda la luz del Sol en llegar a la Tierra?', options: ['1 segundo', '8 minutos', '1 hora', '24 horas'], correctAnswer: 1 },
+        { subject: 'Astronomía', difficulty: 'hard', question: '¿Qué es la radiación de Hawking?', options: ['Luz solar', 'Emisión de agujeros negros', 'Rayos gamma', 'Ondas de radio'], correctAnswer: 1 },
+        
+        // =====================================================
+        // CORRIDOS TUMBADOS - PREGUNTAS EXCLUSIVAS (SOLO HOME)
+        // =====================================================
+        
+        // Corridos Tumbados - Fácil
+        { subject: 'Corridos Tumbados', difficulty: 'easy', question: '¿Cuál es el nombre real de Peso Pluma?', options: ['Jesús Ortiz', 'Hassan Emilio', 'Natanael Cano', 'Junior H'], correctAnswer: 1 },
+        { subject: 'Corridos Tumbados', difficulty: 'easy', question: '¿Quién canta "Ella Baila Sola"?', options: ['Fuerza Regida', 'Peso Pluma y Eslabon Armado', 'Junior H', 'Natanael Cano'], correctAnswer: 1 },
+        { subject: 'Corridos Tumbados', difficulty: 'easy', question: '¿De qué país son la mayoría de artistas de corridos tumbados?', options: ['Colombia', 'México', 'España', 'Argentina'], correctAnswer: 1 },
+        { subject: 'Corridos Tumbados', difficulty: 'easy', question: '¿Qué instrumento es común en los corridos tumbados?', options: ['Piano', 'Requinto', 'Violín', 'Saxofón'], correctAnswer: 1 },
+        { subject: 'Corridos Tumbados', difficulty: 'easy', question: '¿Quién es conocido como el "Doble P"?', options: ['Junior H', 'Natanael Cano', 'Peso Pluma', 'Fuerza Regida'], correctAnswer: 2 },
+        { subject: 'Corridos Tumbados', difficulty: 'easy', question: '¿Qué grupo canta "Bebe Dame"?', options: ['Peso Pluma', 'Fuerza Regida', 'Los Tucanes', 'Banda MS'], correctAnswer: 1 },
+        { subject: 'Corridos Tumbados', difficulty: 'easy', question: '¿Cuál es el género musical padre de los corridos tumbados?', options: ['Reggaetón', 'Corrido tradicional', 'Rock', 'Pop'], correctAnswer: 1 },
+        { subject: 'Corridos Tumbados', difficulty: 'easy', question: '¿Quién canta "AMG"?', options: ['Junior H', 'Natanael Cano', 'Peso Pluma', 'Eslabón Armado'], correctAnswer: 2 },
+        { subject: 'Corridos Tumbados', difficulty: 'easy', question: '¿De qué estado de México es Peso Pluma?', options: ['Sinaloa', 'Jalisco', 'Sonora', 'Chihuahua'], correctAnswer: 1 },
+        { subject: 'Corridos Tumbados', difficulty: 'easy', question: '¿Quién es el líder de Fuerza Regida?', options: ['Natanael Cano', 'Jesús Ortiz Paz', 'Junior H', 'Luis R Conriquez'], correctAnswer: 1 },
+        
+        // Corridos Tumbados - Media
+        { subject: 'Corridos Tumbados', difficulty: 'medium', question: '¿En qué año nació Peso Pluma?', options: ['1995', '1999', '2001', '2003'], correctAnswer: 1 },
+        { subject: 'Corridos Tumbados', difficulty: 'medium', question: '¿Qué canción hizo famoso a Natanael Cano?', options: ['Ella Baila Sola', 'Soy El Diablo', 'AMG', 'Bebe Dame'], correctAnswer: 1 },
+        { subject: 'Corridos Tumbados', difficulty: 'medium', question: '¿Con quién colaboró Peso Pluma en "La Bebe"?', options: ['Yng Lvcas', 'Bad Bunny', 'Natanael Cano', 'Fuerza Regida'], correctAnswer: 0 },
+        { subject: 'Corridos Tumbados', difficulty: 'medium', question: '¿Qué significa "tumbado" en el contexto del género?', options: ['Acostado/relajado', 'Caído', 'Triste', 'Bailando'], correctAnswer: 0 },
+        { subject: 'Corridos Tumbados', difficulty: 'medium', question: '¿Quién canta "Por las Noches"?', options: ['Peso Pluma', 'Junior H', 'Fuerza Regida', 'Eslabón Armado'], correctAnswer: 0 },
+        { subject: 'Corridos Tumbados', difficulty: 'medium', question: '¿Qué álbum de Peso Pluma incluye "Ella Baila Sola"?', options: ['Génesis', 'Éxodo', 'ÉXODO', 'Doble P'], correctAnswer: 1 },
+        { subject: 'Corridos Tumbados', difficulty: 'medium', question: '¿Quién es Brian Tovar?', options: ['Eslabón Armado', 'Fuerza Regida', 'Los Elegantes', 'Legado 7'], correctAnswer: 0 },
+        { subject: 'Corridos Tumbados', difficulty: 'medium', question: '¿Qué artista fusionó corridos con trap primero?', options: ['Peso Pluma', 'Natanael Cano', 'Junior H', 'Fuerza Regida'], correctAnswer: 1 },
+        { subject: 'Corridos Tumbados', difficulty: 'medium', question: '¿En qué año explotó "Ella Baila Sola"?', options: ['2021', '2022', '2023', '2024'], correctAnswer: 2 },
+        { subject: 'Corridos Tumbados', difficulty: 'medium', question: '¿Quién canta "Ch y la Pizza"?', options: ['Natanael Cano', 'Fuerza Regida', 'Peso Pluma', 'Junior H'], correctAnswer: 1 },
+        
+        // Corridos Tumbados - Difícil
+        { subject: 'Corridos Tumbados', difficulty: 'hard', question: '¿Cuál fue el primer álbum de estudio de Peso Pluma?', options: ['Ah y Qué?', 'Efectos Secundarios', 'Génesis', 'ÉXODO'], correctAnswer: 1 },
+        { subject: 'Corridos Tumbados', difficulty: 'hard', question: '¿En qué ciudad de Jalisco nació Peso Pluma?', options: ['Guadalajara', 'Zapopan', 'Tlaquepaque', 'Tonalá'], correctAnswer: 0 },
+        { subject: 'Corridos Tumbados', difficulty: 'hard', question: '¿Quién produjo "Ella Baila Sola"?', options: ['Edgar Barrera', 'Tainy', 'Sky Rompiendo', 'Ovy On The Drums'], correctAnswer: 0 },
+        { subject: 'Corridos Tumbados', difficulty: 'hard', question: '¿En qué premios ganó Peso Pluma en 2023?', options: ['Grammy Latino', 'MTV', 'Billboard', 'Todos los anteriores'], correctAnswer: 3 },
+        { subject: 'Corridos Tumbados', difficulty: 'hard', question: '¿Cuál es el nombre completo de Junior H?', options: ['Antonio Herrera', 'Antonio Salazar', 'Antonio Valdez', 'Antonio Chávez'], correctAnswer: 0 },
+        { subject: 'Corridos Tumbados', difficulty: 'hard', question: '¿Qué significa "belicon" en los corridos?', options: ['Fiesta', 'Problema/bronca', 'Dinero', 'Carro'], correctAnswer: 1 },
+        { subject: 'Corridos Tumbados', difficulty: 'hard', question: '¿Quién colaboró con Peso Pluma en "LADY GAGA"?', options: ['Gabito Ballesteros', 'Junior H', 'Natanael Cano', 'Fuerza Regida'], correctAnswer: 0 },
+        { subject: 'Corridos Tumbados', difficulty: 'hard', question: '¿Cuál fue la primera canción viral de Fuerza Regida?', options: ['Radicamos en South Central', 'Bebe Dame', 'Ch y la Pizza', 'TQM'], correctAnswer: 0 },
+        { subject: 'Corridos Tumbados', difficulty: 'hard', question: '¿En qué festival de USA tocó Peso Pluma en 2023?', options: ['Lollapalooza', 'Coachella', 'Rolling Loud', 'Austin City Limits'], correctAnswer: 1 },
+        { subject: 'Corridos Tumbados', difficulty: 'hard', question: '¿Quién es el compositor de "Siempre Pendientes"?', options: ['Edgar Barrera', 'Peso Pluma', 'Luis R Conriquez', 'Natanael Cano'], correctAnswer: 2 },
+        
+        // =====================================================
+        // PELÍCULAS - PREGUNTAS EXCLUSIVAS (SOLO HOME)
+        // =====================================================
+        
+        // Películas - Fácil
+        { subject: 'Películas', difficulty: 'easy', question: '¿Quién interpreta a Spider-Man en las películas más recientes de Marvel?', options: ['Tobey Maguire', 'Andrew Garfield', 'Tom Holland', 'Miles Morales'], correctAnswer: 2 },
+        { subject: 'Películas', difficulty: 'easy', question: '¿Cómo se llama el personaje principal de "Avatar"?', options: ['Jake Sully', 'John Smith', 'Jack Sparrow', 'James Bond'], correctAnswer: 0 },
+        { subject: 'Películas', difficulty: 'easy', question: '¿Qué superhéroe tiene un martillo llamado Mjolnir?', options: ['Iron Man', 'Thor', 'Capitán América', 'Hulk'], correctAnswer: 1 },
+        { subject: 'Películas', difficulty: 'easy', question: '¿Qué película de Disney tiene a una princesa que congela todo?', options: ['Moana', 'Frozen', 'Enredados', 'Valiente'], correctAnswer: 1 },
+        { subject: 'Películas', difficulty: 'easy', question: '¿Quién es el actor principal de "Rápidos y Furiosos"?', options: ['Jason Statham', 'The Rock', 'Vin Diesel', 'Paul Walker'], correctAnswer: 2 },
+        { subject: 'Películas', difficulty: 'easy', question: '¿Cómo se llama el ogro verde de DreamWorks?', options: ['Fiona', 'Burro', 'Shrek', 'Farquaad'], correctAnswer: 2 },
+        { subject: 'Películas', difficulty: 'easy', question: '¿Qué actor interpreta a Jack Sparrow?', options: ['Orlando Bloom', 'Johnny Depp', 'Brad Pitt', 'Leonardo DiCaprio'], correctAnswer: 1 },
+        { subject: 'Películas', difficulty: 'easy', question: '¿Cuál es el nombre del león en "El Rey León"?', options: ['Scar', 'Mufasa', 'Simba', 'Timon'], correctAnswer: 2 },
+        { subject: 'Películas', difficulty: 'easy', question: '¿Qué película ganó 11 Oscars en 1998?', options: ['Gladiador', 'Titanic', 'Matrix', 'Braveheart'], correctAnswer: 1 },
+        { subject: 'Películas', difficulty: 'easy', question: '¿Quién dirige la saga de "Avengers: Endgame"?', options: ['Zack Snyder', 'Christopher Nolan', 'Hermanos Russo', 'Joss Whedon'], correctAnswer: 2 },
+        
+        // Películas - Media
+        { subject: 'Películas', difficulty: 'medium', question: '¿En qué año se estrenó la primera película de "Harry Potter"?', options: ['1999', '2001', '2003', '2005'], correctAnswer: 1 },
+        { subject: 'Películas', difficulty: 'medium', question: '¿Cuál es la película más taquillera de la historia (2023)?', options: ['Avengers: Endgame', 'Avatar', 'Titanic', 'Avatar: The Way of Water'], correctAnswer: 1 },
+        { subject: 'Películas', difficulty: 'medium', question: '¿Quién interpretó al Joker en "El Caballero de la Noche"?', options: ['Jared Leto', 'Joaquin Phoenix', 'Heath Ledger', 'Jack Nicholson'], correctAnswer: 2 },
+        { subject: 'Películas', difficulty: 'medium', question: '¿Cuántas películas tiene la saga de "Misión Imposible"?', options: ['5', '6', '7', '8'], correctAnswer: 2 },
+        { subject: 'Películas', difficulty: 'medium', question: '¿Qué actor NO ha interpretado a Batman?', options: ['Ben Affleck', 'Christian Bale', 'Ryan Reynolds', 'Robert Pattinson'], correctAnswer: 2 },
+        { subject: 'Películas', difficulty: 'medium', question: '¿Cuál es el verdadero nombre de Black Widow?', options: ['Wanda Maximoff', 'Natasha Romanoff', 'Carol Danvers', 'Hope Van Dyne'], correctAnswer: 1 },
+        { subject: 'Películas', difficulty: 'medium', question: '¿Qué película de 2023 es sobre un científico atómico?', options: ['Barbie', 'Oppenheimer', 'Dune 2', 'Napoleon'], correctAnswer: 1 },
+        { subject: 'Películas', difficulty: 'medium', question: '¿Quién dirigió "Parásitos" ganadora del Oscar?', options: ['Hayao Miyazaki', 'Bong Joon-ho', 'Park Chan-wook', 'Wong Kar-wai'], correctAnswer: 1 },
+        { subject: 'Películas', difficulty: 'medium', question: '¿Cuántas gemas del infinito existen en Marvel?', options: ['4', '5', '6', '7'], correctAnswer: 2 },
+        { subject: 'Películas', difficulty: 'medium', question: '¿Qué actor protagoniza "John Wick"?', options: ['Tom Cruise', 'Keanu Reeves', 'Liam Neeson', 'Jason Statham'], correctAnswer: 1 },
+        
+        // Películas - Difícil
+        { subject: 'Películas', difficulty: 'hard', question: '¿Cuál fue la primera película de Pixar?', options: ['Buscando a Nemo', 'Monsters Inc', 'Toy Story', 'Bichos'], correctAnswer: 2 },
+        { subject: 'Películas', difficulty: 'hard', question: '¿Quién ganó el Oscar a Mejor Actor en 2023?', options: ['Austin Butler', 'Brendan Fraser', 'Colin Farrell', 'Bill Nighy'], correctAnswer: 1 },
+        { subject: 'Películas', difficulty: 'hard', question: '¿En qué película Margot Robbie NO aparece?', options: ['Barbie', 'El Lobo de Wall Street', 'La La Land', 'Escuadrón Suicida'], correctAnswer: 2 },
+        { subject: 'Películas', difficulty: 'hard', question: '¿Cuál fue la última película de Chadwick Boseman?', options: ['Black Panther 2', 'Ma Rainey\'s Black Bottom', 'Da 5 Bloods', '21 Bridges'], correctAnswer: 1 },
+        { subject: 'Películas', difficulty: 'hard', question: '¿Qué director tiene más premios Oscar?', options: ['Steven Spielberg', 'Martin Scorsese', 'John Ford', 'Francis Ford Coppola'], correctAnswer: 2 },
+        { subject: 'Películas', difficulty: 'hard', question: '¿En qué año se fundó Marvel Studios?', options: ['1993', '1996', '1998', '2005'], correctAnswer: 1 },
+        { subject: 'Películas', difficulty: 'hard', question: '¿Qué película tiene el récord de más nominaciones al Oscar sin ganar?', options: ['El Color Púrpura', 'Gangs of New York', 'The Turning Point', 'True Grit'], correctAnswer: 0 },
+        { subject: 'Películas', difficulty: 'hard', question: '¿Quién escribió el guión de "Pulp Fiction"?', options: ['Martin Scorsese', 'Quentin Tarantino', 'David Fincher', 'Christopher Nolan'], correctAnswer: 1 },
+        { subject: 'Películas', difficulty: 'hard', question: '¿Cuál es la película más cara de la historia?', options: ['Avatar 2', 'Piratas del Caribe 4', 'Avengers: Endgame', 'Star Wars: Force Awakens'], correctAnswer: 1 },
+        { subject: 'Películas', difficulty: 'hard', question: '¿Qué película animada fue la primera en ganar Mejor Película en los Globos de Oro?', options: ['Up', 'Toy Story 3', 'La Bella y la Bestia', 'El Rey León'], correctAnswer: 2 },
+        
+        // =====================================================
+        // CULTURA GENERAL - PREGUNTAS EXCLUSIVAS (SOLO HOME)
+        // =====================================================
+        
+        // Cultura General - Fácil
+        { subject: 'Cultura General', difficulty: 'easy', question: '¿Cuál es el país más grande del mundo?', options: ['China', 'Estados Unidos', 'Rusia', 'Canadá'], correctAnswer: 2 },
+        { subject: 'Cultura General', difficulty: 'easy', question: '¿Cuántos continentes hay en el mundo?', options: ['5', '6', '7', '8'], correctAnswer: 2 },
+        { subject: 'Cultura General', difficulty: 'easy', question: '¿Cuál es el océano más grande?', options: ['Atlántico', 'Índico', 'Ártico', 'Pacífico'], correctAnswer: 3 },
+        { subject: 'Cultura General', difficulty: 'easy', question: '¿En qué país está la Torre Eiffel?', options: ['Italia', 'España', 'Francia', 'Alemania'], correctAnswer: 2 },
+        { subject: 'Cultura General', difficulty: 'easy', question: '¿Cuál es el animal terrestre más grande?', options: ['Jirafa', 'Rinoceronte', 'Elefante', 'Hipopótamo'], correctAnswer: 2 },
+        { subject: 'Cultura General', difficulty: 'easy', question: '¿Cuántos colores tiene el arcoíris?', options: ['5', '6', '7', '8'], correctAnswer: 2 },
+        { subject: 'Cultura General', difficulty: 'easy', question: '¿Cuál es la capital de España?', options: ['Barcelona', 'Sevilla', 'Madrid', 'Valencia'], correctAnswer: 2 },
+        { subject: 'Cultura General', difficulty: 'easy', question: '¿Qué planeta es conocido como el planeta rojo?', options: ['Venus', 'Marte', 'Júpiter', 'Saturno'], correctAnswer: 1 },
+        { subject: 'Cultura General', difficulty: 'easy', question: '¿Cuál es el río más largo del mundo?', options: ['Amazonas', 'Nilo', 'Misisipi', 'Yangtsé'], correctAnswer: 1 },
+        { subject: 'Cultura General', difficulty: 'easy', question: '¿Quién pintó la Mona Lisa?', options: ['Picasso', 'Van Gogh', 'Leonardo da Vinci', 'Miguel Ángel'], correctAnswer: 2 },
+        
+        // Cultura General - Media
+        { subject: 'Cultura General', difficulty: 'medium', question: '¿En qué año llegó el hombre a la Luna?', options: ['1965', '1969', '1972', '1975'], correctAnswer: 1 },
+        { subject: 'Cultura General', difficulty: 'medium', question: '¿Cuál es el hueso más largo del cuerpo humano?', options: ['Húmero', 'Tibia', 'Fémur', 'Radio'], correctAnswer: 2 },
+        { subject: 'Cultura General', difficulty: 'medium', question: '¿Quién escribió "Don Quijote de la Mancha"?', options: ['Lope de Vega', 'Cervantes', 'Calderón', 'Quevedo'], correctAnswer: 1 },
+        { subject: 'Cultura General', difficulty: 'medium', question: '¿Cuál es el metal más abundante en la corteza terrestre?', options: ['Hierro', 'Aluminio', 'Cobre', 'Oro'], correctAnswer: 1 },
+        { subject: 'Cultura General', difficulty: 'medium', question: '¿Cuántos jugadores tiene un equipo de fútbol en cancha?', options: ['9', '10', '11', '12'], correctAnswer: 2 },
+        { subject: 'Cultura General', difficulty: 'medium', question: '¿En qué continente está Egipto?', options: ['Asia', 'África', 'Europa', 'Medio Oriente'], correctAnswer: 1 },
+        { subject: 'Cultura General', difficulty: 'medium', question: '¿Qué invento se atribuye a Thomas Edison?', options: ['Teléfono', 'Bombilla eléctrica', 'Radio', 'Televisión'], correctAnswer: 1 },
+        { subject: 'Cultura General', difficulty: 'medium', question: '¿Cuál es la moneda de Japón?', options: ['Yuan', 'Won', 'Yen', 'Rupia'], correctAnswer: 2 },
+        { subject: 'Cultura General', difficulty: 'medium', question: '¿Quién fue el primer presidente de Estados Unidos?', options: ['Abraham Lincoln', 'Thomas Jefferson', 'George Washington', 'John Adams'], correctAnswer: 2 },
+        { subject: 'Cultura General', difficulty: 'medium', question: '¿Cuál es el elemento químico más abundante en el universo?', options: ['Oxígeno', 'Carbono', 'Helio', 'Hidrógeno'], correctAnswer: 3 },
+        
+        // Cultura General - Difícil
+        { subject: 'Cultura General', difficulty: 'hard', question: '¿En qué año cayó el Muro de Berlín?', options: ['1987', '1989', '1991', '1993'], correctAnswer: 1 },
+        { subject: 'Cultura General', difficulty: 'hard', question: '¿Cuál es la montaña más alta de América?', options: ['Monte McKinley', 'Aconcagua', 'Chimborazo', 'Monte Logan'], correctAnswer: 1 },
+        { subject: 'Cultura General', difficulty: 'hard', question: '¿Quién formuló la teoría de la relatividad?', options: ['Newton', 'Einstein', 'Hawking', 'Bohr'], correctAnswer: 1 },
+        { subject: 'Cultura General', difficulty: 'hard', question: '¿Cuántos países hay en la Unión Europea (2024)?', options: ['25', '27', '28', '30'], correctAnswer: 1 },
+        { subject: 'Cultura General', difficulty: 'hard', question: '¿Qué tratado terminó la Primera Guerra Mundial?', options: ['Versalles', 'Westfalia', 'París', 'Viena'], correctAnswer: 0 },
+        { subject: 'Cultura General', difficulty: 'hard', question: '¿Cuál es el país con más idiomas oficiales?', options: ['India', 'Sudáfrica', 'Suiza', 'Bolivia'], correctAnswer: 1 },
+        { subject: 'Cultura General', difficulty: 'hard', question: '¿Quién escribió "El origen de las especies"?', options: ['Mendel', 'Darwin', 'Lamarck', 'Wallace'], correctAnswer: 1 },
+        { subject: 'Cultura General', difficulty: 'hard', question: '¿Cuál es la empresa más valiosa del mundo (2024)?', options: ['Amazon', 'Microsoft', 'Apple', 'Google'], correctAnswer: 2 },
+        { subject: 'Cultura General', difficulty: 'hard', question: '¿En qué año se fundó la ONU?', options: ['1942', '1945', '1948', '1950'], correctAnswer: 1 },
+        { subject: 'Cultura General', difficulty: 'hard', question: '¿Cuál es el desierto más grande del mundo?', options: ['Sahara', 'Gobi', 'Antártida', 'Arábigo'], correctAnswer: 2 }
     ];
 }
+

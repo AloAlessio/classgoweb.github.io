@@ -546,123 +546,64 @@ function updateDynamicSection(isAuthenticated) {
     
     if (!sectionTitle || !contentSection) return;
     
-    if (isAuthenticated) {
-        const userRole = getUserRole();
-        
-        // Different content for tutors vs students
-        if (userRole === USER_ROLES.TUTOR || userRole === USER_ROLES.ADMIN) {
-            // Show popular topics for tutors to consider teaching
-            sectionTitle.textContent = 'Temas Más Demandados por Estudiantes';
-            contentSection.innerHTML = `
-                <div class="class-item" style="cursor: pointer;">
-                    <div class="class-info">
-                        <div class="class-subject">🔥 Matemáticas Avanzadas</div>
-                        <div class="class-teacher">Alta demanda - Considera crear una clase</div>
-                        <div class="class-time">📊 +1,250 estudiantes buscando tutores</div>
-                    </div>
-                    <button class="join-button" style="background: linear-gradient(135deg, #f59e0b, #d97706);">Crear Clase</button>
-                </div>
-                <div class="class-item" style="cursor: pointer;">
-                    <div class="class-info">
-                        <div class="class-subject">🌍 Inglés para Negocios</div>
-                        <div class="class-teacher">Tendencia creciente en idiomas</div>
-                        <div class="class-time">📊 +980 estudiantes interesados</div>
-                    </div>
-                    <button class="join-button">Crear Clase</button>
-                </div>
-                <div class="class-item" style="cursor: pointer;">
-                    <div class="class-info">
-                        <div class="class-subject">💻 Programación Python</div>
-                        <div class="class-teacher">El lenguaje más demandado actualmente</div>
-                        <div class="class-time">📊 +850 estudiantes buscando tutores</div>
-                    </div>
-                    <button class="join-button">Crear Clase</button>
-                </div>
-                <div class="class-item" style="cursor: pointer;">
-                    <div class="class-info">
-                        <div class="class-subject">🧪 Química Orgánica</div>
-                        <div class="class-teacher">Popular en ciencias naturales</div>
-                        <div class="class-time">📊 +720 estudiantes interesados</div>
-                    </div>
-                    <button class="join-button">Crear Clase</button>
-                </div>
-            `;
-        } else {
-            // Show popular topics for students
-            sectionTitle.textContent = 'Lo Más Popular';
-            contentSection.innerHTML = `
-                <div class="class-item" style="cursor: pointer;">
-                    <div class="class-info">
-                        <div class="class-subject">🔥 Matemáticas Avanzadas</div>
-                        <div class="class-teacher">El tema más solicitado este mes</div>
-                        <div class="class-time">📊 +1,250 estudiantes interesados</div>
-                    </div>
-                    <button class="join-button">Explorar</button>
-                </div>
-                <div class="class-item" style="cursor: pointer;">
-                    <div class="class-info">
-                        <div class="class-subject">🌍 Inglés para Negocios</div>
-                        <div class="class-teacher">Tendencia en idiomas profesionales</div>
-                        <div class="class-time">📊 +980 estudiantes interesados</div>
-                    </div>
-                    <button class="join-button">Explorar</button>
-                </div>
-                <div class="class-item" style="cursor: pointer;">
-                    <div class="class-info">
-                        <div class="class-subject">💻 Programación Python</div>
-                        <div class="class-teacher">El lenguaje más demandado actualmente</div>
-                        <div class="class-time">📊 +850 estudiantes interesados</div>
-                    </div>
-                    <button class="join-button">Explorar</button>
-                </div>
-                <div class="class-item" style="cursor: pointer;">
-                    <div class="class-info">
-                        <div class="class-subject">🧪 Química Orgánica</div>
-                        <div class="class-teacher">Popular en ciencias naturales</div>
-                        <div class="class-time">📊 +720 estudiantes interesados</div>
-                    </div>
-                    <button class="join-button">Explorar</button>
-                </div>
-            `;
-        }
-    } else {
-        // Show features/benefits for guests
-        sectionTitle.textContent = '¿Por Qué Elegir ClassGo?';
-        contentSection.innerHTML = `
-            <div class="class-item" style="cursor: default;" onclick="event.stopPropagation();">
-                <div class="class-info">
-                    <div class="class-subject">🎓 Tutores Expertos</div>
-                    <div class="class-teacher">Aprende con profesionales certificados</div>
-                    <div class="class-time">Más de 250 tutores disponibles en múltiples áreas</div>
-                </div>
-                <button class="join-button" onclick="goToLogin(); event.stopPropagation();">Comenzar</button>
+    // Always show games section for everyone (guests, students, tutors)
+    sectionTitle.textContent = '🎮 ¡Pon a Prueba tu Conocimiento!';
+    contentSection.innerHTML = `
+        <div class="class-item game-item" style="cursor: pointer;" onclick="playGameTopic('Astronomía', 'astronomy')">
+            <div class="class-info">
+                <div class="class-subject">🚀 Astronomía</div>
+                <div class="class-teacher">Explora el universo y sus secretos</div>
+                <div class="class-time">🌟 Planetas, estrellas, galaxias y más</div>
             </div>
-            <div class="class-item" style="cursor: default;" onclick="event.stopPropagation();">
-                <div class="class-info">
-                    <div class="class-subject">⏰ Horarios Flexibles</div>
-                    <div class="class-teacher">Clases cuando tú quieras</div>
-                    <div class="class-time">Programa tus sesiones según tu disponibilidad</div>
-                </div>
-                <button class="join-button" onclick="goToLogin(); event.stopPropagation();">Comenzar</button>
+            <button class="join-button" style="background: linear-gradient(135deg, #6366f1, #4f46e5);">¡Jugar!</button>
+        </div>
+        <div class="class-item game-item" style="cursor: pointer;" onclick="playGameTopic('Programación', 'programming')">
+            <div class="class-info">
+                <div class="class-subject">💻 Programación</div>
+                <div class="class-teacher">Demuestra tus habilidades de código</div>
+                <div class="class-time">🔧 Variables, funciones, algoritmos</div>
             </div>
-            <div class="class-item" style="cursor: default;" onclick="event.stopPropagation();">
-                <div class="class-info">
-                    <div class="class-subject">💻 Clases Interactivas</div>
-                    <div class="class-teacher">Tecnología de última generación</div>
-                    <div class="class-time">Pizarra digital, video en HD y chat en tiempo real</div>
-                </div>
-                <button class="join-button" onclick="goToLogin(); event.stopPropagation();">Comenzar</button>
+            <button class="join-button" style="background: linear-gradient(135deg, #10b981, #059669);">¡Jugar!</button>
+        </div>
+        <div class="class-item game-item" style="cursor: pointer;" onclick="playGameTopic('Inglés', 'english')">
+            <div class="class-info">
+                <div class="class-subject">🌍 Inglés</div>
+                <div class="class-teacher">Practica tu vocabulario y gramática</div>
+                <div class="class-time">📚 Vocabulario, frases, traducción</div>
             </div>
-            <div class="class-item" style="cursor: default;" onclick="event.stopPropagation();">
-                <div class="class-info">
-                    <div class="class-subject">📈 Seguimiento de Progreso</div>
-                    <div class="class-teacher">Monitorea tu avance</div>
-                    <div class="class-time">Reportes detallados y estadísticas personalizadas</div>
-                </div>
-                <button class="join-button" onclick="goToLogin(); event.stopPropagation();">Comenzar</button>
+            <button class="join-button" style="background: linear-gradient(135deg, #f59e0b, #d97706);">¡Jugar!</button>
+        </div>
+        <div class="class-item game-item" style="cursor: pointer;" onclick="playGameTopic('Corridos Tumbados', 'corridos')">
+            <div class="class-info">
+                <div class="class-subject">🎤 Corridos Tumbados</div>
+                <div class="class-teacher">¿Cuánto sabes del género del momento?</div>
+                <div class="class-time">🔥 Peso Pluma, Natanael, Junior H y más</div>
             </div>
-        `;
-    }
+            <button class="join-button" style="background: linear-gradient(135deg, #ec4899, #db2777);">¡Jugar!</button>
+        </div>
+        <div class="class-item game-item" style="cursor: pointer;" onclick="playGameTopic('Películas', 'movies')">
+            <div class="class-info">
+                <div class="class-subject">🎬 Películas</div>
+                <div class="class-teacher">Demuestra tu conocimiento del cine</div>
+                <div class="class-time">🎥 Marvel, DC, Netflix y más</div>
+            </div>
+            <button class="join-button" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">¡Jugar!</button>
+        </div>
+        <div class="class-item game-item" style="cursor: pointer;" onclick="playGameTopic('Cultura General', 'culture')">
+            <div class="class-info">
+                <div class="class-subject">🧠 Cultura General</div>
+                <div class="class-teacher">Pon a prueba tus conocimientos</div>
+                <div class="class-time">🌎 Historia, geografía, ciencia y más</div>
+            </div>
+            <button class="join-button" style="background: linear-gradient(135deg, #14b8a6, #0d9488);">¡Jugar!</button>
+        </div>
+    `;
+}
+
+// Function to play game with specific topic
+function playGameTopic(topicName, topicId) {
+    // Navigate to archer game with the selected topic
+    window.location.href = `/archer-game?subject=${encodeURIComponent(topicName)}&difficulty=medium&topic=${topicId}&mode=free`;
 }
 
 // Update stats for authenticated users
@@ -1073,10 +1014,392 @@ function viewSystemStats() {
     document.getElementById('userMenuDropdown')?.remove();
     
     if (hasPermission('canViewAllStats')) {
-        showNotification('info', 'Estadísticas del sistema - Próximamente disponible');
+        showGameScoresPanel();
     } else {
         showNotification('error', 'No tienes permisos para ver estadísticas del sistema');
     }
+}
+
+// Show Game Scores Panel for Admin
+async function showGameScoresPanel() {
+    // Block body scroll
+    document.body.style.overflow = 'hidden';
+    
+    const panelHTML = `
+        <div id="gameScoresModal" style="
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(15px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            animation: fadeIn 0.3s ease-out;
+        ">
+            <div style="
+                background: linear-gradient(135deg, rgba(20, 25, 33, 0.98), rgba(13, 115, 119, 0.95));
+                backdrop-filter: blur(40px);
+                border-radius: 24px;
+                padding: 0;
+                border: 1px solid rgba(45, 212, 191, 0.3);
+                max-width: 1000px;
+                width: 95%;
+                max-height: 90vh;
+                overflow-y: auto;
+                color: white;
+                box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+            ">
+                <!-- Header -->
+                <div style="
+                    background: linear-gradient(135deg, rgba(45, 212, 191, 0.15), rgba(20, 184, 166, 0.1));
+                    border-bottom: 1px solid rgba(45, 212, 191, 0.2);
+                    padding: 24px 32px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                ">
+                    <div>
+                        <h2 style="margin: 0 0 4px 0; font-size: 24px; font-weight: 700;">🎮 Puntuaciones del Juego</h2>
+                        <p style="margin: 0; font-size: 13px; color: rgba(255,255,255,0.7);">Estadísticas de todos los jugadores</p>
+                    </div>
+                    <button onclick="closeGameScoresPanel()" style="
+                        background: rgba(255,255,255,0.1);
+                        border: none;
+                        color: white;
+                        width: 40px;
+                        height: 40px;
+                        border-radius: 12px;
+                        cursor: pointer;
+                        font-size: 20px;
+                    ">✕</button>
+                </div>
+                
+                <!-- Stats Summary -->
+                <div id="gameStatsSection" style="padding: 24px 32px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                        <div style="background: rgba(45, 212, 191, 0.1); border-radius: 16px; padding: 16px; text-align: center; border: 1px solid rgba(45, 212, 191, 0.2);">
+                            <div id="statTotalPlays" style="font-size: 28px; font-weight: 700; color: #2dd4bf;">-</div>
+                            <div style="font-size: 12px; color: rgba(255,255,255,0.7);">Partidas Totales</div>
+                        </div>
+                        <div style="background: rgba(251, 191, 36, 0.1); border-radius: 16px; padding: 16px; text-align: center; border: 1px solid rgba(251, 191, 36, 0.2);">
+                            <div id="statGuestPlays" style="font-size: 28px; font-weight: 700; color: #fbbf24;">-</div>
+                            <div style="font-size: 12px; color: rgba(255,255,255,0.7);">Invitados</div>
+                        </div>
+                        <div style="background: rgba(99, 102, 241, 0.1); border-radius: 16px; padding: 16px; text-align: center; border: 1px solid rgba(99, 102, 241, 0.2);">
+                            <div id="statUserPlays" style="font-size: 28px; font-weight: 700; color: #6366f1;">-</div>
+                            <div style="font-size: 12px; color: rgba(255,255,255,0.7);">Usuarios</div>
+                        </div>
+                        <div style="background: rgba(236, 72, 153, 0.1); border-radius: 16px; padding: 16px; text-align: center; border: 1px solid rgba(236, 72, 153, 0.2);">
+                            <div id="statTopScore" style="font-size: 28px; font-weight: 700; color: #ec4899;">-</div>
+                            <div style="font-size: 12px; color: rgba(255,255,255,0.7);">Mejor Puntaje</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Filter -->
+                    <div style="margin-bottom: 20px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+                        <select id="filterSubject" onchange="filterGameScores()" style="
+                            background: rgba(255,255,255,0.1);
+                            border: 1px solid rgba(45, 212, 191, 0.3);
+                            border-radius: 8px;
+                            color: white;
+                            padding: 8px 16px;
+                            font-size: 14px;
+                        ">
+                            <option value="">Todos los temas</option>
+                            <option value="Astronomía">🚀 Astronomía</option>
+                            <option value="Programación">💻 Programación</option>
+                            <option value="Inglés">🌍 Inglés</option>
+                            <option value="Corridos Tumbados">🎤 Corridos Tumbados</option>
+                            <option value="Películas">🎬 Películas</option>
+                            <option value="Cultura General">🧠 Cultura General</option>
+                            <option value="Matemáticas">📐 Matemáticas</option>
+                            <option value="Ciencias">🔬 Ciencias</option>
+                            <option value="Historia">📜 Historia</option>
+                        </select>
+                        <select id="filterGuest" onchange="filterGameScores()" style="
+                            background: rgba(255,255,255,0.1);
+                            border: 1px solid rgba(45, 212, 191, 0.3);
+                            border-radius: 8px;
+                            color: white;
+                            padding: 8px 16px;
+                            font-size: 14px;
+                        ">
+                            <option value="">Todos</option>
+                            <option value="true">Solo Invitados</option>
+                            <option value="false">Solo Usuarios</option>
+                        </select>
+                        <div style="flex: 1;"></div>
+                        <button onclick="clearAllGameScores()" style="
+                            background: rgba(239, 68, 68, 0.2);
+                            border: 1px solid rgba(239, 68, 68, 0.4);
+                            color: #ef4444;
+                            padding: 8px 16px;
+                            border-radius: 8px;
+                            font-size: 13px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                            gap: 6px;
+                        ">🗑️ Vaciar Tabla</button>
+                    </div>
+                    
+                    <!-- Scores Table -->
+                    <div style="background: rgba(0,0,0,0.2); border-radius: 16px; overflow: hidden;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: rgba(45, 212, 191, 0.1);">
+                                    <th style="padding: 16px; text-align: left; font-weight: 600; font-size: 13px; color: #2dd4bf;">#</th>
+                                    <th style="padding: 16px; text-align: left; font-weight: 600; font-size: 13px; color: #2dd4bf;">Jugador</th>
+                                    <th style="padding: 16px; text-align: left; font-weight: 600; font-size: 13px; color: #2dd4bf;">Tema</th>
+                                    <th style="padding: 16px; text-align: center; font-weight: 600; font-size: 13px; color: #2dd4bf;">Puntaje</th>
+                                    <th style="padding: 16px; text-align: center; font-weight: 600; font-size: 13px; color: #2dd4bf;">Correctas</th>
+                                    <th style="padding: 16px; text-align: center; font-weight: 600; font-size: 13px; color: #2dd4bf;">Tipo</th>
+                                    <th style="padding: 16px; text-align: left; font-weight: 600; font-size: 13px; color: #2dd4bf;">Fecha</th>
+                                    <th style="padding: 16px; text-align: center; font-weight: 600; font-size: 13px; color: #2dd4bf;">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="gameScoresTableBody">
+                                <tr>
+                                    <td colspan="8" style="padding: 40px; text-align: center; color: rgba(255,255,255,0.5);">
+                                        Cargando puntuaciones...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', panelHTML);
+    
+    // Load scores
+    await loadGameScores();
+}
+
+function closeGameScoresPanel() {
+    const modal = document.getElementById('gameScoresModal');
+    if (modal) modal.remove();
+    document.body.style.overflow = '';
+}
+
+let allGameScores = [];
+
+async function loadGameScores() {
+    try {
+        const token = localStorage.getItem('authToken');
+        const response = await fetch('/api/stats/game-scores/admin', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            allGameScores = data.data.scores;
+            
+            // Update stats
+            document.getElementById('statTotalPlays').textContent = data.data.statistics.totalPlays;
+            document.getElementById('statGuestPlays').textContent = data.data.statistics.guestPlays;
+            document.getElementById('statUserPlays').textContent = data.data.statistics.userPlays;
+            document.getElementById('statTopScore').textContent = data.data.statistics.topScore;
+            
+            // Render table
+            renderGameScoresTable(allGameScores);
+        } else {
+            showNotification('error', 'Error al cargar puntuaciones');
+        }
+    } catch (error) {
+        console.error('Error loading game scores:', error);
+        document.getElementById('gameScoresTableBody').innerHTML = `
+            <tr>
+                <td colspan="7" style="padding: 40px; text-align: center; color: rgba(255,255,255,0.5);">
+                    Error al cargar puntuaciones. Intenta de nuevo.
+                </td>
+            </tr>
+        `;
+    }
+}
+
+function filterGameScores() {
+    const subjectFilter = document.getElementById('filterSubject').value;
+    const guestFilter = document.getElementById('filterGuest').value;
+    
+    let filtered = [...allGameScores];
+    
+    if (subjectFilter) {
+        filtered = filtered.filter(s => s.subject === subjectFilter);
+    }
+    
+    if (guestFilter !== '') {
+        const isGuest = guestFilter === 'true';
+        filtered = filtered.filter(s => s.isGuest === isGuest);
+    }
+    
+    renderGameScoresTable(filtered);
+}
+
+// Delete a single game score
+async function deleteGameScore(scoreId) {
+    if (!confirm('¿Estás seguro de eliminar esta puntuación?')) {
+        return;
+    }
+    
+    try {
+        const token = localStorage.getItem('authToken');
+        const response = await fetch(`/api/stats/game-scores/${scoreId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification('success', 'Puntuación eliminada');
+            // Remove from local array and re-render
+            allGameScores = allGameScores.filter(s => s.id !== scoreId);
+            filterGameScores();
+            // Update stats
+            document.getElementById('statTotalPlays').textContent = allGameScores.length;
+            document.getElementById('statGuestPlays').textContent = allGameScores.filter(s => s.isGuest).length;
+            document.getElementById('statUserPlays').textContent = allGameScores.filter(s => !s.isGuest).length;
+            document.getElementById('statTopScore').textContent = allGameScores.length > 0 ? Math.max(...allGameScores.map(s => s.score)) : 0;
+        } else {
+            showNotification('error', 'Error al eliminar: ' + data.error);
+        }
+    } catch (error) {
+        console.error('Error deleting score:', error);
+        showNotification('error', 'Error al eliminar la puntuación');
+    }
+}
+
+// Clear all game scores
+async function clearAllGameScores() {
+    if (!confirm('⚠️ ¿Estás seguro de VACIAR TODA la tabla de puntuaciones?\n\nEsta acción no se puede deshacer.')) {
+        return;
+    }
+    
+    if (!confirm('🚨 CONFIRMACIÓN FINAL: ¿Realmente deseas eliminar TODAS las puntuaciones?')) {
+        return;
+    }
+    
+    try {
+        const token = localStorage.getItem('authToken');
+        const response = await fetch('/api/stats/game-scores/clear-all', {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification('success', `Se eliminaron ${data.data.deleted} puntuaciones`);
+            allGameScores = [];
+            renderGameScoresTable([]);
+            // Reset stats
+            document.getElementById('statTotalPlays').textContent = '0';
+            document.getElementById('statGuestPlays').textContent = '0';
+            document.getElementById('statUserPlays').textContent = '0';
+            document.getElementById('statTopScore').textContent = '0';
+        } else {
+            showNotification('error', 'Error al vaciar tabla: ' + data.error);
+        }
+    } catch (error) {
+        console.error('Error clearing scores:', error);
+        showNotification('error', 'Error al vaciar la tabla');
+    }
+}
+
+function renderGameScoresTable(scores) {
+    const tbody = document.getElementById('gameScoresTableBody');
+    
+    if (scores.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" style="padding: 40px; text-align: center; color: rgba(255,255,255,0.5);">
+                    No hay puntuaciones que mostrar
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    const subjectEmojis = {
+        'Astronomía': '🚀',
+        'Programación': '💻',
+        'Inglés': '🌍',
+        'Corridos Tumbados': '🎤',
+        'Películas': '🎬',
+        'Cultura General': '🧠',
+        'Matemáticas': '📐',
+        'Ciencias': '🔬',
+        'Historia': '📜',
+        'Geografía': '🌎',
+        'Biología': '🧬',
+        'Química': '⚗️',
+        'Música': '🎵',
+        'Francés': '🇫🇷'
+    };
+    
+    tbody.innerHTML = scores.map((s, index) => `
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); ${index % 2 === 0 ? 'background: rgba(255,255,255,0.02);' : ''}" data-score-id="${s.id}">
+            <td style="padding: 14px 16px; font-weight: 600; color: ${index < 3 ? '#fbbf24' : 'rgba(255,255,255,0.7)'};">
+                ${index < 3 ? ['🥇', '🥈', '🥉'][index] : index + 1}
+            </td>
+            <td style="padding: 14px 16px;">
+                <div style="font-weight: 500;">${s.playerName}</div>
+            </td>
+            <td style="padding: 14px 16px; color: rgba(255,255,255,0.8);">
+                ${subjectEmojis[s.subject] || '📚'} ${s.subject}
+            </td>
+            <td style="padding: 14px 16px; text-align: center; font-weight: 700; color: #2dd4bf;">
+                ${s.score}
+            </td>
+            <td style="padding: 14px 16px; text-align: center; color: rgba(255,255,255,0.7);">
+                ${s.correctAnswers}/${s.totalQuestions}
+            </td>
+            <td style="padding: 14px 16px; text-align: center;">
+                <span style="
+                    background: ${s.isGuest ? 'rgba(251, 191, 36, 0.2)' : 'rgba(99, 102, 241, 0.2)'};
+                    color: ${s.isGuest ? '#fbbf24' : '#6366f1'};
+                    padding: 4px 10px;
+                    border-radius: 20px;
+                    font-size: 11px;
+                    font-weight: 600;
+                ">${s.isGuest ? '👤 Invitado' : '✓ Usuario'}</span>
+            </td>
+            <td style="padding: 14px 16px; color: rgba(255,255,255,0.5); font-size: 12px;">
+                ${new Date(s.createdAt || s.date).toLocaleString('es-MX', { 
+                    day: '2-digit', 
+                    month: 'short', 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                })}
+            </td>
+            <td style="padding: 14px 16px; text-align: center;">
+                <button onclick="deleteGameScore('${s.id}')" style="
+                    background: rgba(239, 68, 68, 0.15);
+                    border: none;
+                    color: #ef4444;
+                    padding: 6px 10px;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-size: 14px;
+                " title="Eliminar">🗑️</button>
+            </td>
+        </tr>
+    `).join('');
 }
 
 // Admin Panel Functions

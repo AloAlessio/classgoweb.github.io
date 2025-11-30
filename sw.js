@@ -1,7 +1,7 @@
 // Service Worker for ClassGo PWA
 // Handles caching, offline functionality, and background sync
 
-const CACHE_NAME = 'classgo-v68-modal-sync-optimization'; // Updated: Modal state management optimized
+const CACHE_NAME = 'classgo-v71-new-game-topics'; // Updated: Added Películas and Cultura General
 const OFFLINE_URL = '/frontend/html/home.html';
 
 // Import app shell configuration

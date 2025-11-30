@@ -437,4 +437,269 @@ router.get('/dashboard/:role', asyncHandler(async (req, res) => {
     }
 }));
 
+/**
+ * @route   POST /api/stats/game-scores
+ * @desc    Save a game score (for guests and logged users)
+ * @access  Public
+ */
+router.post('/game-scores', asyncHandler(async (req, res) => {
+    try {
+        console.log('📊 Saving game score:', req.body);
+        const { playerName, score, correctAnswers, totalQuestions, bestCombo, subject, difficulty } = req.body;
+        
+        // Validate required fields
+        if (!playerName || score === undefined || !subject) {
+            console.log('❌ Missing required fields:', { playerName, score, subject });
+            return res.status(400).json({
+                success: false,
+                error: 'Missing required fields: playerName, score, subject'
+            });
+        }
+        
+        // Check if user is logged in
+        const isGuest = !req.user;
+        
+        // Create score document
+        const scoreDoc = {
+            playerName: playerName.substring(0, 50), // Limit name length
+            score: parseInt(score) || 0,
+            correctAnswers: parseInt(correctAnswers) || 0,
+            totalQuestions: parseInt(totalQuestions) || 10,
+            bestCombo: parseInt(bestCombo) || 0,
+            subject: subject,
+            difficulty: difficulty || 'medium',
+            isGuest: isGuest,
+            userId: req.user?.uid || null,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            date: new Date().toISOString()
+        };
+        
+        // Save to Firestore
+        const docRef = await admin.firestore()
+            .collection('gameScores')
+            .add(scoreDoc);
+        
+        res.json({
+            success: true,
+            message: 'Score saved successfully',
+            data: {
+                id: docRef.id,
+                ...scoreDoc,
+                createdAt: new Date().toISOString()
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error saving game score:', error);
+        throw error;
+    }
+}));
+
+/**
+ * @route   GET /api/stats/game-scores
+ * @desc    Get game scores leaderboard (top 50)
+ * @access  Public
+ */
+router.get('/game-scores', asyncHandler(async (req, res) => {
+    try {
+        const { subject, limit = 50 } = req.query;
+        
+        let query = admin.firestore()
+            .collection('gameScores')
+            .orderBy('score', 'desc')
+            .limit(parseInt(limit));
+        
+        // Filter by subject if provided
+        if (subject) {
+            query = admin.firestore()
+                .collection('gameScores')
+                .where('subject', '==', subject)
+                .orderBy('score', 'desc')
+                .limit(parseInt(limit));
+        }
+        
+        const snapshot = await query.get();
+        
+        const scores = [];
+        snapshot.forEach(doc => {
+            scores.push({
+                id: doc.id,
+                ...doc.data(),
+                createdAt: doc.data().createdAt?.toDate?.()?.toISOString() || doc.data().date
+            });
+        });
+        
+        res.json({
+            success: true,
+            data: {
+                scores,
+                total: scores.length
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error getting game scores:', error);
+        throw error;
+    }
+}));
+
+/**
+ * @route   GET /api/stats/game-scores/admin
+ * @desc    Get all game scores for admin panel with details
+ * @access  Admin only
+ */
+router.get('/game-scores/admin', requireAdmin, asyncHandler(async (req, res) => {
+    try {
+        console.log('📊 Admin requesting game scores');
+        const { subject, isGuest, startDate, endDate, limit = 100 } = req.query;
+        
+        let snapshot;
+        try {
+            // Try with orderBy first (requires index)
+            let query = admin.firestore()
+                .collection('gameScores')
+                .orderBy('createdAt', 'desc')
+                .limit(parseInt(limit));
+            
+            snapshot = await query.get();
+        } catch (indexError) {
+            // If index doesn't exist, query without ordering
+            console.log('⚠️ Index not ready, querying without order:', indexError.message);
+            snapshot = await admin.firestore()
+                .collection('gameScores')
+                .limit(parseInt(limit))
+                .get();
+        }
+        
+        let scores = [];
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            scores.push({
+                id: doc.id,
+                ...data,
+                createdAt: data.createdAt?.toDate?.()?.toISOString() || data.date
+            });
+        });
+        
+        // Apply filters in memory (Firestore has limitations on multiple where clauses)
+        if (subject) {
+            scores = scores.filter(s => s.subject === subject);
+        }
+        if (isGuest !== undefined) {
+            const guestFilter = isGuest === 'true';
+            scores = scores.filter(s => s.isGuest === guestFilter);
+        }
+        
+        // Sort by score (highest first)
+        scores.sort((a, b) => b.score - a.score);
+        
+        // Calculate statistics
+        const totalPlays = scores.length;
+        const guestPlays = scores.filter(s => s.isGuest).length;
+        const userPlays = scores.filter(s => !s.isGuest).length;
+        const averageScore = scores.length > 0 
+            ? Math.round(scores.reduce((sum, s) => sum + s.score, 0) / scores.length) 
+            : 0;
+        const topScore = scores.length > 0 ? Math.max(...scores.map(s => s.score)) : 0;
+        
+        // Get subject distribution
+        const subjectCounts = {};
+        scores.forEach(s => {
+            subjectCounts[s.subject] = (subjectCounts[s.subject] || 0) + 1;
+        });
+        
+        console.log('✅ Returning', scores.length, 'game scores to admin');
+        res.json({
+            success: true,
+            data: {
+                scores,
+                statistics: {
+                    totalPlays,
+                    guestPlays,
+                    userPlays,
+                    averageScore,
+                    topScore,
+                    subjectDistribution: subjectCounts
+                }
+            }
+        });
+        
+    } catch (error) {
+        console.error('❌ Error getting admin game scores:', error);
+        throw error;
+    }
+}));
+
+/**
+ * @route   DELETE /api/stats/game-scores/clear-all
+ * @desc    Delete all game scores (clear entire table)
+ * @access  Admin only
+ * NOTE: This route MUST be before :scoreId route
+ */
+router.delete('/game-scores/clear-all', requireAdmin, asyncHandler(async (req, res) => {
+    try {
+        console.log('🗑️ Admin clearing all game scores...');
+        
+        const snapshot = await admin.firestore()
+            .collection('gameScores')
+            .get();
+        
+        if (snapshot.empty) {
+            return res.json({
+                success: true,
+                message: 'No scores to delete',
+                data: { deleted: 0 }
+            });
+        }
+        
+        // Delete in batches (Firestore limit is 500 per batch)
+        const batch = admin.firestore().batch();
+        let count = 0;
+        
+        snapshot.docs.forEach(doc => {
+            batch.delete(doc.ref);
+            count++;
+        });
+        
+        await batch.commit();
+        
+        console.log(`✅ Deleted ${count} game scores`);
+        
+        res.json({
+            success: true,
+            message: `Deleted ${count} scores`,
+            data: { deleted: count }
+        });
+        
+    } catch (error) {
+        console.error('❌ Error clearing all game scores:', error);
+        throw error;
+    }
+}));
+
+/**
+ * @route   DELETE /api/stats/game-scores/:scoreId
+ * @desc    Delete a game score
+ * @access  Admin only
+ */
+router.delete('/game-scores/:scoreId', requireAdmin, asyncHandler(async (req, res) => {
+    try {
+        const { scoreId } = req.params;
+        
+        await admin.firestore()
+            .collection('gameScores')
+            .doc(scoreId)
+            .delete();
+        
+        res.json({
+            success: true,
+            message: 'Score deleted successfully'
+        });
+        
+    } catch (error) {
+        console.error('Error deleting game score:', error);
+        throw error;
+    }
+}));
+
 module.exports = router;

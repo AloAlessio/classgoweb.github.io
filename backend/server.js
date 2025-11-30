@@ -145,7 +145,91 @@ app.get('/archer-game', (req, res) => {
     res.sendFile(path.join(frontendPath, 'html', 'archer-game.html'));
 });
 
-// API Routes
+// Public API Routes (no authentication required)
+// Game scores - allow guests to save scores
+app.post('/api/stats/game-scores', async (req, res, next) => {
+    // Optional: Try to authenticate but don't require it
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        try {
+            const token = authHeader.split(' ')[1];
+            const { admin } = require('./config/firebaseAdmin');
+            const decoded = await admin.auth().verifyIdToken(token);
+            req.user = { uid: decoded.uid, role: decoded.role || 'alumno' };
+            console.log('📊 Game score POST - authenticated user:', decoded.uid);
+        } catch (err) {
+            // Token invalid, continue as guest
+            req.user = null;
+            console.log('📊 Game score POST - invalid token, treating as guest');
+        }
+    } else {
+        req.user = null;
+        console.log('📊 Game score POST - no token, saving as guest');
+    }
+    
+    // Handle the request directly here instead of passing to router
+    try {
+        const { admin } = require('./config/firebaseAdmin');
+        const { playerName, score, correctAnswers, totalQuestions, bestCombo, subject, difficulty } = req.body;
+        
+        console.log('📊 Saving game score:', { playerName, score, subject, isGuest: !req.user });
+        
+        // Validate required fields
+        if (!playerName || score === undefined || !subject) {
+            console.log('❌ Missing required fields:', { playerName, score, subject });
+            return res.status(400).json({
+                success: false,
+                error: 'Missing required fields: playerName, score, subject'
+            });
+        }
+        
+        // Check if user is logged in
+        const isGuest = !req.user;
+        
+        // Create score document
+        const scoreDoc = {
+            playerName: playerName.substring(0, 50),
+            score: parseInt(score) || 0,
+            correctAnswers: parseInt(correctAnswers) || 0,
+            totalQuestions: parseInt(totalQuestions) || 10,
+            bestCombo: parseInt(bestCombo) || 0,
+            subject: subject,
+            difficulty: difficulty || 'medium',
+            isGuest: isGuest,
+            userId: req.user?.uid || null,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            date: new Date().toISOString()
+        };
+        
+        // Save to Firestore
+        const docRef = await admin.firestore()
+            .collection('gameScores')
+            .add(scoreDoc);
+        
+        console.log('✅ Game score saved:', docRef.id, 'isGuest:', isGuest);
+        
+        res.json({
+            success: true,
+            message: 'Score saved successfully',
+            data: {
+                id: docRef.id,
+                ...scoreDoc,
+                createdAt: new Date().toISOString()
+            }
+        });
+    } catch (error) {
+        console.error('❌ Error saving game score:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Error saving score'
+        });
+    }
+});
+
+// Public leaderboard
+app.get('/api/stats/game-scores', statsRoutes);
+
+// API Routes (protected)
 app.use('/api/auth', authRoutes);
 app.use('/api/users', authenticateUser, userRoutes);
 app.use('/api/classes', authenticateUser, classRoutes);
