@@ -1,7 +1,7 @@
 // Service Worker for ClassGo PWA
 // Handles caching, offline functionality, and background sync
 
-const CACHE_NAME = 'classgo-v71-new-game-topics'; // Updated: Added Películas and Cultura General
+const CACHE_NAME = 'classgo-v72-rfid-autodetect'; // Updated: RFID auto-detection
 const OFFLINE_URL = '/frontend/html/home.html';
 
 // Import app shell configuration

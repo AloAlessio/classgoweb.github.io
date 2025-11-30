@@ -8,8 +8,12 @@ let currentAttendanceClassName = null;
 let attendanceCheckInterval = null;
 let lastAttendanceCount = 0;
 
-// Configuración del Arduino Bridge (IP local)
-let ARDUINO_BRIDGE_URL = localStorage.getItem('arduinoBridgeURL') || null;
+// Configuración del Arduino Bridge - AUTO-DETECCIÓN
+// El bridge SIEMPRE corre en la computadora local del estudiante
+// Por eso intentamos localhost primero (funciona tanto local como en Render)
+const DEFAULT_BRIDGE_URL = 'http://localhost:3001';
+let ARDUINO_BRIDGE_URL = localStorage.getItem('arduinoBridgeURL') || DEFAULT_BRIDGE_URL;
+let bridgeConnectionVerified = false;
 
 // Flags de control
 let isModalOpening = false;
@@ -51,33 +55,47 @@ async function openAttendanceModal(classId, className) {
     // Resetear estados
     showWaitingState();
     
-    // Verificar si ya hay una URL configurada
-    if (!ARDUINO_BRIDGE_URL) {
-        console.log('⚙️ No hay URL configurada, solicitando al usuario...');
+    // AUTO-DETECCIÓN: Intentar localhost primero (el bridge siempre es local)
+    if (!bridgeConnectionVerified) {
+        console.log('🔍 Auto-detectando Arduino Bridge...');
+        
+        // Intentar localhost:3001 primero (el default)
         try {
-            await promptForArduinoBridge();
+            await testArduinoBridgeConnection(DEFAULT_BRIDGE_URL);
+            ARDUINO_BRIDGE_URL = DEFAULT_BRIDGE_URL;
+            bridgeConnectionVerified = true;
+            console.log('✅ Bridge detectado automáticamente en localhost:3001');
         } catch (error) {
-            console.error('❌ Usuario canceló la configuración');
-            showErrorState('Necesitas configurar el lector RFID para registrar asistencia');
-            return;
-        }
-    } else {
-        // Verificar que la URL guardada sigue funcionando
-        console.log('🔍 Verificando conexión con:', ARDUINO_BRIDGE_URL);
-        try {
-            await testArduinoBridgeConnection(ARDUINO_BRIDGE_URL);
-            console.log('✅ Conexión verificada correctamente');
-        } catch (error) {
-            console.warn('⚠️ La URL guardada no responde, solicitando nueva configuración');
-            ARDUINO_BRIDGE_URL = null;
-            localStorage.removeItem('arduinoBridgeURL');
-            try {
-                await promptForArduinoBridge();
-            } catch (error) {
-                showErrorState('No se pudo conectar al lector RFID');
-                return;
+            console.log('⚠️ Bridge no encontrado en localhost, verificando configuración guardada...');
+            
+            // Si hay una URL diferente guardada, intentarla
+            const savedURL = localStorage.getItem('arduinoBridgeURL');
+            if (savedURL && savedURL !== DEFAULT_BRIDGE_URL) {
+                try {
+                    await testArduinoBridgeConnection(savedURL);
+                    ARDUINO_BRIDGE_URL = savedURL;
+                    bridgeConnectionVerified = true;
+                    console.log('✅ Bridge detectado en URL guardada:', savedURL);
+                } catch (e) {
+                    console.log('❌ URL guardada tampoco responde');
+                }
             }
         }
+    } else {
+        // Ya verificado, solo confirmar que sigue activo
+        try {
+            await testArduinoBridgeConnection(ARDUINO_BRIDGE_URL);
+        } catch (error) {
+            bridgeConnectionVerified = false;
+            console.log('⚠️ Bridge desconectado, re-detectando...');
+        }
+    }
+    
+    // Si aún no hay conexión, mostrar instrucciones simples
+    if (!bridgeConnectionVerified) {
+        showBridgeNotFoundState();
+        isModalOpening = false;
+        return;
     }
     
     // Intentar configurar el Arduino Bridge automáticamente
@@ -257,6 +275,103 @@ function showBridgeInstructions(classId, className) {
     `;
     waitingElement.innerHTML = instructionsHTML;
 }
+
+/**
+ * Mostrar estado cuando el bridge no está corriendo
+ * SIN pedir configuración manual - solo instrucciones claras
+ */
+function showBridgeNotFoundState() {
+    const waitingElement = document.getElementById('attendanceWaiting');
+    waitingElement.innerHTML = `
+        <div class="rfid-card-animation error">
+            <div class="card-pulse error-pulse"></div>
+            <div class="card-icon" style="font-size: 3rem;">🔌</div>
+        </div>
+        <h3 style="color: #f56565;">Lector RFID No Detectado</h3>
+        <p style="color: #a0aec0; margin-bottom: 1.5rem;">
+            Asegúrate de que el Arduino Bridge esté corriendo en tu computadora
+        </p>
+        
+        <div style="background: rgba(45, 212, 191, 0.1); border: 1px solid rgba(45, 212, 191, 0.3); border-radius: 12px; padding: 1rem; text-align: left; max-width: 350px; margin: 0 auto;">
+            <p style="font-weight: 600; color: #2dd4bf; margin-bottom: 0.5rem;">📋 Pasos:</p>
+            <ol style="color: #e2e8f0; font-size: 0.9rem; margin: 0; padding-left: 1.2rem;">
+                <li style="margin-bottom: 0.3rem;">Conecta el Arduino al USB</li>
+                <li style="margin-bottom: 0.3rem;">Abre la carpeta <code style="background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px;">arduino-bridge</code></li>
+                <li style="margin-bottom: 0.3rem;">Ejecuta <code style="background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px;">start-bridge.bat</code></li>
+                <li>Haz clic en "Reintentar"</li>
+            </ol>
+        </div>
+        
+        <div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <button onclick="retryBridgeConnection()" style="
+                background: linear-gradient(135deg, #2dd4bf, #14b8a6);
+                color: white;
+                border: none;
+                padding: 0.75rem 1.5rem;
+                border-radius: 8px;
+                font-weight: 600;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            ">🔄 Reintentar</button>
+            
+            <button onclick="showAdvancedConfig()" style="
+                background: rgba(255,255,255,0.1);
+                color: #a0aec0;
+                border: 1px solid rgba(255,255,255,0.2);
+                padding: 0.75rem 1.5rem;
+                border-radius: 8px;
+                font-weight: 500;
+                cursor: pointer;
+                font-size: 0.9rem;
+            ">⚙️ Configuración Avanzada</button>
+        </div>
+    `;
+    waitingElement.classList.remove('hidden');
+}
+
+/**
+ * Reintentar conexión con el bridge
+ */
+window.retryBridgeConnection = async function() {
+    bridgeConnectionVerified = false;
+    showWaitingState();
+    
+    // Intentar auto-detectar de nuevo
+    try {
+        await testArduinoBridgeConnection(DEFAULT_BRIDGE_URL);
+        ARDUINO_BRIDGE_URL = DEFAULT_BRIDGE_URL;
+        bridgeConnectionVerified = true;
+        console.log('✅ Bridge detectado!');
+        
+        // Configurar clase
+        if (currentAttendanceClassId) {
+            await configureArduinoBridge(currentAttendanceClassId);
+        }
+        
+        // Iniciar detección
+        startCardDetectionForAttendance();
+    } catch (error) {
+        console.log('❌ Bridge aún no disponible');
+        showBridgeNotFoundState();
+    }
+};
+
+/**
+ * Mostrar configuración avanzada (para IPs personalizadas)
+ */
+window.showAdvancedConfig = function() {
+    promptForArduinoBridge().then(() => {
+        bridgeConnectionVerified = true;
+        if (currentAttendanceClassId) {
+            configureArduinoBridge(currentAttendanceClassId);
+            startCardDetectionForAttendance();
+        }
+    }).catch(() => {
+        showBridgeNotFoundState();
+    });
+};
 
 /**
  * Configurar clase en Arduino Bridge automáticamente

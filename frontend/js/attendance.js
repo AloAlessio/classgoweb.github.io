@@ -1,12 +1,17 @@
 // Attendance System JavaScript - ClassGo
 // Sistema completo de asistencias con RFID
 
+// Auto-detección de Arduino Bridge
+const DEFAULT_BRIDGE_URL = 'http://localhost:3001';
+let bridgeConnectionVerified = false;
+
 class AttendanceSystem {
     constructor() {
         this.apiService = new APIService();
         this.currentClassId = null;
         this.attendances = [];
         this.selectedDate = null;
+        this.bridgeUrl = localStorage.getItem('arduinoBridgeURL') || DEFAULT_BRIDGE_URL;
         
         this.init();
     }
@@ -296,8 +301,24 @@ class AttendanceSystem {
         // Polling cada 1 segundo para verificar nuevas lecturas
         this.cardDetectionInterval = setInterval(async () => {
             try {
+                // Auto-detectar bridge si no está verificado
+                if (!bridgeConnectionVerified) {
+                    try {
+                        const testResponse = await fetch(`${DEFAULT_BRIDGE_URL}/status`, {
+                            signal: AbortSignal.timeout(2000)
+                        });
+                        if (testResponse.ok) {
+                            this.bridgeUrl = DEFAULT_BRIDGE_URL;
+                            bridgeConnectionVerified = true;
+                            console.log('✅ Bridge auto-detectado en localhost:3001');
+                        }
+                    } catch (e) {
+                        // Silencioso - bridge no disponible
+                    }
+                }
+                
                 // Intentar obtener el último UID detectado del Arduino Bridge
-                const response = await fetch('http://localhost:3001/status');
+                const response = await fetch(`${this.bridgeUrl}/status`);
                 
                 if (response.ok) {
                     const data = await response.json();
