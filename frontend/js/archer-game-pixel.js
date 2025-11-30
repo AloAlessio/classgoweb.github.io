@@ -25,7 +25,7 @@ let bgMusicGain = null;
 
 // 🎵 Background Music MP3
 let bgMusic = null;
-let musicVolume = 0.3; // Default 30%
+let musicVolume = 0.1; // Default 10% - música de fondo suave
 const BG_MUSIC_URL = '../assets/audio/waka-waka.mp3';
 
 // Initialize background music
