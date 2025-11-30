@@ -1843,7 +1843,7 @@ async function clearChatHistory(conversationId) {
             }
             
             // Reload conversations list to update last message
-            await loadConversations();
+            await loadMessages();
         } else {
             const errorMsg = response?.error || 'Error al eliminar historial';
             throw new Error(typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg);
