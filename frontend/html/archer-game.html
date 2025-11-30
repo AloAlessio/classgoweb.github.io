@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Knowledge Arrow - ClassGo</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <link rel="stylesheet" href="../css/archer-game-pixel.css?v=85">
+    <link rel="stylesheet" href="../css/archer-game-pixel.css?v=86">
 </head>
 <body>
     <!-- SVG Filter for CRT Curve Effect -->
@@ -31,14 +31,16 @@
     <div class="game-container" id="gameContainer">
         <!-- Header -->
         <div class="game-header">
-            <button class="back-btn" onclick="goBack()">
-                <span>←</span> Volver
-            </button>
-            <div class="game-title">
-                <h1>🏹 Knowledge Arrow</h1>
-                <p class="subject-tag" id="subjectTag">General</p>
+            <div class="header-top">
+                <button class="back-btn" onclick="goBack()">
+                    <span>←</span> Volver
+                </button>
+                <div class="game-title">
+                    <h1>🏹 Knowledge Arrow</h1>
+                    <span class="subject-tag" id="subjectTag">General</span>
+                </div>
             </div>
-            <div class="stats-display">
+            <div class="header-stats">
                 <div class="stat-item">
                     <span class="stat-icon">🎯</span>
                     <span class="stat-value" id="score">0</span>
@@ -47,12 +49,13 @@
                     <span class="stat-icon">🔥</span>
                     <span class="stat-value" id="combo">x1</span>
                 </div>
-                <!-- Sound Controls -->
+            </div>
+            <div class="header-controls">
                 <button class="sound-btn" id="soundToggle" onclick="toggleSound()" title="Efectos de sonido">
                     🔊
                 </button>
                 <button class="pause-btn" onclick="togglePause()" title="Pausar">
-                    <span>⏸</span>
+                    ⏸
                 </button>
             </div>
         </div>

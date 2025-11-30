@@ -59,42 +59,72 @@ body::before {
 
 /* Header - Pixel style */
 .game-header {
-    background: #0a0a0a;
-    border: 4px solid #1a1a1a;
-    padding: 15px;
+    background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
+    border: 4px solid #2a2a2a;
+    padding: 12px 20px;
     margin-bottom: 20px;
-    box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.8);
+    box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.8),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    flex-wrap: wrap;
 }
 
-.header-content {
+.header-top {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 30px;
+    gap: 15px;
+    flex: 1;
+    min-width: 200px;
+}
+
+.header-stats {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex: 1;
+}
+
+.header-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
 }
 
 .game-title {
     display: flex;
     align-items: center;
-    gap: 15px;
-    flex: 1;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.game-title h1 {
+    font-size: 14px;
+    color: #FFD700;
+    text-shadow: 3px 3px 0 #8B4513;
+    margin: 0;
+    white-space: nowrap;
 }
 
 .back-button,
 .back-btn {
-    background: #8B4513;
-    border: 3px solid #5C2E0A;
+    background: linear-gradient(180deg, #8B4513 0%, #5C2E0A 100%);
+    border: 3px solid #3d1f08;
     color: #FFF;
     padding: 10px 16px;
     cursor: pointer;
     font-family: 'Press Start 2P', monospace;
     font-size: 9px;
     text-decoration: none;
-    display: inline-block;
-    box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.4);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
     transition: all 0.1s;
-    margin-right: 20px;
+    white-space: nowrap;
 }
 
 .back-button:hover,
@@ -106,44 +136,44 @@ body::before {
 
 .back-button:active,
 .back-btn:active {
-    transform: translate(5px, 5px);
+    transform: translate(4px, 4px);
     box-shadow: none;
     background: #6B3410;
 }
 
-.back-button span,
-.back-btn span {
-    margin-right: 5px;
-}
-
-.title-text h1 {
-    font-size: 16px;
-    color: #FFD700;
-    text-shadow: 3px 3px 0 #8B4513;
-    margin: 0;
-}
-
 .subject-tag {
-    background: #4CAF50;
-    border: 3px solid #2E7D32;
+    background: linear-gradient(180deg, #4CAF50 0%, #2E7D32 100%);
+    border: 3px solid #1B5E20;
     color: #FFF;
-    padding: 5px 10px;
-    font-size: 10px;
-    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.3);
+    padding: 6px 12px;
+    font-size: 9px;
+    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    white-space: nowrap;
 }
 
 /* Game stats - Pixel blocks */
-.game-stats {
+.game-stats,
+.header-stats {
     display: flex;
-    gap: 15px;
+    gap: 12px;
 }
 
 .stat-item {
-    background: #424242;
-    border: 3px solid #212121;
-    padding: 8px 12px;
+    background: linear-gradient(180deg, #424242 0%, #2d2d2d 100%);
+    border: 3px solid #1a1a1a;
+    padding: 8px 14px;
     text-align: center;
-    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.3);
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 70px;
+}
+
+.stat-icon {
+    font-size: 16px;
 }
 
 .stat-label {
@@ -1015,18 +1045,36 @@ body::before {
     }
     
     .game-header {
-        padding: 12px;
+        padding: 10px 12px;
         margin-bottom: 15px;
         border-width: 3px;
+        flex-direction: column;
+        gap: 10px;
     }
     
-    .header-content {
-        gap: 15px;
+    .header-top {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .header-stats {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .header-controls {
+        position: absolute;
+        top: 10px;
+        right: 12px;
+    }
+    
+    .game-header {
+        position: relative;
     }
     
     .game-title {
         flex-direction: column;
-        gap: 8px;
+        gap: 6px;
         align-items: flex-start;
     }
     
@@ -1041,24 +1089,18 @@ body::before {
     
     .back-button,
     .back-btn {
-        padding: 10px 16px;
+        padding: 10px 14px;
         font-size: 8px;
-        margin-right: 10px;
         min-height: 44px;
-    }
-    
-    .stats-display {
-        width: 100%;
-        justify-content: space-between;
-    }
-    
-    .game-stats {
-        gap: 8px;
     }
     
     .stat-item {
         padding: 8px 12px;
         min-height: 44px;
+    }
+    
+    .stat-icon {
+        font-size: 14px;
     }
     
     .stat-label {
@@ -1069,10 +1111,11 @@ body::before {
         font-size: 11px;
     }
     
+    .sound-btn,
     .pause-btn {
-        width: 44px;
-        height: 44px;
-        font-size: 18px;
+        width: 40px;
+        height: 40px;
+        font-size: 14px;
     }
     
     .canvas-wrapper {
@@ -1135,19 +1178,32 @@ body::before {
     }
     
     .game-header {
-        padding: 8px;
+        padding: 10px;
         margin-bottom: 10px;
         border-width: 2px;
+        position: relative;
     }
     
-    .header-content {
-        flex-direction: column;
-        gap: 10px;
-        align-items: stretch;
+    .header-top {
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .header-stats {
+        width: 100%;
+        gap: 8px;
+    }
+    
+    .header-controls {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        gap: 6px;
     }
     
     .game-title {
-        width: 100%;
+        width: calc(100% - 100px);
     }
     
     .game-title h1 {
@@ -1161,30 +1217,21 @@ body::before {
     
     .back-button,
     .back-btn {
-        padding: 8px 12px;
+        padding: 8px 10px;
         font-size: 7px;
-        margin-right: 0;
-        margin-bottom: 8px;
-        min-height: 44px;
-        width: 100%;
-    }
-    
-    .stats-display {
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-    
-    .game-stats {
-        flex: 1;
-        gap: 6px;
-        width: 100%;
+        min-height: 38px;
     }
     
     .stat-item {
         padding: 6px 10px;
         border-width: 2px;
         flex: 1;
-        min-height: 44px;
+        min-height: 40px;
+        justify-content: center;
+    }
+    
+    .stat-icon {
+        font-size: 12px;
     }
     
     .stat-label {
@@ -1195,15 +1242,11 @@ body::before {
         font-size: 10px;
     }
     
-    .stat-icon {
-        font-size: 12px;
-    }
-    
+    .sound-btn,
     .pause-btn {
-        width: 44px;
-        height: 44px;
-        font-size: 16px;
-        margin-left: 0;
+        width: 38px;
+        height: 38px;
+        font-size: 14px;
         border-width: 2px;
     }
     
@@ -1954,61 +1997,76 @@ body::before {
 
 /* Sound Button */
 .sound-btn {
-    background: rgba(0, 0, 0, 0.6);
-    border: 2px solid #4ECDC4;
-    border-radius: 8px;
+    background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
+    border: 3px solid #4ECDC4;
+    border-radius: 0;
     color: #4ECDC4;
-    font-size: 18px;
-    width: 40px;
-    height: 40px;
+    font-size: 16px;
+    width: 44px;
+    height: 44px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.15s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-left: 8px;
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(78, 205, 196, 0.3);
 }
 
 .sound-btn:hover {
-    background: rgba(78, 205, 196, 0.2);
-    transform: scale(1.1);
-    box-shadow: 0 0 15px rgba(78, 205, 196, 0.5);
+    background: linear-gradient(180deg, #4ECDC4 0%, #3db8b0 100%);
+    color: #000;
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.5);
 }
 
 .sound-btn:active {
-    transform: scale(0.95);
+    transform: translate(4px, 4px);
+    box-shadow: none;
 }
 
 .sound-btn.muted {
     border-color: #FF5252;
     color: #FF5252;
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 82, 82, 0.3);
+}
+
+.sound-btn.muted:hover {
+    background: linear-gradient(180deg, #FF5252 0%, #e04545 100%);
+    color: #FFF;
 }
 
 /* Pause Button */
 .pause-btn {
-    background: rgba(0, 0, 0, 0.6);
-    border: 2px solid #FFD700;
-    border-radius: 8px;
+    background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
+    border: 3px solid #FFD700;
+    border-radius: 0;
     color: #FFD700;
-    font-size: 20px;
-    width: 40px;
-    height: 40px;
+    font-size: 16px;
+    width: 44px;
+    height: 44px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.15s ease;
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 215, 0, 0.3);
+}
     margin-left: 10px;
 }
 
 .pause-btn:hover {
-    background: rgba(255, 215, 0, 0.2);
-    transform: scale(1.1);
-    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+    background: linear-gradient(180deg, #FFD700 0%, #e5c200 100%);
+    color: #000;
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.5);
 }
 
 .pause-btn:active {
-    transform: scale(0.95);
+    transform: translate(4px, 4px);
+    box-shadow: none;
 }
 
 /* Pause Overlay */
