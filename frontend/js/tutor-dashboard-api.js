@@ -768,6 +768,10 @@ async function toggleAttendance(studentId, attended) {
         // Reload attendance view
         await loadAttendance();
         
+        // Refresh main dashboard data (stats, courses list)
+        await loadStats();
+        await loadCourses();
+        
         showNotification('success', attended ? 'Asistencia registrada' : 'Asistencia removida');
         
     } catch (error) {
