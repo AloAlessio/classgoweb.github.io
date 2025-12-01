@@ -1,11 +1,26 @@
 // Validation schemas for authentication endpoints
-// Uses Joi for request validation
+// Uses Joi for request validation with anti-injection patterns
 
 const Joi = require('joi');
 const { validationErrorHandler } = require('../middleware/errorMiddleware');
+const { sanitizeEmail, sanitizeId, containsDangerousPattern, SQL_INJECTION_PATTERNS, XSS_PATTERNS } = require('./inputSanitizer');
 
 // Available roles in the system
 const VALID_ROLES = ['alumno', 'tutor', 'administrador'];
+
+// Custom Joi extension for injection detection
+const safeString = Joi.string().custom((value, helpers) => {
+    if (containsDangerousPattern(value, SQL_INJECTION_PATTERNS)) {
+        return helpers.error('string.injection', { value });
+    }
+    if (containsDangerousPattern(value, XSS_PATTERNS)) {
+        return helpers.error('string.xss', { value });
+    }
+    return value;
+}).messages({
+    'string.injection': 'Input contains potentially dangerous patterns',
+    'string.xss': 'Input contains potentially dangerous HTML/script content'
+});
 
 /**
  * Registration validation schema
@@ -16,27 +31,42 @@ const registrationSchema = Joi.object({
     email: Joi.string()
         .email()
         .required()
+        .max(254)
+        .custom((value, helpers) => {
+            const sanitized = sanitizeEmail(value);
+            if (!sanitized) {
+                return helpers.error('string.email');
+            }
+            return sanitized;
+        })
         .messages({
             'string.email': 'Please provide a valid email address',
-            'any.required': 'Email is required'
+            'any.required': 'Email is required',
+            'string.max': 'Email cannot exceed 254 characters'
         }),
     
     password: Joi.string()
         .min(6)
+        .max(128)
         .required()
+        .pattern(/^[^\s<>'"`;\\]*$/) // No spaces, quotes, or special chars that could be injection
         .messages({
             'string.min': 'Password must be at least 6 characters long',
-            'any.required': 'Password is required'
+            'string.max': 'Password cannot exceed 128 characters',
+            'any.required': 'Password is required',
+            'string.pattern.base': 'Password contains invalid characters'
         }),
     
-    name: Joi.string()
+    name: safeString
         .min(2)
         .max(100)
         .required()
+        .pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s\-'.]+$/) // Only letters, spaces, hyphens, apostrophes
         .messages({
             'string.min': 'Name must be at least 2 characters long',
             'string.max': 'Name cannot exceed 100 characters',
-            'any.required': 'Name is required'
+            'any.required': 'Name is required',
+            'string.pattern.base': 'Name contains invalid characters'
         })
     // Campo 'role' removido - siempre será 'alumno' en registro público
 });
@@ -58,8 +88,12 @@ const loginSchema = Joi.object({
 const roleChangeSchema = Joi.object({
     userId: Joi.string()
         .required()
+        .pattern(/^[a-zA-Z0-9_-]+$/) // Only alphanumeric, underscore, hyphen
+        .max(128)
         .messages({
-            'any.required': 'User ID is required'
+            'any.required': 'User ID is required',
+            'string.pattern.base': 'Invalid user ID format',
+            'string.max': 'User ID cannot exceed 128 characters'
         }),
     
     newRole: Joi.string()
@@ -75,16 +109,18 @@ const roleChangeSchema = Joi.object({
  * Profile update validation schema
  */
 const profileUpdateSchema = Joi.object({
-    name: Joi.string()
+    name: safeString
         .min(2)
         .max(100)
         .optional()
+        .pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s\-'.]+$/)
         .messages({
             'string.min': 'Name must be at least 2 characters long',
-            'string.max': 'Name cannot exceed 100 characters'
+            'string.max': 'Name cannot exceed 100 characters',
+            'string.pattern.base': 'Name contains invalid characters'
         }),
     
-    bio: Joi.string()
+    bio: safeString
         .max(500)
         .allow('')
         .optional()
@@ -93,7 +129,7 @@ const profileUpdateSchema = Joi.object({
         }),
     
     subjects: Joi.array()
-        .items(Joi.string())
+        .items(safeString.max(50).pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s\-0-9]+$/))
         .max(10)
         .optional()
         .messages({

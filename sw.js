@@ -1,7 +1,7 @@
 // Service Worker for ClassGo PWA
 // Handles caching, offline functionality, and background sync
 
-const CACHE_NAME = 'classgo-v84-ios-safari-volume'; // Updated: Web Audio API for iOS Safari volume control
+const CACHE_NAME = 'classgo-v85-input-sanitizer'; // Updated: Anti-injection input validation
 const OFFLINE_URL = '/frontend/html/home.html';
 
 // Import app shell configuration

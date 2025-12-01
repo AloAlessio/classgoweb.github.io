@@ -13,6 +13,7 @@ const rateLimit = require('express-rate-limit');
 const { initFirebaseAdmin } = require('./config/firebaseAdmin');
 const { errorHandler, notFound } = require('./middleware/errorMiddleware');
 const { authenticateUser } = require('./middleware/authMiddleware');
+const { secureInputMiddleware } = require('./validators/inputSanitizer');
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -95,6 +96,9 @@ app.get('/favicon.ico', (req, res) => {
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Input validation and sanitization (anti-injection protection)
+app.use('/api/', secureInputMiddleware);
 
 // Logging
 if (process.env.NODE_ENV !== 'test') {
