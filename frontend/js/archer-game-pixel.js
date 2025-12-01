@@ -34,9 +34,21 @@ function initBackgroundMusic() {
     if (!bgMusic) {
         bgMusic = new Audio(BG_MUSIC_URL);
         bgMusic.loop = true;
-        bgMusic.volume = musicVolume;
         bgMusic.preload = 'auto';
+        
+        // Force volume on canplaythrough for mobile
+        bgMusic.addEventListener('canplaythrough', () => {
+            bgMusic.volume = musicVolume;
+        });
+        
+        // Sync with slider on load
+        const slider = document.getElementById('musicVolume');
+        if (slider) {
+            musicVolume = (parseInt(slider.value) / 100) * MAX_MUSIC_VOLUME;
+        }
     }
+    // Always force volume
+    bgMusic.volume = musicVolume;
 }
 
 // Set music volume (0-100 in slider, but capped at MAX_MUSIC_VOLUME)
@@ -262,7 +274,12 @@ function startBackgroundMusic() {
         initBackgroundMusic();
         if (bgMusic) {
             bgMusic.currentTime = 0;
+            // Force volume before play (critical for mobile)
             bgMusic.volume = musicVolume;
+            // Double-check with setTimeout for mobile browsers
+            setTimeout(() => {
+                if (bgMusic) bgMusic.volume = musicVolume;
+            }, 100);
             bgMusic.play().catch(e => {
                 console.log('Music autoplay blocked, will play on next interaction:', e);
             });
@@ -399,6 +416,31 @@ window.addEventListener('DOMContentLoaded', () => {
     difficulty = urlParams.get('difficulty') || 'medium';
     
     timeLimit = difficulty === 'easy' ? 20 : difficulty === 'hard' ? 10 : 15;
+    
+    // Initialize volume from slider (important for mobile)
+    const volumeSlider = document.getElementById('musicVolume');
+    if (volumeSlider) {
+        // Set initial volume from slider value
+        musicVolume = (parseInt(volumeSlider.value) / 100) * MAX_MUSIC_VOLUME;
+        
+        // Add touch events for mobile
+        volumeSlider.addEventListener('touchstart', function(e) {
+            this.focus();
+        }, { passive: true });
+        
+        volumeSlider.addEventListener('touchmove', function(e) {
+            setMusicVolume(this.value);
+        }, { passive: true });
+        
+        volumeSlider.addEventListener('touchend', function(e) {
+            setMusicVolume(this.value);
+        }, { passive: true });
+        
+        // Also input event for all browsers
+        volumeSlider.addEventListener('input', function(e) {
+            setMusicVolume(this.value);
+        });
+    }
     
     // Update UI
     document.getElementById('subjectTag').textContent = classSubject;

@@ -1,7 +1,7 @@
 // Service Worker for ClassGo PWA
 // Handles caching, offline functionality, and background sync
 
-const CACHE_NAME = 'classgo-v82-mobile-volume'; // Updated: Mobile volume slider fix + lower volume
+const CACHE_NAME = 'classgo-v83-mobile-volume-fix'; // Updated: Mobile volume fix with touch events
 const OFFLINE_URL = '/frontend/html/home.html';
 
 // Import app shell configuration
