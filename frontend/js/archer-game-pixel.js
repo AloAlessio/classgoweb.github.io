@@ -23,41 +23,76 @@ let masterVolume = 0.5;
 let bgMusicOscillator = null;
 let bgMusicGain = null;
 
-// 🎵 Background Music MP3
+// 🎵 Background Music MP3 - Using Web Audio API for iOS Safari compatibility
 let bgMusic = null;
+let bgMusicSource = null;
+let bgMusicGainNode = null;
+let musicAudioContext = null;
+let musicBuffer = null;
 let musicVolume = 0.01; // Default 1% (slider at 50% = 50/100 * 2% = 1%)
 const BG_MUSIC_URL = '../assets/audio/waka-waka.mp3';
 const MAX_MUSIC_VOLUME = 0.02; // Volumen máximo permitido 2%
+let isMusicPlaying = false;
+let musicStartTime = 0;
+let musicPauseTime = 0;
 
-// Initialize background music
-function initBackgroundMusic() {
-    if (!bgMusic) {
-        bgMusic = new Audio(BG_MUSIC_URL);
-        bgMusic.loop = true;
-        bgMusic.preload = 'auto';
-        
-        // Force volume on canplaythrough for mobile
-        bgMusic.addEventListener('canplaythrough', () => {
-            bgMusic.volume = musicVolume;
-        });
-        
-        // Sync with slider on load
-        const slider = document.getElementById('musicVolume');
-        if (slider) {
-            musicVolume = (parseInt(slider.value) / 100) * MAX_MUSIC_VOLUME;
-        }
+// Initialize music audio context (for iOS Safari volume control)
+function initMusicAudioContext() {
+    if (!musicAudioContext) {
+        musicAudioContext = new (window.AudioContext || window.webkitAudioContext)();
     }
-    // Always force volume
-    bgMusic.volume = musicVolume;
+    if (musicAudioContext.state === 'suspended') {
+        musicAudioContext.resume();
+    }
+    
+    // Create gain node for volume control (works on iOS!)
+    if (!bgMusicGainNode) {
+        bgMusicGainNode = musicAudioContext.createGain();
+        bgMusicGainNode.connect(musicAudioContext.destination);
+        bgMusicGainNode.gain.value = musicVolume;
+    }
+    
+    return musicAudioContext;
+}
+
+// Load music buffer
+async function loadMusicBuffer() {
+    if (musicBuffer) return musicBuffer;
+    
+    try {
+        initMusicAudioContext();
+        const response = await fetch(BG_MUSIC_URL);
+        const arrayBuffer = await response.arrayBuffer();
+        musicBuffer = await musicAudioContext.decodeAudioData(arrayBuffer);
+        return musicBuffer;
+    } catch (e) {
+        console.log('Error loading music:', e);
+        return null;
+    }
+}
+
+// Initialize background music (preload)
+function initBackgroundMusic() {
+    // Sync with slider on load
+    const slider = document.getElementById('musicVolume');
+    if (slider) {
+        musicVolume = (parseInt(slider.value) / 100) * MAX_MUSIC_VOLUME;
+    }
+    
+    // Preload the music buffer
+    loadMusicBuffer();
 }
 
 // Set music volume (0-100 in slider, but capped at MAX_MUSIC_VOLUME)
 function setMusicVolume(value) {
     // Map 0-100 slider to 0-MAX_MUSIC_VOLUME
     musicVolume = (value / 100) * MAX_MUSIC_VOLUME;
-    if (bgMusic) {
-        bgMusic.volume = musicVolume;
+    
+    // Update Web Audio API gain node (works on iOS!)
+    if (bgMusicGainNode) {
+        bgMusicGainNode.gain.value = musicVolume;
     }
+    
     // Update slider if exists
     const slider = document.getElementById('musicVolume');
     if (slider && parseInt(slider.value) !== parseInt(value)) {
@@ -267,31 +302,51 @@ function playSoundResume() {
 // Shakira's iconic World Cup 2010 anthem!
 let musicInterval = null;
 
-function startBackgroundMusic() {
+async function startBackgroundMusic() {
     if (!musicEnabled) return;
     
     try {
-        initBackgroundMusic();
-        if (bgMusic) {
-            bgMusic.currentTime = 0;
-            // Force volume before play (critical for mobile)
-            bgMusic.volume = musicVolume;
-            // Double-check with setTimeout for mobile browsers
-            setTimeout(() => {
-                if (bgMusic) bgMusic.volume = musicVolume;
-            }, 100);
-            bgMusic.play().catch(e => {
-                console.log('Music autoplay blocked, will play on next interaction:', e);
-            });
+        initMusicAudioContext();
+        
+        // Load buffer if not loaded
+        if (!musicBuffer) {
+            await loadMusicBuffer();
         }
+        
+        if (!musicBuffer || !musicAudioContext) return;
+        
+        // Stop any existing playback
+        if (bgMusicSource) {
+            try {
+                bgMusicSource.stop();
+            } catch (e) {}
+        }
+        
+        // Create new buffer source
+        bgMusicSource = musicAudioContext.createBufferSource();
+        bgMusicSource.buffer = musicBuffer;
+        bgMusicSource.loop = true;
+        bgMusicSource.connect(bgMusicGainNode);
+        
+        // Set volume via gain node (iOS compatible!)
+        bgMusicGainNode.gain.value = musicVolume;
+        
+        // Start playback
+        bgMusicSource.start(0);
+        isMusicPlaying = true;
+        musicStartTime = musicAudioContext.currentTime;
+        
     } catch (e) {
         console.log('Music error:', e);
     }
 }
 
 function stopBackgroundMusic() {
-    if (bgMusic) {
-        bgMusic.pause();
+    if (bgMusicSource && isMusicPlaying) {
+        try {
+            bgMusicSource.stop();
+        } catch (e) {}
+        isMusicPlaying = false;
     }
 }
 

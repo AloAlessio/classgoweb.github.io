@@ -1,7 +1,7 @@
 // Service Worker for ClassGo PWA
 // Handles caching, offline functionality, and background sync
 
-const CACHE_NAME = 'classgo-v83-mobile-volume-fix'; // Updated: Mobile volume fix with touch events
+const CACHE_NAME = 'classgo-v84-ios-safari-volume'; // Updated: Web Audio API for iOS Safari volume control
 const OFFLINE_URL = '/frontend/html/home.html';
 
 // Import app shell configuration
