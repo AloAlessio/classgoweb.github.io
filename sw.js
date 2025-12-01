@@ -1,7 +1,7 @@
 // Service Worker for ClassGo PWA
 // Handles caching, offline functionality, and background sync
 
-const CACHE_NAME = 'classgo-v80-music-soft'; // Updated: RFID auto-detection
+const CACHE_NAME = 'classgo-v81-restart-fix'; // Updated: RFID auto-detection
 const OFFLINE_URL = '/frontend/html/home.html';
 
 // Import app shell configuration

@@ -602,6 +602,9 @@ function togglePause() {
 }
 
 function restartGame() {
+    // Stop music
+    stopBackgroundMusic();
+    
     // Reset pause state first
     isPaused = false;
     
@@ -609,12 +612,33 @@ function restartGame() {
     gameState = 'start';
     clearInterval(timerInterval);
     
-    // Hide pause overlay - force hide
+    // Hide pause overlay
     const pauseOverlay = document.getElementById('pauseOverlay');
     if (pauseOverlay) {
         pauseOverlay.classList.remove('active');
         pauseOverlay.style.display = 'none';
     }
+    
+    // Hide game over screen
+    const gameOverScreen = document.getElementById('gameoverScreen') || document.getElementById('gameOverScreen');
+    if (gameOverScreen) {
+        gameOverScreen.style.display = 'none';
+    }
+    
+    // Reset game variables
+    score = 0;
+    combo = 1;
+    bestCombo = 1;
+    correctAnswers = 0;
+    totalQuestions = 0;
+    currentQuestionIndex = 0;
+    canShoot = true;
+    targets = [];
+    arrows = [];
+    particles = [];
+    
+    // Generate new questions
+    generateQuestions();
     
     // Show start screen
     const startScreen = document.getElementById('startScreen');
@@ -623,7 +647,9 @@ function restartGame() {
     }
     
     // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (ctx && canvas) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
 }
 
 function gameLoop() {
@@ -2416,14 +2442,6 @@ function goBack() {
         console.warn('⚠️ No pendingCompletionClassId found in sessionStorage');
     }
     window.location.href = '/student-dashboard';
-}
-
-function restartGame() {
-    const gameOverScreen = document.getElementById('gameoverScreen') || document.getElementById('gameOverScreen');
-    if (gameOverScreen) gameOverScreen.style.display = 'none';
-    currentQuestionIndex = 0;
-    generateQuestions();
-    startGame();
 }
 
 function saveScore() {
